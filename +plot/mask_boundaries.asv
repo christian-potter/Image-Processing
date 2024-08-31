@@ -1,0 +1,15 @@
+function [] = mask_boundaries(color,maskcoords,planeshift,idxshift)
+
+arguments
+    color string
+    maskcoords cell  
+    planeshift double
+    idxshift double 
+end
+
+%% PLOT MASKS LOOP
+for i = 1:length(maskcoords)
+    xcoords=maskcoords{i}(:,1); ycoords=maskcoords{i}(:,2); 
+    plot(double(xcoords)-planeshift(1),double(ycoords)-planeshift(2),color,'LineWidth',2)
+    text(max(xcoords)+1-planeshift(1),max(ycoords)+1-planeshift(2),num2str(i+idxshift),'Color',color) % make text of ROI index 
+end
