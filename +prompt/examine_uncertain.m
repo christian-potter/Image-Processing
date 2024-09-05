@@ -15,14 +15,13 @@ surround = 20;
 completion = 0; 
 
 % determine index of neuron for inspect_roi 
-while completion ~= 0
+while completion ~= 1
     %-
-    cstat= stat{unc(idx)}; 
+    cstat= stat{unc(i)}; 
     
-    plot.inspect_roi(cstat,surround,p)
+    plot.inspect_roi(unc(i),cstat,surround,ops,stat)
     
-    
-    id_str=prompt.neuron_idstr(id_vect,i); 
+    id_str=prompt.neuron_idstr(id_vect,unc(i)); 
     disp(id_str)
     
     inputstr=prompt.menu_str(3);
@@ -47,10 +46,6 @@ while completion ~= 0
     elseif strcmp(change,'q')
         completion = 1; 
     end
-
-           
-    
-
 
 end
 

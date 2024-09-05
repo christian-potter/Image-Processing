@@ -48,7 +48,7 @@ while p ~= -1
     elseif strcmp(answer,'d')
         if p-1 == 0 
             p = nplanes; 
-        elseif p -1 > 0
+        elseif p-1 > 0
             p = p-1; 
         end
     elseif strcmp(answer,'f') %threshold is always 2 digit even if it is a merged image 
@@ -62,7 +62,7 @@ while p ~= -1
             disp('No ROIs currently unclassified.',char(10))
             unc_vect = input('Enter neurons you wish to unclassify:'); 
             id_vect(unc_vect)=3; 
-            id_vect= prompt.examine_uncertain(roi_planeidx,id_vect,ops,stat); 
+            id_vect= prompt.examine_ucertain(roi_planeidx,id_vect,ops,stat); 
         else 
             id_vect= prompt.examine_uncertain(roi_planeidx,id_vect,ops,stat); 
         end

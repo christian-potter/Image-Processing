@@ -15,7 +15,7 @@ for i = 1:length(maskcoords)
     if strcmp(opt.idxtype,'shifted')
         text(max(xcoords)+1-planeshift(1),max(ycoords)+1-planeshift(2),num2str(i+idxshift),'Color',mask_colors(:,i)) % make text of ROI index
     elseif strcmp(opt.idxtype,'specified')
-        text(max(xcoords)+1-planeshift(1),max(ycoords)+1-planeshift(2),num2str(specified(i)),'Color',mask_colors(:,i)) % make text of ROI index
+        text(max(xcoords)+1-planeshift(1),max(ycoords)+1-planeshift(2),num2str(idxshift(i)),'Color',mask_colors(:,i)) % make text of ROI index
     end
 
 end
