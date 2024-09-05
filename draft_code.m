@@ -12,7 +12,7 @@ ex_vect = ~in_vect;
 id_vect= zeros(length(red_vect),1); 
 id_vect(ex_vect)=1; 
 id_vect(in_vect)=2; 
-
+id_vect([5 10 15])=3; 
 %% RECOGNIZE NUMBER OF PLANES 
 
 for i = 1:length(stat)
@@ -40,24 +40,40 @@ while p ~= -1
         cprompt = ['Enter ROIs you wish to change:',char(10),char(10)]; 
         [id_vect] = prompt.change_rois(id_vect,cprompt);        
     elseif strcmp(answer,'s')
-        if p+1 < 
-        p= p+1; 
+        if p+1 <= nplanes
+            p= p+1;
+        elseif p+1 >nplanes  
+            p = 1; 
+        end 
     elseif strcmp(answer,'d')
-        p = p-1; 
+        if p-1 == 0 
+            p = nplanes; 
+        elseif p -1 > 0
+            p = p-1; 
+        end
     elseif strcmp(answer,'f') %threshold is always 2 digit even if it is a merged image 
-        cprompt= ['Current Threshold = ',num2str(thresh),char(10),'Enter the New Threshold:'] ; 
+        cprompt= ['Current threshold = ',num2str(thresh),char(10),'Enter the new threshold:'] ; 
         thresh = input(cprompt); 
-    elseif strcmp(answer,'f') %threshold is always 2 digit even if it is a merged image 
+    elseif strcmp(answer,'r') %threshold is always 2 digit even if it is a merged image 
         p = -1; 
+        close
+    elseif strcmp (answer,'q')
+        if sum(id_vect==3)<0
+            disp('No ROIs currently unclassified.',char(10))
+            unc_vect = input('Enter neurons you wish to unclassify:'); 
+            id_vect(unc_vect)=3; 
+            id_vect= prompt.examine_uncertain(roi_planeidx,id_vect,ops,stat); 
+        else 
+            id_vect= prompt.examine_uncertain(roi_planeidx,id_vect,ops,stat); 
+        end
+
     end
     
-
-
 
 end
 
 
-%% LOOK AT UNCERTAIN NEURONS
+%% EXCLUDE STILL-UNCERTAIN NEURONS
 
 
 

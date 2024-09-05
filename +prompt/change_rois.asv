@@ -6,8 +6,9 @@ roi= input(curprompt);
 for i = 1:length(roi)
     % make string to show to ROI is currently classified 
 
-    [formatstr]= prompt.neuron_idstr(id_vect,roi(i)); 
+    [form]
 
+    formatstr=['ROI# ', num2str(roi(i)),'is ',str1]; 
     disp(formatstr)
     input_str = prompt.menu_str(2); 
     completion =0; 

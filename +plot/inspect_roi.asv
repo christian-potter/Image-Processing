@@ -1,0 +1,45 @@
+function [] = inspect_roi(roi,cstat,surround,ops)
+
+%% DETERMINE SELECTED AREA TO PLOT 
+dims = size(ops.meanImg); 
+
+selection = zeros(dims); 
+
+x1= min(cstat.xpix)-surround; 
+if x1 < 1
+    x1=1; 
+end
+
+x2= max(cstat.xpix)+surround; 
+if x2 > dims(1)
+    x2=dims(1); 
+end
+
+y1= min(cstat.xpix)-surround; 
+if y1 < 0
+    y1=1; 
+end
+
+y2= min(cstat.xpix)-surround; 
+if y2 > dims(2)
+    y2=dims(2); 
+end
+
+
+selection(x1:x2,y1:y2)=1; 
+
+%% PLOT SELECTION 
+figure(3)
+
+clf 
+
+subplot(2,1,1)
+title('Green Image')
+ops.meanImg(selection)
+plot.mask_boundaries([1 0 1],maskcoords(roi),[x1,y2],roi,'idxtype','specified'); 
+
+
+
+
+sgtitle(['ROI#: ',num2str(roi)])
+

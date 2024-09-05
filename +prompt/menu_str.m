@@ -1,6 +1,4 @@
 function [inputstr] = menu_str(menu)
-
-
 % MENU 1
 if menu == 1 
 
@@ -10,7 +8,8 @@ if menu == 1
     d = ['D: Go to Previous Plane',char(10)]; 
     f = ['F: Change Image Brightness',char(10)];
     r = ['R: Stop ',char(10)];
-    inputstr= [titleinput,a,s,d,f,r]; 
+    q = ['Q: Examine Uncertain',char(10)]; 
+    inputstr= [titleinput,a,s,d,f,r,q]; 
 
 % MENU 2
 % used in prompt.change_rois
@@ -23,8 +22,23 @@ elseif menu == 2
     
     inputstr= [titleinput,a,s,d,f]; 
 
+% MENU 3
+% used in prompt.examine_uncertain 
+
+elseif menu ==3 
+    titleinput= ['Select Option:',char(10)]; 
+    a = ['A: Change to EX',char(10)]; 
+    s = ['S: Change to IN',char(10)]; 
+    d = ['D: Change to SPBN',char(10)]; 
+    f = ['F: Keep Uncertain',char(10)]; 
+    q = ['Q: Return to Main Menu',char(10)]; 
+
+    inputstr= [titleinput,a,s,d,f,q]; 
+
 end
 
+
+end
 
 
 

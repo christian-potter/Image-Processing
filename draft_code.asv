@@ -8,57 +8,71 @@ sample_rcthresh= prctile(redcell(:,2),75);
 red_vect = redcell(:,2)>sample_rcthresh; 
 in_vect = red_vect; 
 ex_vect = ~in_vect; 
-proj_vect=logical(zeros(length(red_vect),1)); 
 
+id_vect= zeros(length(red_vect),1); 
+id_vect(ex_vect)=1; 
+id_vect(in_vect)=2; 
+
+%% RECOGNIZE NUMBER OF PLANES 
+
+for i = 1:length(stat)
+    curstat= stat{i}; 
+    roi_planeidx(i)=curstat.iplane+1; % add 1 to the plane 
+end
+
+nplanes = length(unique(roi_planeidx));
 
 %% VERIFY RED CELL SELECTION FOR EACH PLANE AND SELECT CANDIDATE CELLS 
-
- 
 figure(1)
 
-thresh = 5; 
+thresh = [5 5]; 
 p = 1; 
+rg_gain =[1 1]; 
+
 
 while p ~= -1  
-    plot.plane_masks(p,ops,stat,thresh,in_vect,ex_vect,proj_vect)
     
-    input_str=prompt_input(); 
-    answer = input (inputstr,"s"); 
+    plot.plane_masks(p,ops,stat,thresh,id_vect) 
+    input_str=prompt.menu_str(1); 
+    answer = input (input_str,"s"); 
 
     if strcmp(answer,'a')
-        prompt = ['Enter ROIs you wish to change',char(10)]; 
-        exinput= input(prompt);
-        
+        cprompt = ['Enter ROIs you wish to change:',char(10),char(10)]; 
+        [id_vect] = prompt.change_rois(id_vect,cprompt);        
+    elseif strcmp(answer,'s')
+        if p+1 <= nplanes
+            p= p+1;
+        elseif p+1 >nplanes  
+            p = 1; 
+        end 
+    elseif strcmp(answer,'d')
+        if p-1 == 0 
+            p = nplanes; 
+        elseif p -1 > 0
+            p = p-1; 
+        end
+    elseif strcmp(answer,'f') %threshold is always 2 digit even if it is a merged image 
+        cprompt= ['Current threshold = ',num2str(thresh),char(10),'Enter the new threshold:'] ; 
+        thresh = input(cprompt); 
+    elseif strcmp(answer,'r') %threshold is always 2 digit even if it is a merged image 
+        p = -1; 
+    elseif strcmp (answer,'q')
+        if sum(id_vect==3)<0
+            disp('No ROIs currently unclassified.',char(10),'Enter neurons you wish to unclassify:')
+
+        else 
+           prompt.examine_uncertain(roi_planeidx,id_vect,ops,stat) 
+        end
 
     end
     
+
 end
 
 
-
-%%
-
-
-% rwindow = ops.meanImg_chan2(xshift+1:xshift+planesize(1),yshift+1:yshift+planesize(2));
-% gwindow = ops.meanImg(xshift+1:xshift+planesize(1),yshift+1:yshift+planesize(2));
-% %rgwindow(:,:,1)=rwindow;rgwindow(:,:,2)=gwindow;rgwindow(:,:,3)=zeros(planesize(1),planesize(2)); 
-% 
-%pause
+%% EXCLUDE STILL-UNCERTAIN NEURONS
 
 
-
-%%
-figure;
-imshow(ops.meanImg)
-hold on
-clim([0 max(max(ops.meanImg))/5])
-
-for i = 1:length(maskcoords)
-
-    xcoords=maskcoords{i}(:,1); ycoords=maskcoords{i}(:,2); 
-    plot(double(xcoords),double(ycoords),'r','LineWidth',2)
-    text(max(xcoords)+1,max(ycoords)+1,num2str(i),'Color','r') % make text of ROI index 
-end
 
 
 
