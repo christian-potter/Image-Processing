@@ -9,8 +9,7 @@ if menu == 1
     f = ['F: Change Image Brightness',char(10)];
     r = ['R: Change Image Type ',char(10)];
     q = ['Q: Examine Uncertain',char(10)]; 
-    c = ['C: Combine/ Separate Images',char(10)]; 
-    inputstr= [titleinput,a,s,d,f,q,r,c]; 
+    inputstr= [titleinput,a,s,d,f,q,r]; 
 
 % MENU 2
 % used in prompt.change_rois

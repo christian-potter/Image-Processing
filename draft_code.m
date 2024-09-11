@@ -13,26 +13,34 @@ id_vect= zeros(length(red_vect),1);
 id_vect(ex_vect)=1; 
 id_vect(in_vect)=2; 
 id_vect([5 10 15])=3; 
+iscell(:,1)=1; 
+
+%% ONLY INCLUDE ISCELL == 1
+
+cellstat= stat(iscell(:,1)==1); 
+id_vect = id_vect(iscell(:,1)==1); 
+
 %% RECOGNIZE NUMBER OF PLANES 
 
-for i = 1:length(stat)
-    curstat= stat{i}; 
+for i = 1:length(cellstat)
+    curstat= cellstat{i}; 
     roi_planeidx(i)=curstat.iplane+1; % add 1 to the plane 
 end
 
 nplanes = length(unique(roi_planeidx));
 
-%% VERIFY RED CELL SELECTION FOR EACH PLANE AND SELECT CANDIDATE CELLS 
-figure(1)
 
-thresh = [5 5]; 
+
+%% DEFAULT VALUES
 p = 1; 
-rg_gain =[1 1]; 
+r_thresh=3 ; g_thresh=3; 
+atype= 'mean';ftype='mean'; 
+img_mode='combined'; 
 
-
-while p ~= -1  
-    
-    plot.plane_masks(p,ops,stat,thresh,id_vect) 
+%% RUN MAIN MENU 
+figure(1)
+while p ~= -1      
+    [gclim,rclim] = plot.plane_masks(p,ops,cellstat,g_thresh,r_thresh,id_vect,roi_planeidx,ftype,atype,'mode',img_mode); 
     input_str=prompt.menu_str(1); 
     answer = input (input_str,"s"); 
 
@@ -42,7 +50,7 @@ while p ~= -1
     elseif strcmp(answer,'s')
         if p+1 <= nplanes
             p= p+1;
-        elseif p+1 >nplanes  
+        elseif p+1 > nplanes  
             p = 1; 
         end 
     elseif strcmp(answer,'d')
@@ -52,23 +60,30 @@ while p ~= -1
             p = p-1; 
         end
     elseif strcmp(answer,'f') %threshold is always 2 digit even if it is a merged image 
-        cprompt= ['Current threshold = ',num2str(thresh),char(10),'Enter the new threshold:'] ; 
-        thresh = input(cprompt); 
-    elseif strcmp(answer,'r') %threshold is always 2 digit even if it is a merged image 
-        p = -1; 
-        close
+        [g_thresh,r_thresh]= prompt.change_brightness(gclim,rclim); 
+
+    elseif strcmp(answer,'r')
+        [ftype,atype]=prompt.img_type(atype,ftype);    
+     
     elseif strcmp (answer,'q')
         if sum(id_vect==3)<0
             disp('No ROIs currently unclassified.',char(10))
             unc_vect = input('Enter neurons you wish to unclassify:'); 
             id_vect(unc_vect)=3; 
-            id_vect= prompt.examine_ucertain(roi_planeidx,id_vect,ops,stat); 
+            id_vect= prompt.examine_unclassified(roi_planeidx,id_vect,ops,cellstat,g_thresh,r_thresh); 
         else 
-            id_vect= prompt.examine_uncertain(roi_planeidx,id_vect,ops,stat); 
+            id_vect= prompt.examine_unclassified(roi_planeidx,id_vect,ops,cellstat,g_thresh,r_thresh); 
+        end
+
+    elseif strcmp(answer,'c')
+        answer = input(['C: Combine Anatomical and Functional Channels',char(10),'S: Separate Anatomical and Functional Channels',char(10)],'s');
+        if strcmp(answer,'c')
+            img_mode='combined';
+        elseif strcmp(answer,'s')
+            img_mode = 'separate'; 
         end
 
     end
-    
 
 end
 

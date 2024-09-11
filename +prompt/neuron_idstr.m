@@ -18,14 +18,7 @@ if strnum == 1
 
 
     id_str=['ROI# ', num2str(roi),' is ',str1]; 
-
-
-elseif strnum==2
-
-
     
-
-
 
 
 end 

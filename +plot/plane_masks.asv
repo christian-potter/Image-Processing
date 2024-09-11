@@ -40,9 +40,6 @@ if strcmp(anatomical,'mean')
     redwin= ops.meanImg_chan2(rshift+1:rshift+planesize(1),cshift+1:cshift+planesize(2)); 
 elseif strcmp(anatomical,'corrected')
     redwin= ops.meanImg_chan2_corrected(rshift+1:rshift+planesize(1),cshift+1:cshift+planesize(2)); 
-else
-    disp(['Input not recognized, defaulting to mean',char(10)])
-    redwin= ops.meanImg_chan2(rshift+1:rshift+planesize(1),cshift+1:cshift+planesize(2)); 
 end
 
 if strcmp(functional,'mean')
@@ -53,9 +50,6 @@ elseif strcmp(functional,'correlation')
     greenwin= ops.Vcorr(rshift+1:rshift+planesize(1),cshift+1:cshift+planesize(2)) ; 
 elseif strcmp(functional,'max') 
     greenwin= ops.max_proj(rshift+1:rshift+planesize(1),cshift+1:cshift+planesize(2)) ; 
-else
-    disp(['Input not recognized, defaulting to mean',char(10)])
-    greenwin= ops.meanImg(rshift+1:rshift+planesize(1),cshift+1:cshift+planesize(2)) ;
 end
 
 % Red-green merge 
@@ -155,9 +149,4 @@ if strcmp(opt.mode,'separate')
 
 elseif strcmp(opt.mode,'combined')
 
-    plot.mask_boundaries(mask_colors,maskcoords(roi_planeidx==p),[cshift,rshift],idxshifts(p)); 
-    plot.set_figure(15,'any')
-    title({['Plane: ',num2str(p)]},'FontSize',20)
-
-end
-
+    
