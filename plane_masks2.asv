@@ -1,0 +1,21 @@
+%% MAKE FIGURE AND SLIDER 
+function plane_masks2(rgwin)
+
+fig = uifigure;
+g = uigridlayout(fig); 
+g.RowHeight = {'1x','fit'};
+g.ColumnWidth = {'1x'};
+
+ax = uiaxes(g);
+imshow(rgwin,'Parent',ax)
+
+sld = uislider(g,"range","Limits",[0 1],"Value",[0 .5]);
+x = .1; y = .8; 
+
+
+
+
+
+end
+
+
