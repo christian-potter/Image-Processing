@@ -19,3 +19,4 @@ function updateRange(src,event,xr)
 val = event.Value;
 xr.Value = val;
 end
+

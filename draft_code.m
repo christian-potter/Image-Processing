@@ -29,13 +29,11 @@ end
 
 nplanes = length(unique(roi_planeidx));
 
-
-
 %% DEFAULT VALUES
 p = 1; 
-r_thresh=3 ; g_thresh=3; 
+r_thresh=1 ; g_thresh=1; 
 atype= 'mean';ftype='mean'; 
-img_mode='combined'; 
+img_mode='separate'; 
 
 %% RUN MAIN MENU 
 figure(1)
@@ -86,9 +84,6 @@ while p ~= -1
     end
 
 end
-
-
-%% EXCLUDE STILL-UNCERTAIN NEURONS
 
 
 
