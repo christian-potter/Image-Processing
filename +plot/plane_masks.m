@@ -12,8 +12,6 @@ arguments
     opt.mode string = 'separate'    
 end
 
-
-
 %% RECOGNIZE NUMBER OF PLANES 
 
 for i = 1:length(stat)

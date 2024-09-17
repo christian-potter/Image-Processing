@@ -1,0 +1,9 @@
+%% LOAD DATA
+ load('sample_ws.mat')
+
+ imgsize=size(ops.refImg);
+ greenwin = ops.meanImg(imgsize(1),imgsize(2)); 
+ redwin= ops.meanImg_chan2(imgsize(1),imgsize(2));
+
+ rgwin(:,:,1)=redwin; rgwin(:,:,2)= zeros(imgsize(1),imgsize(2)); rgwin(:,:,3)= 
+%%
