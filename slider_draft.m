@@ -4,8 +4,10 @@
  imgsize=size(ops.refImg);
  greenwin = ops.meanImg(1:imgsize(1),1:imgsize(2)); 
  redwin= ops.meanImg_chan2(1:imgsize(1),1:imgsize(2));
+ corrwin=ops.Vcorr(1:imgsize(1),1:imgsize(2)); 
 
  rgwin(:,:,1)=redwin; rgwin(:,:,3)= zeros(imgsize(1),imgsize(2)); rgwin(:,:,2)= greenwin; 
+ crwin(:,:,1)=zeros(imgsize(1),imgsize(2)); crwin(:,:,2)=corrwin;crwin(:,:,3)=redwin; 
 
 %% MAKE SAMPLE RED/ GREEN CELL VECT 
 
@@ -19,6 +21,10 @@ id_vect(ex_vect)=1;
 id_vect(in_vect)=2; 
 id_vect([5 10 15])=3; 
 iscell(:,1)=1; 
+%% ONLY INCLUDE ISCELL == 1
+iscell(:,1)=1; 
+cellstat= stat(iscell(:,1)==1); 
+id_vect = id_vect(iscell(:,1)==1); 
 
 %% RECOGNIZE NUMBER OF PLANES 
 
@@ -46,10 +52,7 @@ for i = 1:size(mask_colors,2)
     end
 end
 
-%% ONLY INCLUDE ISCELL == 1
-iscell(:,1)=1; 
-cellstat= stat(iscell(:,1)==1); 
-id_vect = id_vect(iscell(:,1)==1); 
+
 %% CALULATE THE SHIFT IN IDX  
 p = 1; 
 idxshifts=0;
@@ -70,10 +73,18 @@ for i = 1:length(cellstat)
 end
 
 nplanes = length(unique(roi_planeidx));
+%% DEFAULT POSITION 
+figposition=[54 800 600 400]; 
+sldposition=[54 800 600 400];
+fimgposition=[54 800 600 400]; 
+aimgposition=[54 800 600 400];
 
-    
- %%
-adjustImage(rgwin,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift)
+ %% COLOR IMAGE 
+
+[hFigImg,fFigImg,aFigImg,hFigSlider]=adjustImage(crwin,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figposition,sldposition,fimgposition,aimgposition);
+
+%% RED IMAGE
+himg=adjustImage(rgwin,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figposition,sldposition,fimgposition,aimgposition)
 
 %%
 greenthresh= prctile(greenChannel,95); 
