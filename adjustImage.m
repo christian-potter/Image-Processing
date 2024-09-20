@@ -1,13 +1,5 @@
-function [figs] = adjustImage(image,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figs,dfigs)
+function [nfigs] = adjustImage(image,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figs)
 %% CLOSE PREVIOUS FIGURES
-
-%% UNPACK POSITIONS
-    % imgposition= dfigs(1,:); fimgposition=dfigs(2,:); 
-    % aimgposition=dfigs(3,:); sldposition= dfigs(4,:);
-
-
-imgposition=dfigs.rgb.Position; fimgposition=dfigs.functional.Position; 
-aimgposition = dfigs.anatomical.Position;sldposition =dfigs.slider.Position; 
 
 %% CREATE VARIABLES
 hFigImg= NaN; 
@@ -36,7 +28,7 @@ end
 % Create a figure for the image display
 if strcmp(type,'rgb')
     %Create RGB image 
-    hFigImg = figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',imgposition, 'Color', 'White');
+    hFigImg = figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',figs.rgb.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     hImg = imshow(image, 'Parent', hAx);
     hold on 
@@ -44,14 +36,14 @@ if strcmp(type,'rgb')
 
 elseif strcmp(type,'separate')
     %Create functional channel image 
-    fFigImg = figure('Name', 'Functional Image', 'NumberTitle', 'off', 'Position',fimgposition, 'Color', 'White');
+    fFigImg = figure('Name', 'Functional Image', 'NumberTitle', 'off', 'Position',figs.functional.Position, 'Color', 'White');
     fAx = axes('Parent', fFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     fImg = imshow(fimage, 'Parent', fAx);
     hold on 
     plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),[cshift,rshift],idxshifts(p));
     
     % Create anatomical channel image 
-    aFigImg = figure('Name', 'Anatomical Image', 'NumberTitle', 'off', 'Position',aimgposition, 'Color', 'White');
+    aFigImg = figure('Name', 'Anatomical Image', 'NumberTitle', 'off', 'Position',figs.anatomical.Position, 'Color', 'White');
     aAx = axes('Parent', aFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     aImg = imshow(aimage, 'Parent', aAx);
     hold on 
@@ -63,7 +55,7 @@ end
 %% CREATE SLIDER FIGURE WITH HISTOGRAMS
 % Create a second figure for the sliders and histogram
 hFigSlider = figure('Name', 'Adjustments & Histogram', 'NumberTitle', 'off', ...
-    'Position',sldposition, 'Color', 'White');
+    'Position',figs.slider.Position, 'Color', 'White');
 
 % Set default values for sliders
 low_in_red = 0;
@@ -212,12 +204,12 @@ plotHistogram();
     end
 
 
-imgstrs = fields(dfigs);
 
-figs.rgb = hFigImg; 
-figs.functional = fFigImg; 
-figs.anatomical = aFigImg; 
-figs.slider = hFigSlider; 
+
+nfigs.rgb = hFigImg; 
+nfigs.functional = fFigImg; 
+nfigs.anatomical = aFigImg; 
+nfigs.slider = hFigSlider; 
 
 
 end

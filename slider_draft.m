@@ -67,17 +67,16 @@ end
 rshift=floor((p-1)/2)*planesize(1);
 
 %% DEFAULT POSITIONS
-dfigs.rgb.Position=[54 800 600 400]; 
-dfigs.functional.Position=[100 800 600 400];
-dfigs.anatomical.Position=[54 900 600 400]; 
-dfigs.slider.Position=[100 900 600 400];
+figs.rgb.Position=[54 800 600 400]; 
+figs.functional.Position=[100 800 600 400];
+figs.anatomical.Position=[54 900 600 400]; 
+figs.slider.Position=[100 900 600 400];
 
  %% ADJUST IMAGE 
-[figs]=adjustImage(rgwin,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figs,dfigs);
+[nfigs]=adjustImage(rgwin,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figs);
 
-%% SAVE POSITION 
+%% SAVE POSITIONS 
+figs = utils.save_positions(nfigs); 
 
-dfigs.rgb.Position=figs.rgb.Position;
-dfigs.functional.Position=[100 800 600 400];
-dfigs.anatomical.Position=[54 900 600 400]; 
-dfigs.slider.Position=[100 900 600 400];
+%% 
+
