@@ -1,107 +1,136 @@
-function adjustImage(image)
-    % Check if the input is a grayscale or RGB image
-    if size(image, 3) == 1
-        isRGB = false;  % Grayscale image
-    elseif size(image, 3) == 3
-        isRGB = true;   % RGB image
-    else
-        error('Input must be a grayscale or RGB image.');
-    end
+function [figs] = adjustImage(image,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,dfigs)
+%% UNPACK POSITIONS
+% if ~isstruct(dfigs)
+%     imgposition= dfigs(1,:); fimgposition=dfigs(2,:); 
+%     aimgposition=dfigs(3,:); sldposition= dfigs(4,:);
+% else isstruct(dfigs)
 
-    % Normalize the image intensity values to the range [0, 1]
-    if isRGB
-        % Normalize each channel independently for RGB images
-        image(:, :, 1) = mat2gray(image(:, :, 1));  % Red channel
-        image(:, :, 2) = mat2gray(image(:, :, 2));  % Green channel
-        image(:, :, 3) = mat2gray(image(:, :, 3));  % Blue channel
-    else
-        % Normalize grayscale image
-        image = mat2gray(image);
-    end
+imgposition=dfigs.rgb.Position; fimgposition=dfigs.functional.Position; 
+aimgposition = dfigs.anatomical.Position; dfigs.Slider.Position; 
 
-    % Create a figure for the image display
-    hFigImg = figure('Name', 'Image', 'NumberTitle', 'off', 'Position', [50, 100, 600, 400], 'Color', 'White');
-    hAx = axes('Parent', hFigImg, 'Position', [0.1, 0.1, 0.8, 0.8]);
-    hImg = imshow(image, 'Parent', hAx);
+%% CREATE VARIABLES
+hFigImg= NaN; 
+fFigImg= NaN; 
+aFigImg = NaN; 
+hFigSlider = NaN; 
 
-    % Create a second figure for the sliders and histogram
-    hFigSlider = figure('Name', 'Adjustments & Histogram', 'NumberTitle', 'off', ...
-        'Position', [700, 100, 1000, 400], 'Color', 'White');
+%% DETERMINE IMAGE TYPE BASED ON PROPERTIES OF IMAGE
+% Normalize each channel independently for RGB images
+image = utils.normalize_image(image); 
 
-    % Set default values for sliders
-    low_in_red = 0;
-    high_in_red = 1;
-    gamma_red = 1;
-
-    low_in_green = 0;
-    high_in_green = 1;
-    gamma_green = 1;
-
-    % Create sliders and labels for the Red channel (left side)
-    uicontrol('Style', 'text', 'String', 'Red Channel - Low In:', 'Position', [50, 150, 150, 20], 'Parent', hFigSlider);
-    hLowInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_red, ...
-        'Position', [50, 130, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
-
-    uicontrol('Style', 'text', 'String', 'Red Channel - High In:', 'Position', [50, 100, 150, 20], 'Parent', hFigSlider);
-    hHighInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_red, ...
-        'Position', [50, 80, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
-
-    uicontrol('Style', 'text', 'String', 'Red Channel - Gamma:', 'Position', [50, 50, 150, 20], 'Parent', hFigSlider);
-    hGammaRed = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_red, ...
-        'Position', [50, 30, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
-
-    % Create sliders and labels for the Green channel (right side)
-    uicontrol('Style', 'text', 'String', 'Green Channel - Low In:', 'Position', [550, 150, 150, 20], 'Parent', hFigSlider);
-    hLowInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_green, ...
-        'Position', [550, 130, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
-
-    uicontrol('Style', 'text', 'String', 'Green Channel - High In:', 'Position', [550, 100, 150, 20], 'Parent', hFigSlider);
-    hHighInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_green, ...
-        'Position', [550, 80, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
-
-    uicontrol('Style', 'text', 'String', 'Green Channel - Gamma:', 'Position', [550, 50, 150, 20], 'Parent', hFigSlider);
-    hGammaGreen = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_green, ...
-        'Position', [550, 30, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
-
-    % Create an axes for displaying the histogram
-    hHistAx = axes('Parent', hFigSlider, 'Position', [0.1, 0.5, 0.8, 0.4]);
-    
-    % Get the maximum height of the histogram    
-    [h1,~]= histcounts(redChannel(:), 256);
-    [h2,~]= histcounts(greenChannel(:), 256);
-    h1max = max(h1); h2max = max(h2);
-    maxheight=max([h1max,h2max]);
-
-    %Initialize the heights of the lines / gamma line
-    %maxheight= 1;
-    rGammaX = low_in_red:.01:high_in_red; 
-    rGammaY= imadjust(rGammaX,[],[],gamma_red);
-    gGammaX = low_in_green:.01:high_in_green; 
-    gGammaY= imadjust(gGammaX,[],[],gamma_green);
-
-
-    % Initialize line objects for intensity markers after the histogram is plotted
-    hLowRedLine = line([low_in_red, low_in_red-.02], [0, maxheight], 'Color', [.5 0 0], 'Parent', hHistAx);
-    hold(hHistAx, 'on');
-    hHighRedLine = line([high_in_red, high_in_red-.02], [0, maxheight], 'Color', [.5 0 0], 'Parent', hHistAx);
-    hLowGreenLine = line([low_in_green, low_in_green], [0, maxheight], 'Color', [0 .5 0], 'Parent', hHistAx);
-    hHighGreenLine = line([high_in_green, high_in_green], [0, maxheight], 'Color', [0 .5 0], 'Parent', hHistAx);
-
-    GammaRedLine = line(rGammaX,rGammaY,'color',[.5 0 0],'Parent',hHistAx); 
-    GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx); 
-
-   % Define red and green channel/ threshold to remove high values
+if sum(image(:,:,3))==0
+    type = 'rgb'; 
     redChannel = image(:, :, 1);
     greenChannel = image(:, :, 2);
+else
+    type='separate'; 
+    fimage=image(:,:,2); 
+    aimage=image(:,:,3); 
+    redChannel=aimage; 
+    greenChannel=fimage; 
+end
 
-    greenthresh = prctile(greenChannel, 95); 
-    redthresh = prctile(redChannel, 95); 
-    redChannel(redChannel < redthresh) = []; 
-    greenChannel(greenChannel < greenthresh) = [];
 
-    % Plot the initial histogram based on the input image
-    plotHistogram();
+%% CREATE FIGURES FOR COLOR/ BW IMAGES
+% Create a figure for the image display
+if strcmp(type,'rgb')
+    %Create RGB image 
+    hFigImg = figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',imgposition, 'Color', 'White');
+    hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
+    hImg = imshow(image, 'Parent', hAx);
+    hold on 
+    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),[cshift,rshift],idxshifts(p));
 
+elseif strcmp(type,'separate')
+    %Create functional channel image 
+    fFigImg = figure('Name', 'Functional Image', 'NumberTitle', 'off', 'Position',fimgposition, 'Color', 'White');
+    fAx = axes('Parent', fFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
+    fImg = imshow(fimage, 'Parent', fAx);
+    hold on 
+    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),[cshift,rshift],idxshifts(p));
+    
+    % Create anatomical channel image 
+    aFigImg = figure('Name', 'Anatomical Image', 'NumberTitle', 'off', 'Position',aimgposition, 'Color', 'White');
+    aAx = axes('Parent', aFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
+    aImg = imshow(aimage, 'Parent', aAx);
+    hold on 
+    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),[cshift,rshift],idxshifts(p));
+end
+
+
+
+%% CREATE SLIDER FIGURE WITH HISTOGRAMS
+% Create a second figure for the sliders and histogram
+hFigSlider = figure('Name', 'Adjustments & Histogram', 'NumberTitle', 'off', ...
+    'Position',sldposition, 'Color', 'White');
+
+% Set default values for sliders
+low_in_red = 0;
+high_in_red = 1;
+gamma_red = 1;
+
+low_in_green = 0;
+high_in_green = 1;
+gamma_green = 1;
+
+% Create sliders and labels for the Red channel (left side)
+uicontrol('Style', 'text', 'String', 'Red Channel - Low In:', 'Position', [50, 150, 150, 20], 'Parent', hFigSlider);
+hLowInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_red, ...
+    'Position', [50, 130, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+
+uicontrol('Style', 'text', 'String', 'Red Channel - High In:', 'Position', [50, 100, 150, 20], 'Parent', hFigSlider);
+hHighInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_red, ...
+    'Position', [50, 80, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+
+uicontrol('Style', 'text', 'String', 'Red Channel - Gamma:', 'Position', [50, 50, 150, 20], 'Parent', hFigSlider);
+hGammaRed = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_red, ...
+    'Position', [50, 30, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+
+% Create sliders and labels for the Green channel (right side)
+uicontrol('Style', 'text', 'String', 'Green Channel - Low In:', 'Position', [550, 150, 150, 20], 'Parent', hFigSlider);
+hLowInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_green, ...
+    'Position', [550, 130, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+
+uicontrol('Style', 'text', 'String', 'Green Channel - High In:', 'Position', [550, 100, 150, 20], 'Parent', hFigSlider);
+hHighInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_green, ...
+    'Position', [550, 80, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+
+uicontrol('Style', 'text', 'String', 'Green Channel - Gamma:', 'Position', [550, 50, 150, 20], 'Parent', hFigSlider);
+hGammaGreen = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_green, ...
+    'Position', [550, 30, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+
+% Create an axes for displaying the histogram
+hHistAx = axes('Parent', hFigSlider, 'Position', [0.1, 0.5, 0.8, 0.4]);
+
+%% GET SUPPLEMENTAL INFORMATION
+% Get the maximum height of the histogram    
+[h1,~]= histcounts(redChannel(:), 256);
+[h2,~]= histcounts(greenChannel(:), 256);
+h1max = max(h1); h2max = max(h2);
+maxheight=max([h1max,h2max]);
+
+%Initialize the heights of the lines / gamma line
+%maxheight= 1;
+rGammaX = low_in_red:.01:high_in_red; 
+rGammaY= imadjust(rGammaX,[],[],gamma_red);
+gGammaX = low_in_green:.01:high_in_green; 
+gGammaY= imadjust(gGammaX,[],[],gamma_green);
+
+
+% Initialize line objects for intensity markers after the histogram is plotted
+hLowRedLine = line([low_in_red, low_in_red-.02], [0, maxheight], 'Color', [.5 0 0], 'Parent', hHistAx);
+hold(hHistAx, 'on');
+hHighRedLine = line([high_in_red, high_in_red-.02], [0, maxheight], 'Color', [.5 0 0], 'Parent', hHistAx);
+hLowGreenLine = line([low_in_green, low_in_green], [0, maxheight], 'Color', [0 .5 0], 'Parent', hHistAx);
+hHighGreenLine = line([high_in_green, high_in_green], [0, maxheight], 'Color', [0 .5 0], 'Parent', hHistAx);
+
+GammaRedLine = line(rGammaX,rGammaY,'color',[.5 0 0],'Parent',hHistAx); 
+GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx); 
+
+% Plot the initial histogram based on the input image
+plotHistogram();
+
+%% updateImage FUNCTION
     % Callback function to update the image and histogram based on slider values
     function updateImage(~, ~)
         % Get current slider values for both Red and Green channels
@@ -121,29 +150,28 @@ function adjustImage(image)
         if low_in_green >= high_in_green
             low_in_green = high_in_green - 0.01;
         end
-        
-        % Adjust the image based on slider values
-        if isRGB
-            % Apply imadjust to each channel of the RGB image
-            adj_img = cat(3, ...
-                imadjust(image(:, :, 1), [low_in_red, high_in_red], [], gamma_red), ...
-                imadjust(image(:, :, 2), [low_in_green, high_in_green], [], gamma_green), ...
-                image(:, :, 3));  % Blue channel is left unchanged
-        else
-            % Apply imadjust to grayscale image
-            adj_img = imadjust(image, [low_in_red, high_in_red], [], gamma_red);  % For grayscale, it will behave the same
-        end
 
+        % Adjust the image based on slider values to RGB image 
+        if strcmp(type,'rgb')
+        adj_img = cat(3, ...
+            imadjust(image(:, :, 1), [low_in_red, high_in_red], [], gamma_red), ...
+            imadjust(image(:, :, 2), [low_in_green, high_in_green], [], gamma_green), ...
+            image(:, :, 3));  % Blue channel is left unchanged
         % Update the displayed image
         set(hImg, 'CData', adj_img);
+
+        elseif strcmp(type,'separate')
+            adj_fimg = imadjust(fimage,[low_in_green, high_in_green], [], gamma_green); 
+            adj_aimg = imadjust(aimage,[low_in_red, high_in_red], [], gamma_red); 
+        end
+        set(fImg,'CData',adj_fimg)
+        set(aImg,'CData',adj_aimg)
 
         % Update the intensity lines in the histogram
         set(hLowRedLine, 'XData', [low_in_red, low_in_red]);
         set(hHighRedLine, 'XData', [high_in_red, high_in_red]);
         set(hLowGreenLine, 'XData', [low_in_green, low_in_green]);
         set(hHighGreenLine, 'XData', [high_in_green, high_in_green]);
-
-
 
         % Update the Gamma Line Values
         rGammaX = low_in_red:.0001:high_in_red; 
@@ -155,10 +183,10 @@ function adjustImage(image)
         set(GammaRedLine,'XData',rGammaX,'YData',rGammaY*maxheight)
         set(GammaGreenLine,'XData',gGammaX,'YData',gGammaY*maxheight)
     end
-
+%% plotHistogram FUNCTION
     % Function to plot the histogram
     function plotHistogram()
-        if isRGB
+  
             % Plot the histogram of both channels
             h1= histogram(hHistAx, redChannel(:), 256, 'FaceColor', 'r', 'EdgeColor', 'k', 'FaceAlpha', 0.5);
             hold(hHistAx, 'on');
@@ -174,23 +202,20 @@ function adjustImage(image)
             set(hHighRedLine, 'XData', [high_in_red, high_in_red],'YData',[0 maxheight]);
             set(hLowGreenLine, 'XData', [low_in_green, low_in_green],'YData',[0 maxheight]);
             set(hHighGreenLine, 'XData', [high_in_green, high_in_green],'YData',[0 maxheight]);
-            % 
-            % % Update the Gamma Line Values
-            % rGammaX = low_in_red:.01:high_in_red; 
-            % rGammaY= imadjust(rGammaX,[],[],gamma_red);
-            % gGammaX = low_in_green:.01:high_in_green; 
-            % gGammaY= imadjust(gGammaX,[],[],gamma_green);
-            % 
-            % % Set Gamma Lines 
-            % set(GammaRedLine,'XData',rGammaX,'YData',rGammaY*maxheight)
-            % set(GammaGreenLine,'XData',gGammaX,'YData',gGammaY*maxheight)
+            
+            % Set Gamma Lines 
+            set(GammaRedLine,'XData',rGammaX,'YData',rGammaY*maxheight)
+            set(GammaGreenLine,'XData',gGammaX,'YData',gGammaY*maxheight)
 
-        else
-            % Plot histogram for the grayscale image
-            histogram(hHistAx, image(:), 256, 'FaceColor', 'k', 'EdgeColor', 'k');
-            title(hHistAx, 'Histogram of Grayscale Image');
-            xlabel(hHistAx, 'Intensity');
-            ylabel(hHistAx, 'Pixel Count');
-        end
     end
+
+
+imgstrs = fields(dfigs);
+
+figs.h = hFigImg; 
+figs.f = fFigImg; 
+figs.a = aFigImg; 
+figs.s = hFigSlider; 
+
+
 end

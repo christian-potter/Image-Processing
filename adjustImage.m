@@ -1,9 +1,21 @@
-function [hFigImg,fFigImg,aFigImg,hFigSlider] = adjustImage(image,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,imgposition,sldposition,fimgposition,aimgposition)
+function [figs] = adjustImage(image,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figs,dfigs)
+%% CLOSE PREVIOUS FIGURES
 
-hFigImg = NaN;
+%% UNPACK POSITIONS
+    % imgposition= dfigs(1,:); fimgposition=dfigs(2,:); 
+    % aimgposition=dfigs(3,:); sldposition= dfigs(4,:);
+
+
+imgposition=dfigs.rgb.Position; fimgposition=dfigs.functional.Position; 
+aimgposition = dfigs.anatomical.Position;sldposition =dfigs.slider.Position; 
+
+%% CREATE VARIABLES
+hFigImg= NaN; 
 fFigImg= NaN; 
-aFigImg = NaN;
-hFigSlider =NaN; 
+aFigImg = NaN; 
+hFigSlider = NaN; 
+
+%% DETERMINE IMAGE TYPE BASED ON PROPERTIES OF IMAGE
 % Normalize each channel independently for RGB images
 image = utils.normalize_image(image); 
 
@@ -152,9 +164,10 @@ plotHistogram();
         elseif strcmp(type,'separate')
             adj_fimg = imadjust(fimage,[low_in_green, high_in_green], [], gamma_green); 
             adj_aimg = imadjust(aimage,[low_in_red, high_in_red], [], gamma_red); 
+            set(fImg,'CData',adj_fimg)
+            set(aImg,'CData',adj_aimg)
         end
-        set(fImg,'CData',adj_fimg)
-        set(aImg,'CData',adj_aimg)
+        
 
         % Update the intensity lines in the histogram
         set(hLowRedLine, 'XData', [low_in_red, low_in_red]);
@@ -197,4 +210,14 @@ plotHistogram();
             set(GammaGreenLine,'XData',gGammaX,'YData',gGammaY*maxheight)
 
     end
+
+
+imgstrs = fields(dfigs);
+
+figs.rgb = hFigImg; 
+figs.functional = fFigImg; 
+figs.anatomical = aFigImg; 
+figs.slider = hFigSlider; 
+
+
 end

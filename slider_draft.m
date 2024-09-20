@@ -65,28 +65,19 @@ if mod(p,2)==0
     cshift=planesize(2);
 end 
 rshift=floor((p-1)/2)*planesize(1);
-%% RECOGNIZE NUMBER OF PLANES 
 
-for i = 1:length(cellstat)
-    curstat= cellstat{i}; 
-    roi_planeidx(i)=curstat.iplane+1; % add 1 to the plane 
-end
+%% DEFAULT POSITIONS
+dfigs.rgb.Position=[54 800 600 400]; 
+dfigs.functional.Position=[100 800 600 400];
+dfigs.anatomical.Position=[54 900 600 400]; 
+dfigs.slider.Position=[100 900 600 400];
 
-nplanes = length(unique(roi_planeidx));
-%% DEFAULT POSITION 
-figposition=[54 800 600 400]; 
-sldposition=[54 800 600 400];
-fimgposition=[54 800 600 400]; 
-aimgposition=[54 800 600 400];
+ %% ADJUST IMAGE 
+[figs]=adjustImage(rgwin,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figs,dfigs);
 
- %% COLOR IMAGE 
+%% SAVE POSITION 
 
-[hFigImg,fFigImg,aFigImg,hFigSlider]=adjustImage(crwin,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figposition,sldposition,fimgposition,aimgposition);
-
-%% RED IMAGE
-himg=adjustImage(rgwin,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figposition,sldposition,fimgposition,aimgposition)
-
-%%
-greenthresh= prctile(greenChannel,95); 
-redthresh= prctile(redChannel,95); 
-            
+dfigs.rgb.Position=figs.rgb.Position;
+dfigs.functional.Position=[100 800 600 400];
+dfigs.anatomical.Position=[54 900 600 400]; 
+dfigs.slider.Position=[100 900 600 400];
