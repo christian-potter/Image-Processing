@@ -73,10 +73,22 @@ figs.anatomical.Position=[54 900 600 400];
 figs.slider.Position=[100 900 600 400];
 
  %% ADJUST IMAGE 
-[nfigs]=adjustImage(rgwin,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figs);
+[nfigs]=adjustImagev2(cstack,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figs);
 
 %% SAVE POSITIONS 
-figs = utils.save_positions(nfigs); 
+figs = utils.save_positions(nfigs,figs); 
 
-%% 
+%% IMAGE STACK DRAFT 
+x= tiffreadVolume('/Volumes/ross/Christian/#511 Data/#511 Structural 16 bit 2-channel.tif');
 
+i = x(:,:,101); 
+j = x(:,:,102); 
+k = zeros(288,512); 
+
+xy(:,:,1)= i; xy(:,:,2)=j; xy(:,:,3)=k; 
+
+xy = utils.normalize_img (xy); 
+
+figure; imshow(xy)
+
+cstack = utils.convert_img(x);

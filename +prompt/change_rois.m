@@ -27,7 +27,7 @@ for i = 1:length(roi)
             id_vect(roi(i))=3; 
             completion = 1;          
         else
-            sprintf('Error: Entry outside of allowed options')
+            disp('Error: Entry outside of allowed options')
         end
 
     

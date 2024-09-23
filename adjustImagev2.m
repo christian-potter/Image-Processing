@@ -1,4 +1,4 @@
-function [nfigs] = adjustImage(image,p,idxshifts,roi_planeidx,mask_coords,mask_colors,cshift,rshift,figs)
+function [nfigs] = adjustImagev2(image,p,idxshifts,roi_planeidx,mask_coords,mask_colors,crshift,figs)
 %% CLOSE PREVIOUS FIGURES
 
 %% CREATE VARIABLES
@@ -9,13 +9,24 @@ hFigSlider = NaN;
 
 %% DETERMINE IMAGE TYPE BASED ON PROPERTIES OF IMAGE
 % Normalize each channel independently for RGB images
-image = utils.normalize_img(image); 
+ 
 
 if sum(image(:,:,3))==0
-    type = 'rgb'; 
-    redChannel = image(:, :, 1);
-    greenChannel = image(:, :, 2);
+    if size(image,4)>1
+        stack = true; 
+        type ='rgb';
+        redChannel = image(:, :, 1,1);
+        greenChannel = image(:, :, 2,1);
+    else 
+        stack = false; 
+        image = utils.normalize_img(image);
+        type = 'rgb'; 
+        redChannel = image(:, :, 1);
+        greenChannel = image(:, :, 2);
+    end
+    
 else
+    image = utils.normalize_img(image);
     type='separate'; 
     fimage=image(:,:,2); 
     aimage=image(:,:,3); 
@@ -24,30 +35,35 @@ else
 end
 
 
+
 %% CREATE FIGURES FOR COLOR/ BW IMAGES
 % Create a figure for the image display
 if strcmp(type,'rgb')
     %Create RGB image 
     hFigImg = figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',figs.rgb.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
-    hImg = imshow(image, 'Parent', hAx);
+    if stack 
+        hImg = imshow(image(:,:,:,1), 'Parent', hAx);
+    else 
+        hImg = imshow(image, 'Parent', hAx);
+    end
     hold on 
-    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),[cshift,rshift],idxshifts(p));
+    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
 
 elseif strcmp(type,'separate')
     %Create functional channel image 
     fFigImg = figure('Name', 'Functional Image', 'NumberTitle', 'off', 'Position',figs.functional.Position, 'Color', 'White');
-    fAx = axes('Parent', fFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
+    fAx = axes('Parent', fFigImg, 'Position', [0.2, 0.2, 0.8, 0.8]);
     fImg = imshow(fimage, 'Parent', fAx);
     hold on 
-    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),[cshift,rshift],idxshifts(p));
+    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
     
     % Create anatomical channel image 
     aFigImg = figure('Name', 'Anatomical Image', 'NumberTitle', 'off', 'Position',figs.anatomical.Position, 'Color', 'White');
     aAx = axes('Parent', aFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     aImg = imshow(aimage, 'Parent', aAx);
     hold on 
-    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),[cshift,rshift],idxshifts(p));
+    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
 end
 
 
@@ -65,7 +81,7 @@ gamma_red = 1;
 low_in_green = 0;
 high_in_green = 1;
 gamma_green = 1;
-
+img_num = 1; 
 % Create sliders and labels for the Red channel (left side)
 uicontrol('Style', 'text', 'String', 'Red Channel - Low In:', 'Position', [50, 150, 150, 20], 'Parent', hFigSlider);
 hLowInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_red, ...
@@ -92,14 +108,21 @@ uicontrol('Style', 'text', 'String', 'Green Channel - Gamma:', 'Position', [550,
 hGammaGreen = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_green, ...
     'Position', [550, 30, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
 
+if stack 
+    uicontrol('Style', 'text', 'String', 'Image#:', 'Position', [200, 200, 40, 20], 'Parent', hFigSlider);
+    img_slidern = uicontrol('Style', 'slider', 'Min', 1, 'Max', size(image,4), 'Value', img_num, ...
+    'Position', [200 180 40 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+end
+
+
 % Create an axes for displaying the histogram
 hHistAx = axes('Parent', hFigSlider, 'Position', [0.1, 0.5, 0.8, 0.4]);
 
 %% GET SUPPLEMENTAL INFORMATION / MAKE LINES FOR HISTOGRAM 
 % Get the maximum height of the histogram    
-[h1,~]= histcounts(redChannel(:), 256);
-[h2,~]= histcounts(greenChannel(:), 256);
-h1max = max(h1); h2max = max(h2);
+[hc1,~]= histcounts(redChannel(:), 256);
+[hc2,~]= histcounts(greenChannel(:), 256);
+h1max = max(hc1); h2max = max(hc2);
 maxheight=max([h1max,h2max]);
 
 %Initialize the heights of the lines / gamma line
@@ -121,7 +144,7 @@ GammaRedLine = line(rGammaX,rGammaY,'color',[.5 0 0],'Parent',hHistAx);
 GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx); 
 
 % Plot the initial histogram based on the input image
-plotHistogram();
+[h1,h2]=plotHistogram();
 
 %% updateImage FUNCTION
     % Callback function to update the image and histogram based on slider values
@@ -134,6 +157,10 @@ plotHistogram();
         low_in_green = get(hLowInGreen, 'Value');
         high_in_green = get(hHighInGreen, 'Value');
         gamma_green = get(hGammaGreen, 'Value');
+        if stack 
+            img_num = round(get(img_slidern,'Value')); 
+        end
+
 
         % Ensure that low_in is not greater than high_in for both channels
         if low_in_red >= high_in_red
@@ -146,12 +173,31 @@ plotHistogram();
 
         % Adjust the image based on slider values to RGB image 
         if strcmp(type,'rgb')
-        adj_img = cat(3, ...
-            imadjust(image(:, :, 1), [low_in_red, high_in_red], [], gamma_red), ...
-            imadjust(image(:, :, 2), [low_in_green, high_in_green], [], gamma_green), ...
-            image(:, :, 3));  % Blue channel is left unchanged
-        % Update the displayed image
-        set(hImg, 'CData', adj_img);
+            if stack 
+                adj_img = cat(3, ...
+                    imadjust(image(:, :, 1,img_num), [low_in_red, high_in_red], [], gamma_red), ...
+                    imadjust(image(:, :, 2,img_num), [low_in_green, high_in_green], [], gamma_green), ...
+                    image(:, :, 3,img_num));  % Blue channel is left unchanged
+                % Update the displayed image
+                set(hImg, 'CData', adj_img);
+                red = image(:,:,1,img_num); green = image(:,:,2,img_num); 
+                red(red==0)=[]; green(green==0)=[]; 
+                redc=histcounts(red,256); greenc=histcounts(green,256); 
+                maxred =max(redc(:)); maxgreen=max(greenc(:)); 
+                m= max([maxred,maxgreen]); 
+                set(h1,'Data',red(:))
+                set(h2,'Data',green(:))
+                set(hHistAx,'YLim',[0 m])
+
+            else
+                adj_img = cat(3, ...
+                    imadjust(image(:, :, 1), [low_in_red, high_in_red], [], gamma_red), ...
+                    imadjust(image(:, :, 2), [low_in_green, high_in_green], [], gamma_green), ...
+                    image(:, :, 3));  % Blue channel is left unchanged
+                % Update the displayed image
+                set(hImg, 'CData', adj_img);             
+            end
+
 
         elseif strcmp(type,'separate')
             adj_fimg = imadjust(fimage,[low_in_green, high_in_green], [], gamma_green); 
@@ -161,11 +207,11 @@ plotHistogram();
         end
         
 
-        % Update the intensity lines in the histogram
-        set(hLowRedLine, 'XData', [low_in_red, low_in_red]);
-        set(hHighRedLine, 'XData', [high_in_red, high_in_red]);
-        set(hLowGreenLine, 'XData', [low_in_green, low_in_green]);
-        set(hHighGreenLine, 'XData', [high_in_green, high_in_green]);
+ % Update the intensity lines in the histogram
+        set(hLowRedLine, 'XData', [low_in_red, low_in_red],'YData',[0 m]);
+        set(hHighRedLine, 'XData', [high_in_red, high_in_red],'YData',[0 m]);
+        set(hLowGreenLine, 'XData', [low_in_green, low_in_green],'YData',[0 m]);
+        set(hHighGreenLine, 'XData', [high_in_green, high_in_green],'YData',[0 m]);
 
         % Update the Gamma Line Values
         rGammaX = low_in_red:.0001:high_in_red; 
@@ -174,13 +220,13 @@ plotHistogram();
         gGammaY= imadjust(gGammaX,[],[],gamma_green);
 
         % Set Gamma Lines 
-        set(GammaRedLine,'XData',rGammaX,'YData',rGammaY*maxheight)
-        set(GammaGreenLine,'XData',gGammaX,'YData',gGammaY*maxheight)
+        set(GammaRedLine,'XData',rGammaX,'YData',rGammaY*m)
+        set(GammaGreenLine,'XData',gGammaX,'YData',gGammaY*m)
     end
 %% plotHistogram FUNCTION
     % Function to plot the histogram
-    function plotHistogram()
-  
+    function [h1, h2] = plotHistogram()
+            
             % Plot the histogram of both channels
             h1= histogram(hHistAx, redChannel(:), 256, 'FaceColor', 'r', 'EdgeColor', 'k', 'FaceAlpha', 0.5);
             hold(hHistAx, 'on');
