@@ -1,23 +1,20 @@
-function [id_vect] = examine_unclassified(roi_planeidx,id_vect,ops,stat,g_thresh,r_thresh)
+function [id_vect,nfigs] = examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,opt)
 
 arguments
-    roi_planeidx(1,:) double 
+    p double 
+    zstack double
     id_vect (:,1) double
     ops struct
     stat cell
-    g_thresh double 
-    r_thresh double 
+    crshift double
+    figs struct
+    opt.surround double = 20; 
+ 
 end
 
 unc = find(id_vect==3); 
-nplanes = max(roi_planeidx); 
-
 i = 1; 
-
-surround = 20;
 completion = 0; 
-r_thresh= 1; 
-g_thresh= 1; 
 
 
 % determine index of neuron for inspect_roi 
@@ -28,9 +25,7 @@ while completion ~= 1
         disp(["All Unclassified ROIs in this plane have been sorted",char(10)])
     else   
         %-
-        
-        [maskcoords]=get.mask_coordinates(stat); 
-        [gclim,rclim]=plot.roi_mask(unc(i),stat,surround,ops,maskcoords,r_thresh,g_thresh); 
+        nfigs= adjustImagev2(p,stat,crshift,figs,ops,id_vect,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack); 
         
         id_str=prompt.neuron_idstr(id_vect,unc(i)); 
         disp(id_str)
@@ -55,9 +50,6 @@ while completion ~= 1
             id_vect(unc(i))=3; 
             i = i+1; 
         
-        elseif strcmp(change,'q')
-            [g_thresh,r_thresh]= prompt.change_brightness(gclim,rclim);
-
         elseif strcmp(change,'r')
             completion = 1; 
         end
@@ -66,8 +58,3 @@ while completion ~= 1
 
 
 end
-
-
-
-
-

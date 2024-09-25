@@ -6,11 +6,11 @@ if menu == 1
     a = ['A: Reclassify Neurons',char(10)]; 
     s = ['S: Go To Next Plane',char(10)]; 
     d = ['D: Go to Previous Plane',char(10)]; 
-    f = ['F: Change Image Brightness',char(10)];
     r = ['R: Change Image Type ',char(10)];
     q = ['Q: Examine Uncertain',char(10)]; 
-    c = ['C: Combine/ Separate Images',char(10)]; 
-    inputstr= [titleinput,a,s,d,f,q,r,c]; 
+    c = ['C: Combine/ Separate Images',char(10)];
+    w = ['W: Save Figure Positions',char(10)]; 
+    inputstr= [titleinput,a,s,d,q,r,c,w]; 
 
 % MENU 2
 % used in prompt.change_rois
@@ -30,9 +30,8 @@ elseif menu == 3
     s = ['S: Change to IN',char(10)]; 
     d = ['D: Change to SPBN',char(10)]; 
     f = ['F: Keep Uncertain',char(10)]; 
-    q = ['Q: Change Image Brightness',char(10)]; 
     r = ['R: Return to Main Menu',char(10)]; 
-    inputstr= [titleinput,a,s,d,f,q,r]; 
+    inputstr= [titleinput,a,s,d,f,r]; 
 
 % MENU 4
 % used in 

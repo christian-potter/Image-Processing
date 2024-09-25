@@ -1,44 +1,62 @@
-function [nfigs] = adjustImagev2(image,p,idxshifts,roi_planeidx,mask_coords,mask_colors,crshift,figs)
-%% CLOSE PREVIOUS FIGURES
+function [nfigs] = adjustImagev2(p,stat,crshift,figs,ops,id_vect,opt)
+arguments 
+    p double 
+    stat cell 
+    crshift double 
+    figs struct 
+    ops struct 
+    id_vect double 
+    opt.type string = 'rgb'
+    opt.functional string = 'mean'
+    opt.anatomical string = 'mean'
+    opt.idx (1,1) double % individual idx if examining an individual neuron 
+    opt.zstack double = 0; 
+    opt.surround double = 10 
+end 
+
+%% GET VARIABLES
+[roi_planeidx,idxshifts,nplanes] = get.roipidx_shift(stat);
+[mask_coords]=get.mask_coordinates(stat); 
+[mask_colors] = get.mask_colors(id_vect); 
+
 
 %% CREATE VARIABLES
-hFigImg= NaN; 
-fFigImg= NaN; 
-aFigImg = NaN; 
-hFigSlider = NaN; 
+hFigImg= NaN; fFigImg= NaN; aFigImg = NaN; hFigSlider = NaN; 
 
-%% DETERMINE IMAGE TYPE BASED ON PROPERTIES OF IMAGE
-% Normalize each channel independently for RGB images
- 
+%% GET RED/GREENWIN
+[redwin,greenwin]= get.redgreen_images(opt.anatomical,opt.functional,ops,crshift); 
 
-if sum(image(:,:,3))==0
-    if size(image,4)>1
-        stack = true; 
-        type ='rgb';
-        redChannel = image(:, :, 1,1);
-        greenChannel = image(:, :, 2,1);
-    else 
-        stack = false; 
-        image = utils.normalize_img(image);
-        type = 'rgb'; 
-        redChannel = image(:, :, 1);
-        greenChannel = image(:, :, 2);
+%% DEFINE IMAGE 
+
+if strcmp(opt.type,'rgb')
+    image(:,:,1) = redwin; 
+    image(:,:,2) = greenwin;
+    image(:,:,3) = zeros(size(redwin,1),size(redwin,2)); 
+    image = utils.normalize_img(image); 
+    redChannel = image(:,:,1); greenChannel = image(:,:,2);
+    stack = false; 
+elseif strcmp(opt.type,'separate')
+    aimage = redwin; fimage = greenwin; 
+    aimage = utils.normalize_img(aimage); fimage = utils.normalize_img(fimage); 
+    redChannel = aimage; greenChannel = fimage;
+    stack = false; 
+elseif strcmp(opt.type,'zstack')
+    stack = true; 
+    image = opt.zstack; 
+    image = get.roi_surround(image,opt.idx,stat,opt.surround);
+    for i = 1:size(image,4)
+        for j=1:size(image,3)
+        image(:,:,j,i) = utils.normalize_img(image(:,:,j,i));
+        end
     end
-    
-else
-    image = utils.normalize_img(image);
-    type='separate'; 
-    fimage=image(:,:,2); 
-    aimage=image(:,:,3); 
-    redChannel=aimage; 
-    greenChannel=fimage; 
+
+    redChannel = image(:, :, 1,1);greenChannel = image(:, :, 2,1);
+     
 end
-
-
 
 %% CREATE FIGURES FOR COLOR/ BW IMAGES
 % Create a figure for the image display
-if strcmp(type,'rgb')
+if strcmp(opt.type,'rgb')||strcmp(opt.type,'zstack')
     %Create RGB image 
     hFigImg = figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',figs.rgb.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
@@ -50,10 +68,10 @@ if strcmp(type,'rgb')
     hold on 
     plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
 
-elseif strcmp(type,'separate')
+elseif strcmp(opt.type,'separate')
     %Create functional channel image 
     fFigImg = figure('Name', 'Functional Image', 'NumberTitle', 'off', 'Position',figs.functional.Position, 'Color', 'White');
-    fAx = axes('Parent', fFigImg, 'Position', [0.2, 0.2, 0.8, 0.8]);
+    fAx = axes('Parent', fFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     fImg = imshow(fimage, 'Parent', fAx);
     hold on 
     plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
@@ -65,8 +83,6 @@ elseif strcmp(type,'separate')
     hold on 
     plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
 end
-
-
 
 %% CREATE SLIDER FIGURE WITH HISTOGRAMS
 % Create a second figure for the sliders and histogram
@@ -172,7 +188,7 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
         end
 
         % Adjust the image based on slider values to RGB image 
-        if strcmp(type,'rgb')
+        if strcmp(opt.type,'rgb') || strcmp(opt.type,'zstack')
             if stack 
                 adj_img = cat(3, ...
                     imadjust(image(:, :, 1,img_num), [low_in_red, high_in_red], [], gamma_red), ...
@@ -195,15 +211,25 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
                     imadjust(image(:, :, 2), [low_in_green, high_in_green], [], gamma_green), ...
                     image(:, :, 3));  % Blue channel is left unchanged
                 % Update the displayed image
-                set(hImg, 'CData', adj_img);             
+                set(hImg, 'CData', adj_img);
+                red = image(:,:,1,img_num); green = image(:,:,2,img_num); 
+                red(red==0)=[]; green(green==0)=[]; 
+                redc=histcounts(red,256); greenc=histcounts(green,256); 
+                maxred =max(redc(:)); maxgreen=max(greenc(:)); 
+                m= max([maxred,maxgreen]); 
             end
 
 
-        elseif strcmp(type,'separate')
+        elseif strcmp(opt.type,'separate')
             adj_fimg = imadjust(fimage,[low_in_green, high_in_green], [], gamma_green); 
             adj_aimg = imadjust(aimage,[low_in_red, high_in_red], [], gamma_red); 
             set(fImg,'CData',adj_fimg)
             set(aImg,'CData',adj_aimg)
+            red = adj_aimg; green= adj_fimg; 
+            red(red==0)=[]; green(green==0)=[]; 
+            redc=histcounts(red,256); greenc=histcounts(green,256); 
+            maxred =max(redc(:)); maxgreen=max(greenc(:)); 
+            m= max([maxred,maxgreen]); 
         end
         
 
