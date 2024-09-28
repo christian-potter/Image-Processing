@@ -1,0 +1,130 @@
+%%
+load('/Volumes/ross/Christian/suite2p/combined/Fall.mat')
+zstack= get.zstack('/Volumes/ross/Christian/#511 Data/#511 Structural 16 bit 2-channel.tif');
+
+
+%% GET VARIABLES
+
+[roi_planeidx,idxshifts,nplanes] = get.roipidx_shift(stat);
+planesize=size(ops.refImg); 
+planes= nan(planesize(1),planesize(2),2,nplanes); 
+
+%% ARRAY WITH IMAGES FROM ALL PLANES 
+
+for p = 1:nplanes
+    [crshift]=get.crshift(ops,p);
+    [redwin,greenwin]= get.redgreen_images('mean','mean',ops,crshift); 
+    planes(:,:,1,p) = redwin;
+    planes(:,:,2,p) = greenwin;
+end
+
+%% LOOK AT MEAN SHIFT 
+xoff = round(mean(ops.xoff((end-1000):end)));
+yoff = round(mean(ops.yoff((end-1000):end))); 
+%%
+zoffset = 20; 
+
+for i = 1:nplanes
+    planezoffset(i) = i * zoffset; 
+end
+
+planezoffset=planezoffset*1.8; 
+
+%% ALIGN BASED ON Y AND X OFFSETS
+% adj_planes=planes;
+% adj_zstack=zstack; 
+% 
+% if xoff > 0
+%     adj_planes(:,1:xoff,:,:)=[];
+%     adj_zstack(:,end-xoff+1:end,:,:)=[];
+% elseif xoff< 0
+%     adj_planes(:,end+xoff+1:end,:,:)=[]; 
+%     adj_zstack(:,1:-xoff,:,:)=[]; 
+% end
+% 
+% if yoff > 0
+%     adj_planes(1:yoff,:,:,:)=[];
+%     adj_zstack(end-yoff+1:end,:,:,:)=[]; 
+% elseif yoff < 0
+%     adj_planes(end+yoff+1:end,:,:,:)=[]; 
+%     adj_zstack(1:-yoff,:,:,:)=[]; 
+% end
+
+
+planes = circshift(planes,xoff,2); 
+planes=circshift(planes,yoff,1); 
+
+
+%% XC IN Z AND Y 
+%rxcs = nan(51,51,101,nplanes); 
+%gxcs = nan(51,51,101,nplanes); 
+xcs = nan(51,51,101,nplanes); 
+xc_lags = nan(51,51,101,nplanes); 
+
+xrange = 25; 
+zrange = 50; 
+yrange = 25; 
+
+maxy= size(planes,1); 
+maxx=size(planes,2); 
+maxz=size(zstack,3); 
+
+xcs=cell(nplanes,maxy); 
+xclags=cell(nplanes,maxy); 
+xcoffsets=cell(nplanes,maxy); 
+%%
+for p = 1:5
+
+    for r = 1:size(planes,1)
+       redplane_row = planes(r,:,1,p);greenplane_row = planes(r,:,2,p);
+       planerow = [redplane_row,greenplane_row]; 
+
+        for dr = -yrange:yrange           
+            y = r+dr; 
+            for dz = -zrange:zrange
+                z = planezoffset(p)+dz; 
+                
+                if y>0 && y<maxy && z>0 && z<maxz
+
+                    redz_row = zstack(y,:,1,z);greenz_row = zstack(y,:,2,z); 
+                    zrow = [redz_row,greenz_row]; 
+                    [xc,xc_lag]= xcorr(zrow,planerow,xrange,'normalized');
+                    
+
+          
+                end
+
+
+
+
+
+            end
+
+        end
+    end
+end
+
+%%
+
+xcoffsets=cell(nplanes,size(planes,1)); 
+for p = 1:5
+
+    for r = 1:size(planes,1)
+        dr_dz=cell(yrange*2+1,zrange*2+1); 
+
+        for dr = -yrange:yrange           
+            y = r+dr; 
+            for dz = -zrange:zrange
+                z = planezoffset(p)+dz;
+                if y>0 && y<maxy && z>0 && z<maxz
+                    dr_dz{dr+yrange+1,dz+zrange+1}=[dr,dz];
+                end
+            end
+
+        end
+        xcoffsets{p,r}=dr_dz;
+    end
+
+end
+        
+

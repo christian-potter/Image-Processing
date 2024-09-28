@@ -1,4 +1,4 @@
-function [nimage] = roi_surround(image,roi,stat,surround)
+function [nimage,x1,y1] = roi_surround(image,roi,stat,surround)
 
 image_plane = image(:,:,1,1);
 dims = size(image_plane); 

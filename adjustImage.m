@@ -23,7 +23,6 @@ else
     greenChannel=fimage; 
 end
 
-
 %% CREATE FIGURES FOR COLOR/ BW IMAGES
 % Create a figure for the image display
 if strcmp(type,'rgb')
@@ -180,7 +179,6 @@ plotHistogram();
 %% plotHistogram FUNCTION
     % Function to plot the histogram
     function plotHistogram()
-  
             % Plot the histogram of both channels
             h1= histogram(hHistAx, redChannel(:), 256, 'FaceColor', 'r', 'EdgeColor', 'k', 'FaceAlpha', 0.5);
             hold(hHistAx, 'on');
@@ -200,11 +198,7 @@ plotHistogram();
             % Set Gamma Lines 
             set(GammaRedLine,'XData',rGammaX,'YData',rGammaY*maxheight)
             set(GammaGreenLine,'XData',gGammaX,'YData',gGammaY*maxheight)
-
     end
-
-
-
 
 nfigs.rgb = hFigImg; 
 nfigs.functional = fFigImg; 

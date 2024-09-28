@@ -25,11 +25,11 @@ cellstat= stat(iscell(:,1)==1);
 id_vect = id_vect(iscell(:,1)==1); 
 
 %% DEFAULT POSITIONS
-figs.rgb.Position=[54 800 600 400]; 
-figs.functional.Position=[100 800 600 400];
-figs.anatomical.Position=[54 900 600 400]; 
-figs.slider.Position=[100 900 600 400];
-
+% figs.rgb.Position=[54 800 600 400]; 
+% figs.functional.Position=[100 800 600 400];
+% figs.anatomical.Position=[54 900 600 400]; 
+% figs.slider.Position=[100 900 600 400];
+ load('work-positions.mat')
 %% CREATE IMAGE STACK 
 zstack= get.zstack('/Volumes/ross/Christian/#511 Data/#511 Structural 16 bit 2-channel.tif');
 
@@ -70,11 +70,13 @@ while p ~= -1
     
     elseif strcmp (answer,'q')
         if sum(id_vect==3)<0
+            close all 
             disp('No ROIs currently unclassified.',char(10))
             unc_vect = input('Enter neurons you wish to unclassify:'); 
             id_vect(unc_vect)=3; 
             [id_vect,nfigs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,'surround',20); 
         else 
+            close all 
             [id_vect,nfigs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,'surround',20); 
         end
     elseif strcmp(answer,'c')

@@ -19,13 +19,10 @@ end
 [mask_coords]=get.mask_coordinates(stat); 
 [mask_colors] = get.mask_colors(id_vect); 
 
-
 %% CREATE VARIABLES
 hFigImg= NaN; fFigImg= NaN; aFigImg = NaN; hFigSlider = NaN; 
-
 %% GET RED/GREENWIN
 [redwin,greenwin]= get.redgreen_images(opt.anatomical,opt.functional,ops,crshift); 
-
 %% DEFINE IMAGE 
 
 if strcmp(opt.type,'rgb')
@@ -35,23 +32,23 @@ if strcmp(opt.type,'rgb')
     image = utils.normalize_img(image); 
     redChannel = image(:,:,1); greenChannel = image(:,:,2);
     stack = false; 
+
 elseif strcmp(opt.type,'separate')
     aimage = redwin; fimage = greenwin; 
     aimage = utils.normalize_img(aimage); fimage = utils.normalize_img(fimage); 
     redChannel = aimage; greenChannel = fimage;
     stack = false; 
+
 elseif strcmp(opt.type,'zstack')
     stack = true; 
     image = opt.zstack; 
-    image = get.roi_surround(image,opt.idx,stat,opt.surround);
+    [image,x1,y1] = get.roi_surround(image,opt.idx,stat,opt.surround);
     for i = 1:size(image,4)
         for j=1:size(image,3)
-        image(:,:,j,i) = utils.normalize_img(image(:,:,j,i));
+            image(:,:,j,i) = utils.normalize_img(image(:,:,j,i));
         end
     end
-
     redChannel = image(:, :, 1,1);greenChannel = image(:, :, 2,1);
-     
 end
 
 %% CREATE FIGURES FOR COLOR/ BW IMAGES
@@ -61,12 +58,12 @@ if strcmp(opt.type,'rgb')||strcmp(opt.type,'zstack')
     hFigImg = figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',figs.rgb.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     if stack 
-        hImg = imshow(image(:,:,:,1), 'Parent', hAx);
+        hImg = imshow(image(:,:,:,1), 'Parent', hAx); hold on; 
+        plot.mask_boundaries(mask_colors(:,1),mask_coords(opt.idx),[x1 y1],opt.idx,"idxtype",'specified');
     else 
-        hImg = imshow(image, 'Parent', hAx);
+        hImg = imshow(image, 'Parent', hAx); hold on; 
+        plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
     end
-    hold on 
-    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
 
 elseif strcmp(opt.type,'separate')
     %Create functional channel image 
@@ -98,6 +95,7 @@ low_in_green = 0;
 high_in_green = 1;
 gamma_green = 1;
 img_num = 1; 
+
 % Create sliders and labels for the Red channel (left side)
 uicontrol('Style', 'text', 'String', 'Red Channel - Low In:', 'Position', [50, 150, 150, 20], 'Parent', hFigSlider);
 hLowInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_red, ...
@@ -272,11 +270,7 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             % Set Gamma Lines 
             set(GammaRedLine,'XData',rGammaX,'YData',rGammaY*maxheight)
             set(GammaGreenLine,'XData',gGammaX,'YData',gGammaY*maxheight)
-
     end
-
-
-
 
 nfigs.rgb = hFigImg; 
 nfigs.functional = fFigImg; 
