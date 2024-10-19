@@ -89,14 +89,8 @@ for p = 1:5
                     redz_row = zstack(y,:,1,z);greenz_row = zstack(y,:,2,z); 
                     zrow = [redz_row,greenz_row]; 
                     [xc,xc_lag]= xcorr(zrow,planerow,xrange,'normalized');
-                    
-
-          
+                             
                 end
-
-
-
-
 
             end
 

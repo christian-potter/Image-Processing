@@ -32,7 +32,15 @@ id_vect = id_vect(iscell(:,1)==1);
  load('work-positions.mat')
 %% CREATE IMAGE STACK 
 zstack= get.zstack('/Volumes/ross/Christian/#511 Data/#511 Structural 16 bit 2-channel.tif');
+%%
+% use this to load individual tiffs. _00X at the end is the first or second
+% timepoint 
+% have function choose the timepoint 
 
+'/Volumes/Warwick/DRGS project/#511 3-28-24/SDH/Final FOV/Structural/1x resolution (26)/SDH#511_026/ChanB_001_001_208_002.tif'
+
+% metadata for zstack
+'/Volumes/Warwick/DRGS project/#511 3-28-24/SDH/Final FOV/Structural/1x resolution (26)/SDH#511_026/Experiment.xml'
 %% DEFAULT VALUES
 p = 1; 
 atype= 'mean';ftype='mean'; 
