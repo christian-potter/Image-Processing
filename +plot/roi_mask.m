@@ -57,7 +57,7 @@ end
 hold on 
 plot.mask_boundaries([1 0 1]',maskcoords(roi),[x1,y1],roi,'idxtype','specified');
 title("Green Channel")
-utils.set_figure(15,'any')
+utils.sf('fontsize',15)
 
 subplot(2,1,2)
 imshow(redwin)
@@ -75,7 +75,7 @@ hold on
 plot.mask_boundaries([1 0 1]',maskcoords(roi),[x1,y1],roi,'idxtype','specified'); 
 title("Red Channel")
 
-utils.set_figure(15,'any')
+utils.sf('fontsize',15)
 
 sgtitle(['ROI#: ',num2str(roi)],'FontSize',15)
 

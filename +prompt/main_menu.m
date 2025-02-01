@@ -1,56 +1,5 @@
-%% LOAD 
+function [id_vect] = main_menu(id_vect,figs,p, ops, cellstat,ftype,atype,img_mode)
 
-load('/Volumes/Potter/From Abby/#37_TTX/Ready for Suite2p/suite2p/combined/Fall.mat')
-
-%%
-
-load('/Volumes/ross/Christian/suite2p/combined/Fall.mat')
-
-%% MAKE SAMPLE RED/ GREEN CELL VECT 
-
-sample_rcthresh= prctile(redcell(:,2),75); 
-red_vect = redcell(:,2)>sample_rcthresh; 
-in_vect = red_vect; 
-ex_vect = ~in_vect; 
-
-id_vect= zeros(length(red_vect),1); 
-id_vect(ex_vect)=1; 
-id_vect(in_vect)=2; 
-id_vect([5 10 15])=3; 
-iscell(:,1)=1; 
-
-%% ONLY INCLUDE ISCELL == 1
-
-cellstat= stat(iscell(:,1)==1); 
-id_vect = id_vect(iscell(:,1)==1); 
-
-%% DEFAULT POSITIONS
-% figs.rgb.Position=[54 800 600 400]; 
-% figs.functional.Position=[100 800 600 400];
-% figs.anatomical.Position=[54 900 600 400]; 
-% figs.slider.Position=[100 900 600 400];
- load('work-positions.mat')
-%% CREATE IMAGE STACK 
-zstack= get.zstack('/Volumes/ross/Christian/#511 Data/#511 Structural 16 bit 2-channel.tif');
-%%
-% use this to load individual tiffs. _00X at the end is the first or second
-% timepoint 
-% have function choose the timepoint 
-
-'/Volumes/Warwick/DRGS project/#511 3-28-24/SDH/Final FOV/Structural/1x resolution (26)/SDH#511_026/ChanB_001_001_208_002.tif'
-
-% metadata for zstack
-'/Volumes/Warwick/DRGS project/#511 3-28-24/SDH/Final FOV/Structural/1x resolution (26)/SDH#511_026/Experiment.xml'
-%% DEFAULT VALUES
-p = 1; 
-atype= 'mean';ftype='mean'; 
-img_mode='rgb'; 
-nplanes=5; 
-%%
-
-[id_vect] = prompt.main_menu(id_vect,figs,p, ops, cellstat,ftype,atype,img_mode);
-
-%%
 while p ~= -1   
     close all 
     [crshift]=get.crshift(ops,p);

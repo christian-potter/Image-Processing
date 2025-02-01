@@ -3,6 +3,9 @@ function [crshift] = crshift(ops,p)
 % returns the column and row shift for each plane relative to the combined
 % image
 
+% allows you to go from the larger ops.refImg size to the individual plane
+% size 
+
 planesize= size(ops.refImg);
 
 cshift=0; 

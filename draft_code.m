@@ -36,6 +36,11 @@ atype= 'mean';ftype='mean';
 img_mode='separate'; 
 
 %% RUN MAIN MENU 
+
+[id_vect] = prompt.main_menu(id_vect,p, ops, cellstat,g_thresh,r_thresh,roi_planeidx,ftype,atype,img_mode);
+
+
+%%
 figure(1)
 while p ~= -1      
     [gclim,rclim] = plot.plane_masks(p,ops,cellstat,g_thresh,r_thresh,id_vect,roi_planeidx,ftype,atype,'mode',img_mode); 

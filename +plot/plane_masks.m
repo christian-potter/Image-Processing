@@ -143,18 +143,18 @@ if strcmp(opt.mode,'separate')
 
     subplot(2,1,1)
     plot.mask_boundaries(mask_colors,maskcoords(roi_planeidx==p),[cshift,rshift],idxshifts(p)); 
-    plot.set_figure(15,'any')
+    utils.sf('fontsize',15)
     
     subplot(2,1,2)
     plot.mask_boundaries(mask_colors,maskcoords(roi_planeidx==p),[cshift,rshift],idxshifts(p)); 
-    plot.set_figure(15,'any')
+    utils.sf('fontsize',15)
     
     sgtitle({['Plane: ',num2str(p)]},'FontSize',20)
 
 elseif strcmp(opt.mode,'combined')
 
     plot.mask_boundaries(mask_colors,maskcoords(roi_planeidx==p),[cshift,rshift],idxshifts(p)); 
-    plot.set_figure(15,'any')
+    utils.sf('fontsize',15)
     title({['Plane: ',num2str(p)]},'FontSize',20)
 
 end
