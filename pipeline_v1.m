@@ -3,8 +3,10 @@
 load('/Volumes/Potter/From Abby/#37_TTX/Ready for Suite2p/suite2p/combined/Fall.mat')
 
 %%
+load('/Volumes/Potter/#511/Final FOV/Time Series/SDH/Split/suite2p/combined/Fall.mat')
+%load('/Volumes/ross/Christian/suite2p/combined/Fall.mat')
 
-load('/Volumes/ross/Christian/suite2p/combined/Fall.mat')
+%load('/Volumes/Potter/#518/Final FOV/TimeLapse/Finished new/suite2p/combined/Fall.mat')
 
 %% MAKE SAMPLE RED/ GREEN CELL VECT 
 
@@ -32,15 +34,17 @@ id_vect = id_vect(iscell(:,1)==1);
  load('work-positions.mat')
 %% CREATE IMAGE STACK 
 zstack= get.zstack('/Volumes/ross/Christian/#511 Data/#511 Structural 16 bit 2-channel.tif');
+
+%zstack = get.zstack('/Volumes/Potter/#518/Final FOV/TimeLapse/Finished new/oldsuite2p/#518 Suite2p/Depth Files/Zstack 512 8bit RGB.tif');
 %%
 % use this to load individual tiffs. _00X at the end is the first or second
 % timepoint 
 % have function choose the timepoint 
 
-'/Volumes/Warwick/DRGS project/#511 3-28-24/SDH/Final FOV/Structural/1x resolution (26)/SDH#511_026/ChanB_001_001_208_002.tif'
+%'/Volumes/Warwick/DRGS project/#511 3-28-24/SDH/Final FOV/Structural/1x resolution (26)/SDH#511_026/ChanB_001_001_208_002.tif'
 
 % metadata for zstack
-'/Volumes/Warwick/DRGS project/#511 3-28-24/SDH/Final FOV/Structural/1x resolution (26)/SDH#511_026/Experiment.xml'
+%'/Volumes/Warwick/DRGS project/#511 3-28-24/SDH/Final FOV/Structural/1x resolution (26)/SDH#511_026/Experiment.xml'
 %% DEFAULT VALUES
 p = 1; 
 atype= 'mean';ftype='mean'; 
@@ -48,7 +52,7 @@ img_mode='rgb';
 nplanes=5; 
 %%
 
-[id_vect] = prompt.main_menu(id_vect,figs,p, ops, cellstat,ftype,atype,img_mode);
+[id_vect] = prompt.main_menu(id_vect,figs,p, ops, cellstat,ftype,atype,img_mode,nplanes);
 
 %%
 while p ~= -1   

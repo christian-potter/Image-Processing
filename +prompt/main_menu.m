@@ -1,4 +1,4 @@
-function [id_vect] = main_menu(id_vect,figs,p, ops, cellstat,ftype,atype,img_mode)
+function [id_vect] = main_menu(id_vect,figs,p, ops, cellstat,ftype,atype,img_mode,nplanes)
 
 while p ~= -1   
     close all 
