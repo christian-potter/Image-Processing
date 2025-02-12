@@ -10,7 +10,8 @@ if menu == 1
     q = ['Q: Examine Uncertain',char(10)]; 
     c = ['C: Combine/ Separate Images',char(10)];
     w = ['W: Save Figure Positions',char(10)]; 
-    inputstr= [titleinput,a,s,d,q,r,c,w]; 
+    z = ['Z: Align Z-Stack',char(10)]; 
+    inputstr= [titleinput,a,s,d,q,r,c,w,z]; 
 
 % MENU 2
 % used in prompt.change_rois

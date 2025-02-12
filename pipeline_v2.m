@@ -11,7 +11,7 @@ ex_vect = ~in_vect;
 id_vect= zeros(length(red_vect),1); 
 id_vect(ex_vect)=1; 
 id_vect(in_vect)=2; 
-%id_vect([5 10 15])=3; 
+id_vect([20])=3; 
 %iscell(:,1)=1; % why do I do this 
 %%
 
@@ -27,6 +27,7 @@ atype= 'mean';ftype='mean';
 img_mode='rgb'; 
 nplanes=5; 
 
-[id_vect] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane);
+xyshift = [28 20];
+[id_vect] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zs,cellstat,xyshift);
 
 %%

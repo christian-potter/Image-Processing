@@ -1,9 +1,9 @@
-function [id_vect] = main_menu(id_vect,figs,p, ops, cellstat,ftype,atype,img_mode,nplanes)
+function [id_vect] = main_menu(id_vect,figs,p, ops, cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zstack,stat,xyshift)
 
 while p ~= -1   
     close all 
     [crshift]=get.crshift(ops,p);
-    [nfigs] = adjustImagev2(p,cellstat,crshift,figs,ops,id_vect,'functional',ftype,'anatomical',atype,'type',img_mode); 
+    [nfigs] = adjustImagev2(p,cellstat,crshift,figs,ops,id_vect,ypix_zplane,xyshift,'functional',ftype,'anatomical',atype,'type',img_mode); 
     input_str=prompt.menu_str(1); 
     answer = input (input_str,"s"); 
     
@@ -33,11 +33,12 @@ while p ~= -1
             disp('No ROIs currently unclassified.',char(10))
             unc_vect = input('Enter neurons you wish to unclassify:'); 
             id_vect(unc_vect)=3; 
-            [id_vect,nfigs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,'surround',20); 
+            [id_vect,nfigs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,ypix_zplane,xyshift,'surround',20); 
         else 
             close all 
-            [id_vect,nfigs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,'surround',20); 
+            [id_vect,nfigs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,ypix_zplane,xyshift,'surround',20); 
         end
+   
     elseif strcmp(answer,'c')
         answer = input(['C: Combine Anatomical and Functional Channels',char(10),'S: Separate Anatomical and Functional Channels',char(10)],'s');
         if strcmp(answer,'c')
@@ -45,8 +46,13 @@ while p ~= -1
         elseif strcmp(answer,'s')
             img_mode = 'separate'; 
         end
+    
     elseif strcmp(answer,'w')
         figs = utils.save_positions(nfigs,figs); 
+
+    elseif strcmp(answer,'z')
+        answer = input('Select a cell as reference:'); 
+        prompt.align_zstack(answer,p,zstack,ops,xyshift)
 
     end
 

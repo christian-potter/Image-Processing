@@ -210,10 +210,10 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
         if strcmp(opt.type,'rgb') || strcmp(opt.type,'zstack')
             if stack 
                 %something here needs to allow the xyshift
-                xyshift_x = get(hXShift, 'Value');
-                xyshift_y = get(hYShift, 'Value');
-                [image, x1, y1] = get.roi_surround(image, opt.idx, stat, opt.surround, [xyshift_x, xyshift_y]);
-                
+                 xyshift_x = get(hXShift, 'Value');
+                 xyshift_y = get(hYShift, 'Value');
+                 [updated_image, x1, y1] = get.roi_surround(image, opt.idx, stat, opt.surround, [xyshift_x, xyshift_y]);
+                set(hImg, 'CData', updated_image(:, :, :, 1));
                 %need to adjust this STOPPED HERE
                 adj_img = cat(3, ...
                     imadjust(image(:, :, 1,img_num), [low_in_red, high_in_red], [], gamma_red), ...

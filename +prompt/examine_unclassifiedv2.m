@@ -1,4 +1,4 @@
-function [id_vect,nfigs] = examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,opt)
+function [id_vect,nfigs] = examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,ypix_zplane,xyshift,opt)
 
 arguments
     p double 
@@ -8,7 +8,9 @@ arguments
     stat cell
     crshift double
     figs struct
-    opt.surround double = 20; 
+    ypix_zplane cell 
+    xyshift double
+    opt.surround double = 20;  
  
 end
 
@@ -25,7 +27,7 @@ while completion ~= 1
         disp(["All Unclassified ROIs in this plane have been sorted",char(10)])
     else   
         %-
-        nfigs= adjustImagev2(p,stat,crshift,figs,ops,id_vect,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack); 
+        nfigs= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,xyshift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack,'xyshift',true); 
         
         id_str=prompt.neuron_idstr(id_vect,unc(i)); 
         disp(id_str)
