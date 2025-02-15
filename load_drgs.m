@@ -1,4 +1,4 @@
-function [zs,tlapse,zstack,tsync,s2p,ypix_zplane] = load_drgs(dsnum)
+function [zs,tlapse,zstack,tsync,s2p,ypix_zplane] = load_drgs(dsnum,plot)
 
 
 %% GET PATHNAMES
@@ -116,25 +116,28 @@ end
 
 
 %% PLOT RELATIONSHIP BETWEEN TLAPSE AND ZSTACK
-
-figure
-hold on 
-
-for z = 1:length(zlocs)
-    plot([1 tlapse.ypix],[max(zlocs)-zlocs(z) max(zlocs)-zlocs(z)],'color','k')
+if strcmp(plot,'plot')
+    
+    figure
+    hold on 
+    
+    for z = 1:length(zlocs)
+        plot([1 tlapse.ypix],[max(zlocs)-zlocs(z) max(zlocs)-zlocs(z)],'color','k')
+    end
+    
+    for p = 1:tlapse.nplanes
+        plot(max(zlocs)-ypix_zdist{p},'LineWidth',3)
+        leg{p}= ['Plane ', num2str(p)];
+    end
+    
+    xlabel('Y Pixel')
+    ylabel('Z Location')
+    
+    title('Matching Y Pixel from Each Plane to Z-Stack Slice')
+    
+    utils.sf
 end
 
-for p = 1:tlapse.nplanes
-    plot(max(zlocs)-ypix_zdist{p},'LineWidth',3)
-    leg{p}= ['Plane ', num2str(p)];
-end
-
-xlabel('Y Pixel')
-ylabel('Z Location')
-
-title('Matching Y Pixel from Each Plane to Z-Stack Slice')
-
-utils.sf
 
 
 %%

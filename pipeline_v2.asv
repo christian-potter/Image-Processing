@@ -1,5 +1,5 @@
 %% LOAD 
-[zs,tlapse,zstack,tsync,s2p,ypix_zplane] = load_drgs(518,'noplot'); 
+[zs,tlapse,zstack,tsync,s2p,ypix_zplane] = load_drgs(511,'noplot'); 
 load(s2p); 
 %% CREATE SAMPLE ID_VECT
 

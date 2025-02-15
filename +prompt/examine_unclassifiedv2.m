@@ -27,7 +27,7 @@ while completion ~= 1
         disp(["All Unclassified ROIs in this plane have been sorted",char(10)])
     else   
         %-
-        nfigs= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,xyshift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack,'xyshift',true); 
+        nfigs= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,xyshift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack); 
         
         id_str=prompt.neuron_idstr(id_vect,unc(i)); 
         disp(id_str)

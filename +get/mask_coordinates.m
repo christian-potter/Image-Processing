@@ -1,11 +1,13 @@
-function [maskcoords]=mask_coordinates(stat)
+function [maskcoords]=mask_coordinates(stat,opt)
 arguments
     stat cell % input from suite2p 
+    opt.type string = 'outline'
 end
 
 %% RUN CODE 
 for i = 1:length(stat)
     curstat=stat{i};
+ 
     xpix=double(curstat.xpix(curstat.soma_crop==1)); %get x/y pixels
     ypix=double(curstat.ypix(curstat.soma_crop==1));
    
@@ -37,7 +39,14 @@ for i = 1:length(stat)
     ycoords(end)=ycoords(1); % complete the outline 
     xcoords(end)=xcoords(1);
 
-    maskcoords{i}=[xcoords,ycoords]; 
+    if strcmp(opt.type,'outline')
+        maskcoords{i}=[xcoords,ycoords]; 
+    elseif strcmp(opt.type,'mask')
+        maskcoords{i}=[xpix',ypix']; 
+    end
+
+
+
 
 end
 

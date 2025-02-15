@@ -1,13 +1,15 @@
-function [nimage,x1,y1] = roi_surround(image,roi,stat,surround,xyshift)
+function [nimage,x1,y1] = roi_surround(image,roi,stat,surround,xyshift,p)
 xshift = xyshift(1); yshift = xyshift(2); 
 
 image_plane = image(:,:,1,1);
 dims = size(image_plane); 
 
 cstat=stat{roi};
+%% GET CRSHIFT FOR PLANE
+
 
 %% DETERMINE BOUNDARIES 
-x1= min(cstat.xpix)-surround+xshift; 
+x1= min(cstat.xpix)-surround+xshift;
 if x1 < 1
     x1=1; 
 end

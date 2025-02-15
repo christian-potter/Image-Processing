@@ -6,16 +6,29 @@ arguments
     planeshift double
     idxshift double 
     opt.idxtype string = 'shifted'
+    opt.masktype string = 'outline'
 end
+
+%%
+
+if strcmp(opt.masktype,'outline')
+    marker = '.';
+    ls = '-'; 
+elseif strcmp(opt.masktype,'mask')
+    marker='.';
+    ls ='none'; 
+end
+
 
 %% PLOT MASKS LOOP
 for i = 1:length(maskcoords)
     xcoords=maskcoords{i}(:,1); ycoords=maskcoords{i}(:,2); 
+    
     if strcmp(opt.idxtype,'shifted')
-        plot(double(xcoords)-planeshift(1),double(ycoords)-planeshift(2),'Color',mask_colors(:,i+idxshift),'LineWidth',2)
+        plot(double(xcoords)-planeshift(1),double(ycoords)-planeshift(2),'Color',mask_colors(:,i+idxshift),'LineWidth',2,'Marker',marker,'LineStyle',ls)
         text(max(xcoords)+1-planeshift(1),max(ycoords)+1-planeshift(2),num2str(i+idxshift),'Color',mask_colors(:,i+idxshift)) % make text of ROI index
     elseif strcmp(opt.idxtype,'specified')
-        plot(double(xcoords)-planeshift(1),double(ycoords)-planeshift(2),'Color',mask_colors(:,i),'LineWidth',2)
+        plot(double(xcoords)-planeshift(1),double(ycoords)-planeshift(2),'Color',mask_colors(:,i),'LineWidth',2,'Marker',marker,'LineStyle',ls)
         text(max(xcoords)+1-planeshift(1),max(ycoords)+1-planeshift(2),num2str(idxshift),'Color',mask_colors(:,i)) % make text of ROI index
     end
 
