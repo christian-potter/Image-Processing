@@ -1,4 +1,4 @@
-function [zs,tlapse,zstack,tsync,s2p,ypix_zplane] = load_drgs(dsnum,plot)
+function [zs,tlapse,zstack,tsync,s2p,ypix_zplane,id_vect] = load_drgs(dsnum,plot)
 
 
 %% GET PATHNAMES
@@ -104,6 +104,16 @@ for p = 1:tlapse.nplanes
     ypix_zplane{p}=y_zmap;
 
 end
+%% GET ID VECT 
+sample_rcthresh= prctile(redcell(:,2),75); 
+red_vect = redcell(:,2)>sample_rcthresh; 
+in_vect = red_vect; 
+ex_vect = ~in_vect; 
+
+id_vect= zeros(length(red_vect),1); 
+id_vect(ex_vect)=1; 
+id_vect(in_vect)=2; 
+
 
 %% 511 adjustment
 if dsnum == 511
@@ -113,6 +123,7 @@ if dsnum == 511
         ypix_zplane{i}=curplane; 
     end
 end
+
 
 
 %% PLOT RELATIONSHIP BETWEEN TLAPSE AND ZSTACK

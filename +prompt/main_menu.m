@@ -30,15 +30,16 @@ while p ~= -1
         [ftype,atype]=prompt.img_type(atype,ftype); 
     %--Examine Uncertain
     elseif strcmp (answer,'q')
+         refimg = get.imagefromFigure(nfigs);
+         close all 
         if sum(id_vect==3)<0
-            close all 
             disp('No ROIs currently unclassified.',char(10))
             unc_vect = input('Enter neurons you wish to unclassify:'); 
-            id_vect(unc_vect)=3; 
-            [id_vect,nfigs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,ypix_zplane,xyshift,'surround',50); 
+            id_vect(unc_vect)=3;         
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,ypix_zplane,xyshift,'surround',50,'refimg',refimg); 
         else 
-            close all 
-            [id_vect,nfigs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,ypix_zplane,xyshift,'surround',50); 
+       
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,ypix_zplane,xyshift,'surround',50,'refimg',refimg); 
         end
    %--Combine/Separate Images 
     elseif strcmp(answer,'c')
@@ -51,6 +52,9 @@ while p ~= -1
     %--Save Figure Positions
     elseif strcmp(answer,'w')
         figs = utils.save_positions(nfigs,figs); 
+    %--Save Current id_vect 
+    elseif strcmp(answer,'e')
+        p =-1; 
     %--Align Z-Stack 
     elseif strcmp(answer,'z')
         answer = input('Select a cell as reference:'); 

@@ -12,23 +12,24 @@ arguments
     opt.functional string = 'mean'
     opt.anatomical string = 'mean'
     opt.idx (1,1) double % individual idx if examining an individual neuron 
-    opt.zstack double = 0; 
+    opt.zstack double = 0
     opt.surround double = 50
     opt.default_plane (1,1) double = 1 % default plane in the z-stack
+    opt.refimg
 end 
 
 %% GET VARIABLES
 [roi_planeidx,idxshifts,nplanes] = get.roipidx_shift(stat);
 [mask_coords]=get.mask_coordinates(stat,'type','outline');
-[stackmask_coords]=get.mask_coordinates(stat,'type','mask');
+[stackmask_coords]=get.mask_coordinates(stat,'type','mask');% filled out masks for zstack 
 [mask_colors] = get.mask_colors(id_vect); 
 
 %% DETERMINE STARTING PLANE 
 
 if isfield(opt,'idx')
-    ypix= stat{opt.idx}.med(2); 
+    ypix= stat{opt.idx}.med(1); %first is weirdly Y
     crshift = get.crshift(ops,p); 
-    ypix = ypix-crshift(1); 
+    %ypix = ypix-crshift(1); 
     curplane = ypix_zplane{p}; 
     opt.default_plane=curplane(ypix); 
 end
@@ -64,6 +65,10 @@ elseif strcmp(opt.type,'zstack')
         end
     end
     redChannel = image(:, :, 1,1);greenChannel = image(:, :, 2,1);
+    %-- Ref image 
+
+    refimage = get.roi_surround(opt.refimg,opt.idx,stat,opt.surround,xyshift); 
+
 end
 
 %% CREATE FIGURES FOR COLOR/ BW IMAGES
@@ -75,10 +80,14 @@ if strcmp(opt.type,'rgb')
     hImg = imshow(image, 'Parent', hAx); hold on; 
     plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p),'masktype','outline');
   
-
 elseif strcmp(opt.type,'zstack')
-    %Create RGB image 
-    hFigImg = figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',figs.zstack.Position, 'Color', 'White');
+    %--reference image 
+    refFig=figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',figs.ref.Position, 'Color', 'White');
+    hAx = axes('Parent', refFig, 'Position', [0.01, 0.01, 0.99, 0.99]);
+    hImg = imshow(refimage, 'Parent', hAx); hold on; 
+    plot.mask_boundaries(mask_colors,mask_coords(opt.idx),crshift,idxshifts(p),'masktype','outline');
+    %--zstack
+    hFigImg = figure('Name', 'Z-Stack', 'NumberTitle', 'off', 'Position',figs.zstack.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     hImg = imshow(image(:,:,:,1), 'Parent', hAx); hold on; 
     plot.mask_boundaries(mask_colors(:,1),stackmask_coords(opt.idx),[x1-xyshift(1) y1-xyshift(2)],opt.idx,"idxtype",'specified','masktype','mask');
@@ -105,14 +114,12 @@ end
 %% CREATE SLIDER FIGURE WITH HISTOGRAMS
 % Create a second figure for the sliders and histogram
 if stack
-    hFigSlider = figure('Name', 'Adjustments & Histogram', 'NumberTitle', 'off', ...
+    hFigSlider = figure('Name', 'Z-Stack Control', 'NumberTitle', 'off', ...
         'Position',figs.zslider.Position, 'Color', 'White');
 else
-    hFigSlider = figure('Name', 'Adjustments & Histogram', 'NumberTitle', 'off', ...
+    hFigSlider = figure('Name', 'Image Control', 'NumberTitle', 'off', ...
         'Position',figs.slider.Position, 'Color', 'White');
-
 end
-
 
 % Set default values for sliders
 low_in_red = 0;
@@ -127,28 +134,28 @@ img_num = 1;
 % Create sliders and labels for the Red channel (left side)
 uicontrol('Style', 'text', 'String', 'Red Channel - Low Thresh:', 'Position', [50, 180, 150, 20], 'Parent', hFigSlider);
 hLowInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_red, ...
-    'Position', [50, 165, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+    'Position', [50, 165, 200, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
 
 uicontrol('Style', 'text', 'String', 'Red Channel - High Thresh:', 'Position', [50, 140, 150, 20], 'Parent', hFigSlider);
 hHighInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_red, ...
-    'Position', [50, 125, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+    'Position', [50, 125, 200, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
 
 uicontrol('Style', 'text', 'String', 'Red Channel - Gamma:', 'Position', [50, 100, 150, 20], 'Parent', hFigSlider);
 hGammaRed = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_red, ...
-    'Position', [50, 85, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+    'Position', [50, 85, 200, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
 
 % Create sliders and labels for the Green channel (right side)
-uicontrol('Style', 'text', 'String', 'Green Channel - Low Thresh:', 'Position', [550, 180, 150, 20], 'Parent', hFigSlider);
+uicontrol('Style', 'text', 'String', 'Green Channel - Low Thresh:', 'Position', [350, 180, 150, 20], 'Parent', hFigSlider);
 hLowInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_green, ...
-    'Position', [550, 165, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+    'Position', [350, 165, 200, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
 
-uicontrol('Style', 'text', 'String', 'Green Channel - High Thresh:', 'Position', [550, 140, 150, 20], 'Parent', hFigSlider);
+uicontrol('Style', 'text', 'String', 'Green Channel - High Thresh:', 'Position', [350, 140, 150, 20], 'Parent', hFigSlider);
 hHighInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_green, ...
-    'Position', [550, 125, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+    'Position', [350, 125, 200, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
 
-uicontrol('Style', 'text', 'String', 'Green Channel - Gamma:', 'Position', [550, 100, 150, 20], 'Parent', hFigSlider);
+uicontrol('Style', 'text', 'String', 'Green Channel - Gamma:', 'Position', [350, 100, 150, 20], 'Parent', hFigSlider);
 hGammaGreen = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_green, ...
-    'Position', [550, 85, 400, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+    'Position', [350, 85, 200, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
 
 % Z-Stack Slider 
 if stack
@@ -167,10 +174,10 @@ if stack
     hXShift = uicontrol('Style', 'slider', 'Min', -50, 'Max', 50, 'Value', xyshift(1), ...
         'Position', [70, 50, 50, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
 
-    uicontrol('Style', 'text', 'String', ['Y Shift: (est=',num2str(xyshift(2)),')'], 'Position', [50, 10, 75, 20], 'Parent', hFigSlider);
+    uicontrol('Style', 'text', 'String', ['Y Shift: (est=',num2str(xyshift(2)),')'], 'Position', [50, 10, 125, 20], 'Parent', hFigSlider);
     yshift_text =uicontrol('Style', 'text', 'String', [num2str(xyshift(2))], 'Position', [50, 30, 20, 20], 'Parent', hFigSlider,'Callback', @updateImage);
     hYShift = uicontrol('Style', 'slider', 'Min', -50, 'Max', 50, 'Value', xyshift(2), ...
-        'Position', [70, 30, 50, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
+        'Position', [70, 30, 30, 20], 'Parent', hFigSlider, 'Callback', @updateImage);
 end
 
 
@@ -331,6 +338,8 @@ if strcmp(opt.type,'rgb')
 elseif strcmp(opt.type,'zstack')
     nfigs.zstack = hFigImg; 
     nfigs.zslider=hFigSlider;
+    nfigs.ref=refFig; 
+    nfigs.rgb = figs.rgb; 
 end
 
 end
