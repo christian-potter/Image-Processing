@@ -18,7 +18,7 @@ end
     % (-) = cutoff left or above ROI 
     % (+) = cutoff right or below ROI 
     % ** will need at some point if you want to center ROI on the cropped
-    % image when there is cutoff 
+    % image wh
 %% DESCRIPTION 
 % function that takes 
 
@@ -30,7 +30,7 @@ cstat=stat{roi};
 cutoff =[0,0]; % assume surround does not require a cutoff 
 
 if isfield(opt,'plane')
-    [plane_crshift]=get.crshift(ops,opt.plane);
+    [plane_crshift]=get.crshift(ops,p);
 else
     plane_crshift=[0,0]; 
 end

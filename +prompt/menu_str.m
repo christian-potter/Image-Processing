@@ -9,8 +9,8 @@ if menu == 1
     r = ['R: Change Image Type ',char(10)];
     q = ['Q: Examine Uncertain',char(10)]; 
     c = ['C: Combine/ Separate Images',char(10)];
-    w = ['W: Save Figure Positions',char(10)]; 
-    e = ['E: Save Current id_vect',char(10)]; 
+    w = ['W: Lock Figure Positions',char(10)]; 
+    e = ['E: Save id_vect/ Current Figure Positions',char(10)]; 
     z = ['Z: Align Z-Stack',char(10)]; 
     inputstr= [titleinput,a,s,d,q,r,c,w,e,z]; 
 
@@ -33,7 +33,7 @@ elseif menu == 3
     d = ['D: Change to SPBN',char(10)]; 
     f = ['F: Keep Uncertain',char(10)]; 
     r = ['R: Return to Main Menu',char(10)]; 
-    w = ['W: Save Figure Positions',char(10)]; 
+    w = ['W: Lock Figure Positions',char(10)]; 
     inputstr= [titleinput,a,s,d,f,r,w]; 
 
 % MENU 4

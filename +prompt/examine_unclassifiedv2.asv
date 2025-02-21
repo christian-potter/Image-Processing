@@ -1,4 +1,4 @@
-function [id_vect,nfigs,figs] = examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,ypix_zplane,zstack_drift,opt)
+function [id_vect,nfigs,figs] = examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,ypix_zplane,xyshift,opt)
 arguments
     p double 
     zstack double
@@ -8,7 +8,7 @@ arguments
     crshift double
     figs struct
     ypix_zplane cell 
-    zstack_drift double
+    xyshift double
     opt.surround double = 200;  
     opt.refimg
 end
@@ -27,12 +27,12 @@ completion = 0;
 while completion ~= 1
     close all 
     %- 
-    if i > length(unc) | roi_planeidx(unc(i))~=p % complete if you go onto ROI in the next plane 
+    if i > length(unc) | roi_planeidx(unc(i))~=p % -- put option to go back to other planes here 
         completion = 1; 
         disp(["All Unclassified ROIs in this plane have been sorted"])
     else   
         %-
-        nfigs= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack,'refimg',opt.refimg);    
+        nfigs= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,xyshift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack,'refimg',opt.refimg);    
         id_str=prompt.neuron_idstr(id_vect,unc(i)); 
         disp(id_str)
         

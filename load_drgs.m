@@ -105,6 +105,7 @@ for p = 1:tlapse.nplanes
 
 end
 %% GET ID VECT 
+load(s2p)
 sample_rcthresh= prctile(redcell(:,2),75); 
 red_vect = redcell(:,2)>sample_rcthresh; 
 in_vect = red_vect; 

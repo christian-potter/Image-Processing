@@ -1,9 +1,9 @@
-function [id_vect,figs] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zstack,zstack_drift)
+function [id_vect,figs] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zstack,xyshift)
 
 while p ~= -1   
     close all 
     [plane_crshift]=get.crshift(ops,p);
-    [nfigs] = adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'functional',ftype,'anatomical',atype,'type',img_mode); 
+    [nfigs] = adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,xyshift,'functional',ftype,'anatomical',atype,'type',img_mode); 
     input_str=prompt.menu_str(1); 
     answer = input (input_str,"s"); 
     
@@ -36,9 +36,9 @@ while p ~= -1
             disp('No ROIs currently unclassified.',char(10))
             unc_vect = input('Enter neurons you wish to unclassify:'); 
             id_vect(unc_vect)=3;         
-            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,'surround',50,'refimg',refimg); 
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,plane_crshift,figs,ypix_zplane,xyshift,'surround',50,'refimg',refimg); 
         else 
-            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,'surround',50,'refimg',refimg); 
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,stat,plane_crshift,figs,ypix_zplane,xyshift,'surround',50,'refimg',refimg); 
         end
    %--Combine/Separate Images 
     elseif strcmp(answer,'c')
@@ -57,7 +57,7 @@ while p ~= -1
     %--Align Z-Stack 
     elseif strcmp(answer,'z')
         answer = input('Select a cell as reference:'); 
-        prompt.align_zstack(answer,p,zstack,ops,zstack_drift)
+        prompt.align_zstack(answer,p,zstack,ops,xyshift)
     end
 
 
