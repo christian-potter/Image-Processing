@@ -1,4 +1,4 @@
-function [nfigs] = adjustImagev2(p,stat,plane_crshift,figs,ops,id_vect,ypix_zplane,opt)
+function [nfigs,nadjusted_xyz] = adjustImagev2(p,stat,plane_crshift,figs,ops,id_vect,ypix_zplane,opt)
 arguments 
     p double 
     stat cell 
@@ -7,6 +7,7 @@ arguments
     ops struct 
     id_vect double 
     ypix_zplane cell % mapping between y pixel value and the z-stack plane it should be on 
+    opt.adjusted_xyz double 
     opt.zstack_drift double % option to specify the amount of drift between functional and z-stack  
     opt.type string = 'rgb'
     opt.functional string = 'mean'
@@ -25,13 +26,17 @@ end
 [stackmask_coords]=get.mask_coordinates(stat,'type','mask');% filled out masks for zstack 
 [mask_colors] = get.mask_colors(id_vect); 
 
+if isfield(opt,'adjusted_xyz')
+    xyshift_x=opt.adjusted_xyz(1);xyshift_y=opt.adjusted_xyz(2);
+end
+
 %% DETERMINE STARTING PLANE 
 
 if isfield(opt,'idx')
     ypix= stat{opt.idx}.med(1); %first is weirdly Y
     %ypix = ypix-crshift(1); 
     curplane = ypix_zplane{p}; 
-    opt.default_plane=curplane(ypix); 
+    opt.default_plane=curplane(ypix)+opt.adjusted_xyz(3); 
 end
 
 %% CREATE VARIABLES
@@ -50,7 +55,8 @@ if strcmp(opt.type,'rgb')
 elseif strcmp(opt.type,'zstack')
     stack = true; 
     image = opt.zstack; 
-    [image,zx1,zy1,zstack_cutoff] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',opt.zstack_drift);
+    nzstack_drift = opt.zstack_drift +opt.adjusted_xyz([1 2]); 
+    [image,zx1,zy1] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',nzstack_drift);
     %-- normalize image
     for i = 1:size(image,4)
         for j=1:size(image,3)
@@ -59,7 +65,7 @@ elseif strcmp(opt.type,'zstack')
     end
     redChannel = image(:, :, 1,opt.default_plane);greenChannel = image(:,:,2,opt.default_plane);    
     %-- Ref image 
-    [refimage,rx1,ry1,ref_cutoff] = get.roi_surround(opt.refimg,opt.idx,stat,opt.refsurround,ops,'plane',p); 
+    [refimage,rx1,ry1] = get.roi_surround(opt.refimg,opt.idx,stat,opt.refsurround,ops,'plane',p); 
 end
 
 %% CREATE FIGURES FOR COLOR/ BW IMAGES
@@ -123,24 +129,24 @@ img_num = 1;
 
 
 % Create sliders and labels for the Red channel (left side)
-uicontrol('Style', 'text', 'String', 'Red Channel - Low Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
+uicontrol('Style', 'text', 'String', 'Red- Low Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
 hLowInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_red, 'Units', 'normalized', 'Position', [0.05, 0.35, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
-uicontrol('Style', 'text', 'String', 'Red Channel - High Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.3, 0.2, 0.05], 'Parent', hFigSlider);
+uicontrol('Style', 'text', 'String', 'Red- High Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.3, 0.2, 0.05], 'Parent', hFigSlider);
 hHighInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_red, 'Units', 'normalized', 'Position', [0.05, 0.25, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
-uicontrol('Style', 'text', 'String', 'Red Channel - Gamma:', 'Units', 'normalized', 'Position', [0.05, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
+uicontrol('Style', 'text', 'String', 'Red- Gamma:', 'Units', 'normalized', 'Position', [0.05, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
 hGammaRed = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_red, 'Units', 'normalized', 'Position', [0.05, 0.15, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
 % Create sliders and labels for the Green channel (right side)
-uicontrol('Style', 'text', 'String', 'Green Channel - Low Thresh:', 'Units', 'normalized', 'Position', [0.55, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
-hLowInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_green, 'Units', 'normalized', 'Position', [0.55, 0.35, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
+uicontrol('Style', 'text', 'String', 'Green- Low Thresh:', 'Units', 'normalized', 'Position', [0.4, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
+hLowInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_green, 'Units', 'normalized', 'Position', [0.4, 0.35, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
-uicontrol('Style', 'text', 'String', 'Green Channel - High Thresh:', 'Units', 'normalized', 'Position', [0.55, 0.3, 0.2, 0.05], 'Parent', hFigSlider);
-hHighInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_green, 'Units', 'normalized', 'Position', [0.55, 0.25, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
+uicontrol('Style', 'text', 'String', 'Green- High Thresh:', 'Units', 'normalized', 'Position', [0.4, 0.3, 0.2, 0.05], 'Parent', hFigSlider);
+hHighInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_green, 'Units', 'normalized', 'Position', [0.4, 0.25, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
-uicontrol('Style', 'text', 'String', 'Green Channel - Gamma:', 'Units', 'normalized', 'Position', [0.55, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
-hGammaGreen = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_green, 'Units', 'normalized', 'Position', [0.55, 0.15, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
+uicontrol('Style', 'text', 'String', 'Green- Gamma:', 'Units', 'normalized', 'Position', [0.4, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
+hGammaGreen = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_green, 'Units', 'normalized', 'Position', [0.4, 0.15, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
 % Z-stack plane selection 
 if stack
@@ -151,13 +157,13 @@ end
 
 % Position hXshift and hYshift sliders beneath hGammaGreen
 if stack 
-    uicontrol('Style', 'text', 'String', ['X Shift: (est=',num2str(opt.zstack_drift(1)),')'],'units','normalized', 'Position', [0.05, 0.11, 0.1, 0.05], 'Parent', hFigSlider);
-    hXShift = uicontrol('Style', 'slider', 'Min', -100, 'Max', 100, 'Value', opt.zstack_drift(1), 'Units', 'normalized', 'Position', [0.1, 0.07, 0.03, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
-    xshift_text = uicontrol('Style', 'text', 'String',[num2str(opt.zstack_drift(1))] , 'Units', 'normalized', 'Position', [0.05, 0.07, 0.04, 0.05], 'Parent', hFigSlider,'Callback', @updateImage);
+    uicontrol('Style', 'text', 'String', ['X Shift: (est=',num2str(nzstack_drift(1)),')'],'units','normalized', 'Position', [0.05, 0.11, 0.1, 0.05], 'Parent', hFigSlider);
+    hXShift = uicontrol('Style', 'slider', 'Min', -100, 'Max', 100, 'Value', nzstack_drift(1), 'Units', 'normalized', 'Position', [0.1, 0.07, 0.03, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
+    xshift_text = uicontrol('Style', 'text', 'String',[num2str(nzstack_drift(1))] , 'Units', 'normalized', 'Position', [0.05, 0.07, 0.04, 0.05], 'Parent', hFigSlider,'Callback', @updateImage);
 
-    uicontrol('Style', 'text', 'String', ['Y Shift: (est=',num2str(opt.zstack_drift(2)),')'],'units','normalized', 'Position', [0.05, .02, 0.1, 0.05], 'Parent', hFigSlider);
-    hYShift = uicontrol('Style', 'slider', 'Min', -100, 'Max', 100, 'Value', opt.zstack_drift(2), 'Units', 'normalized', 'Position', [0.1, -0.01, 0.03, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
-    yshift_text = uicontrol('Style', 'text', 'String', [num2str(opt.zstack_drift(2))], 'Units', 'normalized', 'Position', [0.05, -0.01, 0.05, 0.05], 'Parent', hFigSlider,'Callback', @updateImage);
+    uicontrol('Style', 'text', 'String', ['Y Shift: (est=',num2str(nzstack_drift(2)),')'],'units','normalized', 'Position', [0.05, .02, 0.1, 0.05], 'Parent', hFigSlider);
+    hYShift = uicontrol('Style', 'slider', 'Min', -100, 'Max', 100, 'Value', nzstack_drift(2), 'Units', 'normalized', 'Position', [0.1, -0.01, 0.03, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
+    yshift_text = uicontrol('Style', 'text', 'String', [num2str(nzstack_drift(2))], 'Units', 'normalized', 'Position', [0.05, -0.01, 0.05, 0.05], 'Parent', hFigSlider,'Callback', @updateImage);
 end
 
 
@@ -299,12 +305,14 @@ if strcmp(opt.type,'rgb')
     nfigs.zstack = figs.zstack; 
     nfigs.zslider = figs.zslider; 
     nfigs.ref = figs.ref; 
+    nadjusted_xyz = [0 0 0]; % THE FUNCTION SHOULD NOT ASSIGN THIS VARIABLE WHEN CALLED FOR RGB 
 elseif strcmp(opt.type,'zstack')
     nfigs.rgb = figs.rgb; 
     nfigs.slider = figs. slider; 
     nfigs.zstack = hFigImg; 
     nfigs.zslider=hFigSlider;
     nfigs.ref=refFig;
+    nadjusted_xyz = [nzstack_drift-xyshift_x,nzstack_drift-xyshift_y,opt.default_plane - img_num]; 
 end
 
 end

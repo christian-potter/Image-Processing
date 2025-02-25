@@ -1,4 +1,4 @@
-function [id_vect,nfigs,figs] = examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,ypix_zplane,zstack_drift,opt)
+function [id_vect,nfigs,figs] = examine_unclassifiedv2(p,zstack,id_vect,ops,stat,crshift,figs,ypix_zplane,zstack_drift,adjusted_xyz,opt)
 arguments
     p double 
     zstack double
@@ -9,21 +9,22 @@ arguments
     figs struct
     ypix_zplane cell 
     zstack_drift double
+    adjusted_xyz double 
     opt.surround double = 200;  
-    opt.refimg
+    opt.refimg double 
+    opt.specified_roi double 
 end
-
 
 [roi_planeidx,~,~] = get.roipidx_shift(stat); 
 
+%% Determine index of neuron for inspect_roi 
 
-% determine index of neuron for inspect_roi 
 unc = find(id_vect==3); % start with unclassified on the current plane 
+
+
+%% RUN WHILE LOOP 
 i = 1; 
 completion = 0; 
-
-
-
 while completion ~= 1
     close all 
     %- 
@@ -32,7 +33,7 @@ while completion ~= 1
         disp(["All Unclassified ROIs in this plane have been sorted"])
     else   
         %-
-        nfigs= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack,'refimg',opt.refimg);    
+        [nfigs,~]= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack,'refimg',opt.refimg,'adjusted_xyz',adjusted_xyz);    
         id_str=prompt.neuron_idstr(id_vect,unc(i)); 
         disp(id_str)
         

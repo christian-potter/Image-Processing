@@ -1,5 +1,6 @@
 function [id_vect,figs] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zstack,zstack_drift)
 
+padjusted_xyz = zeros(3,nplanes); 
 while p ~= -1   
     close all 
     [plane_crshift]=get.crshift(ops,p);
@@ -36,29 +37,33 @@ while p ~= -1
             disp('No ROIs currently unclassified.',char(10))
             unc_vect = input('Enter neurons you wish to unclassify:'); 
             id_vect(unc_vect)=3;         
-            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,'surround',50,'refimg',refimg); 
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',50,'refimg',refimg); 
         else 
-            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,'surround',50,'refimg',refimg); 
-        end
-   %--Combine/Separate Images 
-    elseif strcmp(answer,'c')
-        answer = input(['C: Combine Anatomical and Functional Channels',char(10),'S: Separate Anatomical and Functional Channels',char(10)],'s');
-        if strcmp(answer,'c')
-            img_mode='rgb';
-        elseif strcmp(answer,'s')
-            img_mode = 'separate'; 
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',50,'refimg',refimg); 
         end
     %--Save Figure Positions
     elseif strcmp(answer,'w')
         figs = utils.save_positions(nfigs,figs); 
     %--Save Current id_vect 
     elseif strcmp(answer,'e')
-        p =-1; 
+        p = -1; 
     %--Align Z-Stack 
     elseif strcmp(answer,'z')
-        answer = input('Select a cell as reference:'); 
-        prompt.align_zstack(answer,p,zstack,ops,zstack_drift)
-    end
+        refimg = get.imagefromFigure(nfigs);
+        input_str =prompt.menu_str(5); 
+        answer = input(input_str,"s");
+        if strcmp(answer,'e')
+            answer = input('Enter X,Y,Z-Plane Vector:'); 
+            padjusted_xyz(p,:)=answer; 
 
+        elseif strcmp(answer,'r')
+            answer = input('Select a cell as reference:'); 
+            [padjusted_xyz(p,:)] = prompt.align_zstack(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',50,'refimg',refimg,'specified_roi',answer);
+        end
+
+        
+         
+    end
+    
 
 end

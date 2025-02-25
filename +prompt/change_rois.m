@@ -25,7 +25,11 @@ for i = 1:length(roi)
             completion = 1; 
         elseif strcmp(change,'f')
             id_vect(roi(i))=3; 
-            completion = 1;          
+            completion = 1;  
+        elseif strcmp(change,'z')
+            id_vect(roi(i))=4; 
+            completion = 1; 
+   
         else
             disp('Error: Entry outside of allowed options')
         end
