@@ -14,8 +14,8 @@ arguments
     opt.anatomical string = 'mean'
     opt.idx (1,1) double % individual idx if examining an individual neuron 
     opt.zstack double = 0
-    opt.surround double = 50
-    opt.refsurround double = 100 
+    opt.surround double = 100
+    opt.refsurround double = 100
     opt.default_plane (1,1) double = 1 % default plane in the z-stack
     opt.refimg
 end 
@@ -56,13 +56,12 @@ elseif strcmp(opt.type,'zstack')
     stack = true; 
     image = opt.zstack; 
     nzstack_drift = opt.zstack_drift +opt.adjusted_xyz([1 2]); 
+    for i = 1:size(image,4)
+       image(:,:,:,i) = utils.normalize_img(image(:,:,:,i));        
+    end
+    opt.zstack = image; % normalize zstack now before cropping 
     [image,zx1,zy1] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',nzstack_drift);
     %-- normalize image
-    for i = 1:size(image,4)
-        for j=1:size(image,3)
-            image(:,:,j,i) = utils.normalize_img(image(:,:,j,i));
-        end
-    end
     redChannel = image(:, :, 1,opt.default_plane);greenChannel = image(:,:,2,opt.default_plane);    
     %-- Ref image 
     [refimage,rx1,ry1] = get.roi_surround(opt.refimg,opt.idx,stat,opt.refsurround,ops,'plane',p); 
@@ -90,31 +89,17 @@ elseif strcmp(opt.type,'zstack')
     plot.mask_boundaries(mask_colors(:,1),stackmask_coords(opt.idx),plane_crshift,opt.idx,"idxtype",'specified','masktype','mask','crop_x1y1',[zx1 zy1],'image',image(:,:,:,1));
 end
 
-% CODE FOR SEPARATE IMAGES 
-% elseif strcmp(opt.type,'separate')
-%     %Create functional channel image 
-%     fFigImg = figure('Name', 'Functional Image', 'NumberTitle', 'off', 'Position',figs.functional.Position, 'Color', 'White');
-%     fAx = axes('Parent', fFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
-%     fImg = imshow(fimage, 'Parent', fAx);
-%     hold on 
-%     plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
-% 
-%     % Create anatomical channel image 
-%     aFigImg = figure('Name', 'Anatomical Image', 'NumberTitle', 'off', 'Position',figs.anatomical.Position, 'Color', 'White');
-%     aAx = axes('Parent', aFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
-%     aImg = imshow(aimage, 'Parent', aAx);
-%     hold on 
-%     plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
-% end
-
 %% CREATE SLIDER FIGURE WITH HISTOGRAMS
 % Create a second figure for the sliders and histogram
 if stack
     hFigSlider = figure('Name', 'Z-Stack Control', 'NumberTitle', 'off', ...
         'Position',figs.zslider.Position, 'Color', 'White');
+
 elseif ~stack
     hFigSlider = figure('Name', 'Image Control', 'NumberTitle', 'off', ...
         'Position',figs.slider.Position, 'Color', 'White');
+
+    
 end
 
 % Set default values for sliders
@@ -126,7 +111,6 @@ low_in_green = 0;
 high_in_green = 1;
 gamma_green = 1;
 img_num = 1; 
-
 
 % Create sliders and labels for the Red channel (left side)
 uicontrol('Style', 'text', 'String', 'Red- Low Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
@@ -227,16 +211,21 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             xyshift_y = get(hYShift, 'Value');
             set(xshift_text, 'String', [num2str(xyshift_x)]);
             set(yshift_text, 'String', [num2str(xyshift_y)]);
-            image = opt.zstack; 
+            image = opt.zstack(:,:,:,img_num); 
             [crimage, zx1, zy1] = get.roi_surround(image, opt.idx, stat, opt.surround,ops,'zstack_drift', [xyshift_x, xyshift_y]);
-           % --- MAKE NEW IMAGE
+            %size(crimage)
+            %size(image)
+            %ncrimage = utils.normalize_img(crimage(:,:,:,img_num)); 
+            % --- MAKE NEW IMAGE
             adj_img = cat(3, ...
-                imadjust(crimage(:, :, 1,img_num), [low_in_red, high_in_red], [], gamma_red), ...
-                imadjust(crimage(:, :, 2,img_num), [low_in_green, high_in_green], [], gamma_green), ...
-                crimage(:, :, 3,img_num));  % Blue channel is left unchanged
+                imadjust(crimage(:,:,1), [low_in_red, high_in_red], [], gamma_red), ...
+                imadjust(crimage(:,:,2), [low_in_green, high_in_green], [], gamma_green), ...
+                crimage(:, :, 3));  % Blue channel is left unchanged
+            
+            %adj_img = utils.normalize_img(adj_img); 
             % --- UPDATE IMAGE 
             set(hImg, 'CData', adj_img);
-            red = image(:,:,1,img_num); green = image(:,:,2,img_num); 
+            red = image(:,:,1); green = image(:,:,2); 
             red(red==0)=[]; green(green==0)=[]; 
             redc=histcounts(red,256); greenc=histcounts(green,256); 
             maxred =max(redc(:)); maxgreen=max(greenc(:)); 
@@ -252,7 +241,7 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
                 image(:, :, 3));  % Blue channel is left unchanged
             % --- UPDATE IMAGE 
             set(hImg, 'CData', adj_img);
-            red = image(:,:,1,img_num); green = image(:,:,2,img_num); 
+            red = image(:,:,1); green = image(:,:,2); % why is this 4D? 
             red(red==0)=[]; green(green==0)=[]; 
             redc=histcounts(red,256); greenc=histcounts(green,256); 
             maxred =max(redc(:)); maxgreen=max(greenc(:)); 

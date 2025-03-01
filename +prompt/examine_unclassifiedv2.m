@@ -21,7 +21,6 @@ end
 
 unc = find(id_vect==3); % start with unclassified on the current plane 
 
-
 %% RUN WHILE LOOP 
 i = 1; 
 completion = 0; 
@@ -56,6 +55,9 @@ while completion ~= 1
         elseif strcmp(change,'f')
             id_vect(unc(i))=3; 
             i = i+1; 
+        %-- Add to delete_vect 
+        elseif strcmp(change,'z')
+            id_vect(unc(i)) = 4; 
         %--Return to Main Menu
         elseif strcmp(change,'r')
             completion = 1; 

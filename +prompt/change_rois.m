@@ -1,40 +1,57 @@
 function [id_vect] = change_rois(id_vect,curprompt)
+%% ASK WHICH ROIS 
 
-roi= input(curprompt);
+roi = input(curprompt); 
 
 
-for i = 1:length(roi)
-    % make string to show to ROI is currently classified 
+%% CHANGE ID_VECT ACCORDING TO RESPONSE 
+input_str = prompt.menu_str(2.5); 
+change = input(input_str,"s"); 
 
-    [formatstr]= prompt.neuron_idstr(id_vect,roi(i)); 
+%-- make EX  
+if strcmp(change,'a')
+    id_vect(roi)=1;
+%-- make IN  
+elseif strcmp(change,'s')
+    id_vect(roi)=2; 
+%-- make SPBN  
+elseif strcmp(change,'d')
+    id_vect(roi)=0;
+%-- make uncertain 
+elseif strcmp(change,'f')
+    id_vect(roi)=3;    
+%-- add to delete_vect 
+elseif strcmp(change,'z')
+    id_vect(roi)=4; 
 
-    disp(formatstr)
-    input_str = prompt.menu_str(2); 
-    completion =0; 
-    while completion ~= 1
-        change=input(input_str,"s"); 
-     
+%-- categorize individually 
+elseif strcmp(change,'r')
+
+    for i = 1:length(roi)
+        [formatstr]= prompt.neuron_idstr(id_vect,roi(i)); 
+        disp(formatstr)
+        input_str = prompt.menu_str(2); 
+        change=input(input_str,"s");  
         if strcmp(change,'a')
-            id_vect(roi(i))=1; 
-            completion=1; 
+            id_vect(roi(i))=1;  
         elseif strcmp(change,'s')
             id_vect(roi(i))=2; 
-            completion = 1; 
         elseif strcmp(change,'d')
-            id_vect(roi(i))=0;
-            completion = 1; 
+            id_vect(roi(i))=0;     
         elseif strcmp(change,'f')
-            id_vect(roi(i))=3; 
-            completion = 1;  
+            id_vect(roi(i))=3;   
         elseif strcmp(change,'z')
             id_vect(roi(i))=4; 
-            completion = 1; 
-   
-        else
-            disp('Error: Entry outside of allowed options')
+           
         end
+    end
+end
 
     
-    end
+    
+    
+    
+    
+    
+    
 
-end

@@ -4,10 +4,11 @@ load(s2p);
 %% CREATE SAMPLE ID_VECT
 
 cellstat= stat(iscell(:,1)==1); 
+
 idvect = idvect(iscell(:,1)==1); 
 %%
 %id_vect(:)=3; 
-id_vect([11 13])=3; 
+idvect(:)=4; 
 %% LOAD FIGURE POSITIONS 
 load('work-positions.mat')
 figs.zstack = figs.rgb; 
@@ -15,15 +16,11 @@ figs.zslider=figs.slider;
 figs.ref=figs.rgb; 
 %% RUN MAIN MENU
 p = 1; 
-idvect(26)=3; 
-atype= 'mean';ftype='mean'; 
+%idvect(26)=3; 
+atype= 'mean';ftype='max'; 
 img_mode='rgb'; 
 nplanes=5;
 xyshift = [ops.xoff(end) ops.yoff(end)];
 [idvect,figs] = prompt.main_menu(idvect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zs,xyshift);
-
-%%
-
-
 
 %%

@@ -1,5 +1,7 @@
 function [id_vect,figs] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zstack,zstack_drift)
+surround = 50; 
 
+%%
 padjusted_xyz = zeros(3,nplanes); 
 while p ~= -1   
     close all 
@@ -8,28 +10,28 @@ while p ~= -1
     input_str=prompt.menu_str(1); 
     answer = input (input_str,"s"); 
     
-    %--Reclassify Neurons
+    %--Reclassify Neurons -----------------------------------
     if strcmp(answer,'a')
-        cprompt = ['Enter ROIs you wish to change:',char(10),char(10)]; 
+        cprompt = ['Enter ROIs you wish to change:',char(10)]; 
         [id_vect] = prompt.change_rois(id_vect,cprompt);  
-    %--Go to Next Plane
+    %--Go to Next Plane -------------------------------------
     elseif strcmp(answer,'s')
         if p+1 <= nplanes
             p= p+1;
         elseif p+1 > nplanes  
             p = 1;   
         end
-    %--Go to Previous Plane 
+    %--Go to Previous Plane -----------------------------------
     elseif strcmp(answer,'d')
         if p-1 == 0 
             p = nplanes; 
         elseif p-1 > 0
             p = p-1; 
         end
-    %--Change Image Type 
+    %--Change Image Type  --------------------------------------
     elseif strcmp(answer,'r')
         [ftype,atype]=prompt.img_type(atype,ftype); 
-    %--Examine Uncertain
+    %--Examine Uncertain ---------------------------------------
     elseif strcmp (answer,'q')
          refimg = get.imagefromFigure(nfigs);
          close all 
@@ -37,17 +39,17 @@ while p ~= -1
             disp('No ROIs currently unclassified.',char(10))
             unc_vect = input('Enter neurons you wish to unclassify:'); 
             id_vect(unc_vect)=3;         
-            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',50,'refimg',refimg); 
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',surround,'refimg',refimg); 
         else 
-            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',50,'refimg',refimg); 
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',surround,'refimg',refimg); 
         end
-    %--Save Figure Positions
+    %--Save Figure Positions -----------------------------------
     elseif strcmp(answer,'w')
         figs = utils.save_positions(nfigs,figs); 
-    %--Save Current id_vect 
+    %--Save Current id_vect  -----------------------------------
     elseif strcmp(answer,'e')
         p = -1; 
-    %--Align Z-Stack 
+    %--Align Z-Stack  -------------------------------------------
     elseif strcmp(answer,'z')
         refimg = get.imagefromFigure(nfigs);
         input_str =prompt.menu_str(5); 

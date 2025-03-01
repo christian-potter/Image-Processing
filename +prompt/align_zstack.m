@@ -11,7 +11,7 @@ arguments
     ypix_zplane cell 
     zstack_drift double
     adjusted_xyz double 
-    opt.surround double = 200;  
+    opt.surround double = 100;  
     opt.refimg double 
     opt.specified_roi double 
 end
@@ -30,10 +30,13 @@ completion = 0;
 
 while completion ~=1
     [nfigs,nadjusted_xyz]= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack,'refimg',opt.refimg,'adjusted_xyz',adjusted_xyz);
-    answer = input(['Enter S to Save Z-Stack Alignment',char(10)],"s"); 
+    answer = input(['Enter S to Save Z-Stack Alignment',char(10),'Enter C to Cancel, Return to Main Menu',char(10)],"s"); 
 
     if strcmp(answer,'s')
         completion =1; 
+    elseif strcmp(answer,'c')
+        nadjusted_xyz=adjusted_xyz; 
+        completion=1; 
     else
         disp('Invalid Input')
     end

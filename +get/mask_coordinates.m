@@ -43,6 +43,8 @@ for i = 1:length(stat)
         maskcoords{i}=[xcoords,ycoords]; 
     elseif strcmp(opt.type,'mask')
         maskcoords{i}=[xpix',ypix']; 
+    %elseif strcmp(opt.type,'pointoutline')
+        
     end
 
 

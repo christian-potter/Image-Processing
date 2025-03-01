@@ -20,7 +20,7 @@ end
     % ** will need at some point if you want to center ROI on the cropped
     % image when there is cutoff 
 %% DESCRIPTION 
-% function that takes 
+% function that takes either single plane image or z-stack and crops it 
 
 %% MAKE VARIABLES 
 zs_xshift = opt.zstack_drift(1); zs_yshift = opt.zstack_drift(2); % z-stack adjustment, if it exists 
