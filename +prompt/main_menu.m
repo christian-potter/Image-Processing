@@ -3,6 +3,7 @@ surround = 50;
 
 %%
 padjusted_xyz = zeros(3,nplanes); 
+
 while p ~= -1   
     close all 
     [plane_crshift]=get.crshift(ops,p);
@@ -34,7 +35,7 @@ while p ~= -1
     %--Examine Uncertain ---------------------------------------
     elseif strcmp (answer,'q')
          refimg = get.imagefromFigure(nfigs);
-         close all 
+         %close all 
         if sum(id_vect==3)<0
             disp('No ROIs currently unclassified.',char(10))
             unc_vect = input('Enter neurons you wish to unclassify:'); 

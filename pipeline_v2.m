@@ -16,7 +16,7 @@ figs.zslider=figs.slider;
 figs.ref=figs.rgb; 
 %% RUN MAIN MENU
 p = 1; 
-%idvect(26)=3; 
+idvect([4,7])=3; 
 atype= 'mean';ftype='max'; 
 img_mode='rgb'; 
 nplanes=5;

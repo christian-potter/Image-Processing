@@ -3,7 +3,6 @@ function [id_vect] = change_rois(id_vect,curprompt)
 
 roi = input(curprompt); 
 
-
 %% CHANGE ID_VECT ACCORDING TO RESPONSE 
 input_str = prompt.menu_str(2.5); 
 change = input(input_str,"s"); 

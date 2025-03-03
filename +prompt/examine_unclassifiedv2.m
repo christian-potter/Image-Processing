@@ -25,7 +25,9 @@ unc = find(id_vect==3); % start with unclassified on the current plane
 i = 1; 
 completion = 0; 
 while completion ~= 1
-    close all 
+    utils.closeFigureByName('Z-Stack')
+    utils.closeFigureByName('Z-Stack Control')
+
     %- 
     if i > length(unc) | roi_planeidx(unc(i))~=p % complete if you go onto ROI in the next plane 
         completion = 1; 
@@ -35,7 +37,7 @@ while completion ~= 1
         [nfigs,~]= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack,'refimg',opt.refimg,'adjusted_xyz',adjusted_xyz);    
         id_str=prompt.neuron_idstr(id_vect,unc(i)); 
         disp(id_str)
-        
+        fi
         % menu_str #3
         inputstr=prompt.menu_str(3);
         change= input(inputstr,"s"); 

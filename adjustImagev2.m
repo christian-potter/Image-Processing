@@ -94,7 +94,6 @@ end
 if stack
     hFigSlider = figure('Name', 'Z-Stack Control', 'NumberTitle', 'off', ...
         'Position',figs.zslider.Position, 'Color', 'White');
-
 elseif ~stack
     hFigSlider = figure('Name', 'Image Control', 'NumberTitle', 'off', ...
         'Position',figs.slider.Position, 'Color', 'White');
