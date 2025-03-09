@@ -1,5 +1,5 @@
 %% LOAD 
-[zs,tlapse,zstack,tsync,s2p,ypix_zplane,idvect] = load_drgs(511,'noplot'); 
+ [zs,tlapse,zstack,tsync,s2p,ypix_zplane,idvect] = utils.load_drgs(518,'noplot'); 
 load(s2p); 
 %% CREATE SAMPLE ID_VECT
 
@@ -16,7 +16,7 @@ figs.zslider=figs.slider;
 figs.ref=figs.rgb; 
 %% RUN MAIN MENU
 p = 1; 
-idvect([4,7])=3; 
+%idvect([4,7])=3; 
 atype= 'mean';ftype='max'; 
 img_mode='rgb'; 
 nplanes=5;

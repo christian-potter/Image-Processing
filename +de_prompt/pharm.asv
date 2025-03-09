@@ -1,0 +1,38 @@
+function [stim,c]= pharm(i,c,tpoints,answer,stim)  
+
+% For input_str(1.1)
+
+% -- TTX START---------
+if strcmp(answer,'a')
+    stim.ttx(1)= tpoints(i); % should only be one entry 
+    stim.strlist{i}=[stim.strlist{i},'TTX Start']; 
+  
+% -- CBX START ---------
+elseif strcmp(answer,'s')
+    stim.cbx=[stim.cbx,tpoints(i)]; 
+    stim.strlist{i}=[stim.strlist{i},'CBX Start']; 
+
+% -- CBX END ---------
+elseif strcmp(answer,'d')
+    %relies on same counter as CBX start 
+    stim.cbx(c.cbx)=tpoints(i); 
+    stim.strlist{i}=[stim.strlist{i},'CBX End']; 
+% -- WASHOUT ---------
+elseif strcmp(answer,'w')
+    c.wash = c.wash +1; 
+    stim.washout(washcount) = tpoints(i);
+  
+    strlist{i}='Washout'; 
+%-- BASELINE ---------
+elseif strcmp(answer,'b')
+    c.spont = c.spont+1; 
+    stim.baseline(basecount)=tpoints(i); 
+
+    strlist{i}='Baseline'; 
+end
+
+
+
+%%
+
+end

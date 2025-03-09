@@ -5,6 +5,8 @@ function [ntsync] = compress_tsync(tsync,nframes)
 
 field = fields(tsync); 
 
+select= [1 2 3 4 5 8 9 11]; 
+
 for f = 1:length(field)
     vect = tsync.(field{f}); 
     compress_vect = nan(nframes,1); 
