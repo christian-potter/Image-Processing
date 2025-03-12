@@ -3,8 +3,8 @@
 figure
 plot(mean(F,1))
 hold on 
-xline(stim.tlist(:,1))
-xticks([0;stim.tlist(:,1)])
+xline(stim.tpoints(:,1))
+xticks([0;stim.tpoints(:,1)])
 xticklabels(stim.strlist(:,1))
 title('Dataset #6')
 

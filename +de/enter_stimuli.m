@@ -1,4 +1,4 @@
-function [stim] = enter_stimuli(tseries_frames,dsnum)
+function [stim] = enter_stimuli(tseries_frames,dsnum,ops)
 %% DESCRIPTION
 % creates stim function with fields for each ligand or start of a
 % pharmacology state
@@ -25,13 +25,13 @@ tpoints = cumsum(tseries_frames);
 tpoints =[0,tpoints];tpoints(end)=[]; % adjust to start with 0
 
 tlist = nan(length(tseries_frames),1); % coordinates 
-strlist=cell(length(tseries_frames),1);  
+  
 %% DEFINE STIMULUS STRUCTURE
 stim.dsnum = dsnum; 
-stim.fps = 8; 
+stim.fps = 8; % update eventually to work 
 
 %% ADD LIGANDS 
-epochs =['spont','wash','ttx',lligs]; 
+epochs =['spont','wash','ttx','cbx','spont',lligs]; 
 
 for e = 1:length(epochs)
     stim.(epochs{e})=[];
@@ -40,10 +40,18 @@ end
 %** in the future, have cicada be its own separate structure called by
 %stim.cic.grp 
 
-%%
+%% DETERMINE T-SERIES NUMBERS 
+for i = 1:length(ops.filelist)
+    fnumber(i)=str2double(ops.filelist(i,end-10:end-8)); 
+end
+
+fnumber=unique(fnumber); 
+stim.strlist = cell(length(fnumber),1); 
+stim.tpoints= tpoints;  
+%% INPUT INFO FOR EACH TSERIES
 i = 1; 
-while i < length(tseries_frames)
-    disp(['T-Series:', num2str(i)])
+while i < length(fnumber)
+    disp(['T-Series:', num2str(fnumber(i))])
     answer = input(de_prompt.input_str(1),"s"); 
     %-- Ligand ----------------------------
     if strcmp(answer,'a')
@@ -51,32 +59,34 @@ while i < length(tseries_frames)
         answer = input('Enter Option from List',"s"); 
         if ismember(answer,lligs) 
             stim.(answer)=tpoints(i);  
-            strlist{i}=answer; 
+            stim.strlist{i}=answer; 
         else 
             disp('Incorrect Selection') % change so that it loops back to ask you to enter another option 
         end
     %-- Pharmacology State ------------------
     elseif strcmp(answer,'d')
         answer = input(de_prompt.input_str(1.1),"s"); 
-        [stim,strlist]= de_prompt.pharm(i,tpoints,answer,stim);  
+        [stim]= de_prompt.pharm(i,tpoints,answer,stim);  
 
     %-- Repeat of Previous TSeries-----------
     elseif strcmp(answer,'r')
-        strlist{i}=''; 
+        stim.strlist{i}=''; 
+    %-- CANCEL---------- 
+    elseif strcmp(answer,'x')
+        i = length(fnumber)+1; 
     end
-    %--------End Options----------------------
-
+    %------------------------------
     %---Confirm/ Add/ Delete Info------------- 
-    curstr = strlist{i};
-    [input_str]=de_prompt.input_str(1.2,curstr,dsnum); 
+    curstr = stim.strlist{i};
+    [input_str]=de_prompt.input_str(1.2,curstr,fnumber(i)); 
     answer = input(input_str,"s"); 
 
     if strcmp(answer,'a')% add new info 
-
+        % -rerun while loop unchanged 
     elseif strcmp(answer,'c') %continue 
-        i = i+i; 
+        i = i+1; 
     elseif strcmp(answer,'d') %delete info and re-enter
-        strlist{i}=''; 
+        stim.strlist{i}=''; 
         stim = de.removeNumberFromStruct(tpoints(i),stim); 
     end
     
@@ -85,7 +95,7 @@ end
 disp('All T-Series Annotated')
 
 %% ADD VARIABLES TO STIM
-stim.strlist=strlist; 
+
 
 %% TO ADD 
 % - indication that recorded activity is something near spontaneous based

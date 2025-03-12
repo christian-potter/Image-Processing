@@ -1,8 +1,8 @@
 function [input_str] = input_str(num,varargin)
 %% VARIABLE ARGUMENTS 
-if exist(varargin)
+if ~isempty(varargin)
     curstr=varargin{1}; 
-    dsnum = varargin{2};
+    fnumber = varargin{2};
 end
 
 
@@ -24,20 +24,20 @@ if num == 1
 elseif num ==1.1
     % if main menu == d
     a = ['A: TTX Start',char(10)];
-    s = ['S: CBX Start',char(10)]; 
+    c = ['C: CBX Start',char(10)]; 
     d = ['D: CBX End',char(10)]; 
-    c = ['C: CICADA Start',char(10)]; 
+    %c = ['C: CICADA Start',char(10)]; 
     w = ['W: Washout',char(10)]; 
-    b= ['S: Spontaneous',char(10)];
-    input_str=[bookend,a,s,d,c,w,b,bookend];
+    s= ['S: BL/Spont',char(10)];
+    input_str=[bookend,a,c,d,w,s,bookend];
 
 %REPEAT Y/N INPUT  
 elseif num == 1.2
     %-- display how T-Series is currently labeled 
     if isempty(curstr)
-        info_str = sprintf('TSeries #%d is marked as REPEATED', X);
+        info_str = sprintf(['TSeries #%d is marked as REPEATED',char(10)],fnumber );
     else
-        info_str = sprintf('TSeries #%d is marked as %s', X, curstr);
+        info_str = sprintf(['TSeries #%d is marked as %s',char(10)], fnumber, curstr);
     end
     
     %-- List options 

@@ -9,23 +9,74 @@ load(s2p);
 
 [tseries_frames]= de.tseries_frames(ops);
 nframes= sum(tseries_frames);
-[tsync] = de.compress_tsync(tsync,nframes); 
+%[tsync] = de.compress_tsync(tsync,nframes); 
 %% MAKE STIMULUS STRUCTURE 
 %needs to be a structure that can incorportate the appropriate variables from
 %thorsync later 
 
-stim = de.enter_stimuli(tseries_frames,8);
+stim = de.enter_stimuli(tseries_frames,8,ops);
 %** use ops.file_list to get actual saved values for t-series 
-%% THORSYNC PRE-PROCESSING 
 
+%% LOAD FILES 
+tlapse_path = '/Volumes/ross/Christian/#8/t-series.xml'; 
+zstack_mdpath = '/Volumes/ross/Christian/#8/z-stack.xml'; 
+zstack_path = '/Volumes/ross/Christian/#8/z-stack_blur1.tif'; 
+load('/Volumes/ross/Christian/#8/Fall.mat')
 
+tlapse_xml=md.importxml(tlapse_path);
+[tlapse] = md.extract_metadata(tlapse_xml);
+
+zstack_xml = md.importxml(zstack_mdpath); 
+[zstack]=md.extract_metadata(zstack_xml);
+
+zs= get.zstack(zstack_path);
+% just load another dataset to get the zstack info 
+
+%[tsync]= md.read_h5(thorsync_h5); 
+%% GET DATA
+
+f= F(iscell(:,1)==1,:); 
+
+%% DFF
+dF_F = get.dF_F_rolling(f, 400);
+%%
+sdff = sgolayfilt(dF_F,3,15,[],2); 
+
+%% PLOT MEAN SDFF
+
+figure
+plot(mean(sdff,1))
+xticks(stim.tpoints)
+xticklabels(stim.strlist)
+xline(stim.tpoints)
+utils.sf
+xlabel('Stimulus Times')
+ylabel('dF/F')
+title('Smoothed dF/F')
 
 %%
+odff = get.offsetRows(sdff,1);
 
+%% PLOT ALL TRACES 
 
+figure
+plot(odff')
+xticks(stim.tpoints)
+xticklabels(stim.strlist)
+xline(stim.tpoints)
+xlabel('Stimulus Times')
+ylabel('dF/F')
+title('Smoothed dF/F')
+yticks([])
+utils.sf
 
+%%
+d.sdff=sdff; 
+d.tag =8; 
+%%
+[grp_cm]= r.cmatrix(d,[stim.grp(1),stim.cbx(1)]); 
+[gcbx_cm]= r.cmatrix(d,[stim.cbx(1),stim.cbx(2)]); 
 
-
-%% TODO 
-% df/f calculation 
-% 
+%%
+[grp_cm]= r.cmatrix(d,[stim.ttx(1),stim.cbx(3)]);
+[gcbx_cm]= r.cmatrix(d,[stim.cbx(3),stim.cbx(4)]);
