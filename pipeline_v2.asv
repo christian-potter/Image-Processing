@@ -24,12 +24,4 @@ xyshift = [ops.xoff(end) ops.yoff(end)];
 [idvect,figs] = prompt.main_menu(idvect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zs,xyshift);
 
 %%
-figure
-plot(tsync.mforce)
-hold on 
-plot(tsync.mlength)
-xlabel('Time')
-ylabel({'Thorsync Value','(AU)'})
-title('Thorsync data for mechanical stimulation')
-utils.sf
-legend({'Force','Length'})
+fig

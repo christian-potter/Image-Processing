@@ -24,7 +24,6 @@ lligs = lower(liglabels);
 tpoints = cumsum(tseries_frames);
 tpoints =[0,tpoints];tpoints(end)=[]; % adjust to start with 0
 
-tlist = nan(length(tseries_frames),1); % coordinates 
   
 %% DEFINE STIMULUS STRUCTURE
 stim.dsnum = dsnum; 
@@ -50,13 +49,14 @@ stim.strlist = cell(length(fnumber),1);
 stim.tpoints= tpoints;  
 %% INPUT INFO FOR EACH TSERIES
 i = 1; 
+bookend ='----------'; 
 while i < length(fnumber)
-    disp(['T-Series:', num2str(fnumber(i))])
+    disp([bookend,char(10),'T-Series:', num2str(fnumber(i))])
     answer = input(de_prompt.input_str(1),"s"); 
     %-- Ligand ----------------------------
     if strcmp(answer,'a')
-        disp(lligs)
-        answer = input('Enter Option from List',"s"); 
+        disp(bookend);disp(lligs)
+        answer = input(['Enter Option from List',char(10),bookend,char(10)],"s");
         if ismember(answer,lligs) 
             stim.(answer)=tpoints(i);  
             stim.strlist{i}=answer; 

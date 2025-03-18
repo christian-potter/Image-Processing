@@ -66,7 +66,7 @@ end
 %% PLOT TRACES 
 figure(1)
 clf
-utils.sf('fontsize',20)
+utils.set_figure(20,'not square')
 hold on 
 
 %stretch=1; 
@@ -83,7 +83,28 @@ if opt.dimension == 2
     xline(ends,'LineStyle','--','LineWidth',3,'Alpha',.2)
     xline(starts,'k','LineWidth',3,'Alpha',.2)
     ylabel('dF/F')
+    %--------------2D
 
+elseif opt.dimension == 3 
+    %--------------3D
+    for i = 1:opt.nneurons 
+        if inc_issp(i)
+            plot3(1:length(plottime),ones(length(plottime),1)*i*offset,movmean(incl_cells(i+opt.nshift,plottime),opt.avgwindow),'color','r','LineWidth',opt.linewidth)
+        elseif ~inc_issp(i)
+            plot3(1:length(plottime),ones(length(plottime),1)*i*offset,movmean(incl_cells(i+opt.nshift,plottime),opt.avgwindow))
+        end
+    end
+    for i = 1:length(starts)
+        plot3([starts(i) starts(i)],ylim,[0 0],'Color','k','LineStyle','--','LineWidth',3)
+        plot3([ends(i) ends(i)],ylim,[0 0],'Color','k','LineWidth',3)
+    end
+    zl=zlim;
+    zlim([0,zl(2)]); 
+    grid on 
+    zlabel('dF/F')
+    ylabel('Neuron Identity')
+    view(4,11)
+    %--------------3D
 end
 
 %% EDIT FIGURE 

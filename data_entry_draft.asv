@@ -78,7 +78,7 @@ d.tag =8;
 [gcbx_cm]= r.cmatrix(d,[stim.cbx(1),stim.cbx(2)]); 
 
 %%
-[grp_cm]= r.cmatrix(d,[40349,]);
+[grp_cm]= r.cmatrix(d,[stim.ttx(1),stim.cbx(3)]);
 [gcbx_cm]= r.cmatrix(d,[stim.cbx(3),stim.cbx(4)]);
 
 
@@ -86,7 +86,6 @@ d.tag =8;
 
 %% K MEANS OPT
 [idx,c,sumd,k]=clust.kmeans_opt(grp_cm,10);
-%[idx,c,sumd,k]=clust.kmeans_opt(gcbx_cm,10);
 % can look at distances between centroids to compare how similar clusters
 % are 
 
@@ -96,11 +95,11 @@ ttxmat(e==1)=NaN;
 %%
 t= 'Clustering of correlation matrix for GRP ONLY'; 
 kcolors = utils.distinguishable_colors(k);
-plot.img_cmatrix(gcbx_cm,d,t,'labels',idx,'colors',kcolors,'crameri',true);
+plot.img_cmatrix(grp_cm,d,t,'labels',idx,'colors',kcolors,'crameri',true);
 
 %%
 
-odff = get.offsetRows(sdff(idx==5|idx==6,:),1);
+odff = get.offsetRows(sdff(idx==2|idx==3|idx==8,:),1);
 
 figure
 plot(odff')
