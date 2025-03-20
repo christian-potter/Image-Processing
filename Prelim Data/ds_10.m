@@ -10,7 +10,7 @@ d.sdff = sdff; d.tag = 10;
 
 %% GET DFF
 f= F(iscell(:,1)==1,:); 
-dF_F = get.dF_F_rolling(f, 400);
+dF_F = get.dF_F_rolling(f, 400*8);
 sdff = sgolayfilt(dF_F,3,15,[],2); 
 %%  ENTER STIMULUS INFO 
 [stim] = de.enter_stimuli(tseries_frames,10,ops); 
@@ -21,7 +21,7 @@ sdff = sgolayfilt(dF_F,3,15,[],2);
 [cbx_cm]= r.cmatrix(d,[stim.cbx(1),stim.cbx(2)]);
 [ttxs_cm]= r.cmatrix(d,[stim.cbx(2),size(F,2)]);
 %%
-[idx,c,sumd,k]=clust.kmeans_opt(ttx_cm,20);
+[idx,c,sumd,k]=clust.kmeans_opt(ttx_cm,10);
 %[idx,c,sumd,k]=clust.kmeans_opt(gcbx_cm,10);
 % can look at distances between centroids to compare how similar clusters
 % are 
@@ -32,7 +32,7 @@ kcolors = utils.distinguishable_colors(k);
 plot.img_cmatrix(ttx_cm,d,t,'labels',idx,'colors',kcolors,'crameri',true);
 
 %%
-plot.cluster_traces(tpoints,sdff, idx, [1 3 5 6 7 8 9],kcolors)
+plot.cluster_traces(tpoints,sdff, idx, [1 2 3 5 6 7 8],kcolors)
 xline(stim.cbx,'LineWidth',2)
 xticks(tpoints)
 xticklabels(stim.strlist)

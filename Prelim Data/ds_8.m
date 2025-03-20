@@ -41,8 +41,8 @@ kcolors = utils.distinguishable_colors(k);
 plot.img_cmatrix(grp_cm,d,t,'labels',idx,'colors',kcolors,'crameri',true);
 %%
 
-plot.cluster_traces(tpoints,sdff, idx,[2,3],kcolors,'timepoints',[stim.ttx size(sdff,2)])
-xline(stim.cbx(3),'LineWidth',3)
+plot.cluster_traces(tpoints,sdff, idx,[1,2],kcolors,'timepoints',[stim.ttx size(sdff,2)])
+%xline(stim.cbx(3),'LineWidth',3)
 
 
 title({'Dataset 8','Clusters 2 + 3'})
