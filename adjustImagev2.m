@@ -23,7 +23,7 @@ end
 %% GET VARIABLES
 [roi_planeidx,idxshifts,~] = get.roipidx_shift(stat);
 [mask_coords]=get.mask_coordinates(stat,'type','outline');
-[stackmask_coords]=get.mask_coordinates(stat,'type','mask');% filled out masks for zstack 
+[stackmask_coords]=get.mask_coordinates(stat,'type','outline');% filled out masks for zstack 
 [mask_colors] = get.mask_colors(id_vect); 
 
 if isfield(opt,'adjusted_xyz')
@@ -78,15 +78,15 @@ if strcmp(opt.type,'rgb')
   
 elseif strcmp(opt.type,'zstack')
     %--reference image 
-    refFig=figure('Name', 'Reference Functional Image', 'NumberTitle', 'off', 'Position',figs.ref.Position, 'Color', 'White');
-    hAx = axes('Parent', refFig, 'Position', [0.01, 0.01, 0.99, 0.99]);
-    hImg = imshow(refimage, 'Parent', hAx); hold on; 
-    plot.mask_boundaries(mask_colors(:,1),mask_coords(opt.idx),plane_crshift,opt.idx,'idxtype','specified','masktype','outline','crop_x1y1',[rx1 ry1],'image',refimage);
+    %refFig=figure('Name', 'Reference Functional Image', 'NumberTitle', 'off', 'Position',figs.ref.Position, 'Color', 'White');
+    %hAx = axes('Parent', refFig, 'Position', [0.01, 0.01, 0.99, 0.99]);
+    %hImg = imshow(refimage, 'Parent', hAx); hold on; 
+    %plot.mask_boundaries(mask_colors(:,1),mask_coords(opt.idx),plane_crshift,opt.idx,'idxtype','specified','masktype','outline','crop_x1y1',[rx1 ry1],'image',refimage);
     %--zstack
     hFigImg = figure('Name', 'Z-Stack', 'NumberTitle', 'off', 'Position',figs.zstack.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     hImg = imshow(image(:,:,:,opt.default_plane), 'Parent', hAx); hold on; 
-    plot.mask_boundaries(mask_colors(:,1),stackmask_coords(opt.idx),plane_crshift,opt.idx,"idxtype",'specified','masktype','mask','crop_x1y1',[zx1 zy1],'image',image(:,:,:,1));
+    plot.mask_boundaries(mask_colors(:,1),stackmask_coords(opt.idx),plane_crshift,opt.idx,"idxtype",'specified','masktype','outline','crop_x1y1',[zx1 zy1],'image',image(:,:,:,1));
 end
 
 %% CREATE SLIDER FIGURE WITH HISTOGRAMS
@@ -97,8 +97,6 @@ if stack
 elseif ~stack
     hFigSlider = figure('Name', 'Image Control', 'NumberTitle', 'off', ...
         'Position',figs.slider.Position, 'Color', 'White');
-
-    
 end
 
 % Set default values for sliders
@@ -292,14 +290,14 @@ if strcmp(opt.type,'rgb')
     nfigs.slider = hFigSlider; 
     nfigs.zstack = figs.zstack; 
     nfigs.zslider = figs.zslider; 
-    nfigs.ref = figs.ref; 
+    %nfigs.ref = figs.ref; 
     nadjusted_xyz = [0 0 0]; % THE FUNCTION SHOULD NOT ASSIGN THIS VARIABLE WHEN CALLED FOR RGB 
 elseif strcmp(opt.type,'zstack')
     nfigs.rgb = figs.rgb; 
     nfigs.slider = figs. slider; 
     nfigs.zstack = hFigImg; 
     nfigs.zslider=hFigSlider;
-    nfigs.ref=refFig;
+    %nfigs.ref=refFig;
     nadjusted_xyz = [nzstack_drift-xyshift_x,nzstack_drift-xyshift_y,opt.default_plane - img_num]; 
 end
 

@@ -25,7 +25,7 @@ end
 %% MAKE VARIABLES 
 zs_xshift = opt.zstack_drift(1); zs_yshift = opt.zstack_drift(2); % z-stack adjustment, if it exists 
 image_plane = image(:,:,1,1);
-dims = size(image_plane); % max dimensions to correct for if surround is off 
+dims = size(image_plane);dims =flip(dims); % max dimensions to correct for if surround is off 
 cstat=stat{roi};
 cutoff =[0,0]; % assume surround does not require a cutoff 
 

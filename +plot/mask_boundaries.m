@@ -26,7 +26,7 @@ end
 
 %% DETERMINE TOTAL SHIFT 
 
-totalshift = planeshift - opt.crop_x1y1; 
+totalshift = -planeshift - opt.crop_x1y1; 
 
 %% PLOT MASKS LOOP
 for i = 1:length(maskcoords)

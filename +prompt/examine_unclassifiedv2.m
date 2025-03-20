@@ -31,13 +31,14 @@ while completion ~= 1
     %- 
     if i > length(unc) | roi_planeidx(unc(i))~=p % complete if you go onto ROI in the next plane 
         completion = 1; 
+        nfigs=figs;
         disp(["All Unclassified ROIs in this plane have been sorted"])
     else   
         %-
         [nfigs,~]= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack,'refimg',opt.refimg,'adjusted_xyz',adjusted_xyz);    
         id_str=prompt.neuron_idstr(id_vect,unc(i)); 
         disp(id_str)
-        fi
+ 
         % menu_str #3
         inputstr=prompt.menu_str(3);
         change= input(inputstr,"s"); 
