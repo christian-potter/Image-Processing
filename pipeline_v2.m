@@ -16,20 +16,10 @@ figs.zslider=figs.slider;
 figs.ref=figs.rgb; 
 %% RUN MAIN MENU
 p = 1; 
-%idvect([4,7])=3; 
+idvect([2])=3; 
 atype= 'mean';ftype='max'; 
 img_mode='rgb'; 
 nplanes=5;
 xyshift = [ops.xoff(end) ops.yoff(end)];
-[idvect,figs] = prompt.main_menu(idvect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zs,xyshift);
+[idvect,figs] = prompt.main_menu(idvect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zs,'grb',xyshift);
 
-%%
-figure
-plot(tsync.mforce)
-hold on 
-plot(tsync.mlength)
-xlabel('Time')
-ylabel({'Thorsync Value','(AU)'})
-title('Thorsync data for mechanical stimulation')
-utils.sf
-legend({'Force','Length'})

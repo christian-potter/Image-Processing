@@ -1,4 +1,4 @@
-function [id_vect,figs] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zstack,zstack_drift)
+function [id_vect,figs] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zstack,colororder,zstack_drift)
 surround = 50; 
 
 %%
@@ -40,9 +40,9 @@ while p ~= -1
             disp('No ROIs currently unclassified.',char(10))
             unc_vect = input('Enter neurons you wish to unclassify:'); 
             id_vect(unc_vect)=3;         
-            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',surround,'refimg',refimg); 
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',surround,'refimg',refimg,'colororder',colororder); 
         else 
-            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',surround,'refimg',refimg); 
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',surround,'refimg',refimg,'colororder',colororder); 
         end
     %--Save Figure Positions -----------------------------------
     elseif strcmp(answer,'w')

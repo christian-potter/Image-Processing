@@ -24,12 +24,12 @@ figs.ref=figs.rgb;
 
 %%
 p = 1; 
-%idvect([4,7])=3; 
+idvect([2])=3; 
 atype= 'mean';ftype='max'; 
-img_mode='rgb'; 
+img_mode='rgb'; colororder ='grb'; 
 nplanes=5;
 xyshift = [ops.xoff(end) ops.yoff(end)];
-[idvect,figs] = prompt.main_menu(idvect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zs,xyshift);
+[idvect,figs] = prompt.main_menu(idvect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zs,colororder,xyshift);
 
 %%
 

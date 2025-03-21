@@ -1,44 +1,49 @@
-function [nfigs] = adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,opt)
+function [nfigs,nadjusted_xyz] = adjustImagev2(p,stat,plane_crshift,figs,ops,id_vect,ypix_zplane,opt)
 arguments 
     p double 
     stat cell 
-    crshift double 
+    plane_crshift double 
     figs struct 
     ops struct 
     id_vect double 
     ypix_zplane cell % mapping between y pixel value and the z-stack plane it should be on 
+    opt.adjusted_xyz double 
     opt.zstack_drift double % option to specify the amount of drift between functional and z-stack  
     opt.type string = 'rgb'
     opt.functional string = 'mean'
     opt.anatomical string = 'mean'
     opt.idx (1,1) double % individual idx if examining an individual neuron 
     opt.zstack double = 0
-    opt.surround double = 50
-    opt.refsurround double = 100 
+    opt.surround double = 100
+    opt.refsurround double = 100
     opt.default_plane (1,1) double = 1 % default plane in the z-stack
     opt.refimg
+    opt.colororder string = 'rgb'
 end 
 
 %% GET VARIABLES
 [roi_planeidx,idxshifts,~] = get.roipidx_shift(stat);
 [mask_coords]=get.mask_coordinates(stat,'type','outline');
-[stackmask_coords]=get.mask_coordinates(stat,'type','mask');% filled out masks for zstack 
+[stackmask_coords]=get.mask_coordinates(stat,'type','outline');% filled out masks for zstack 
 [mask_colors] = get.mask_colors(id_vect); 
+
+if isfield(opt,'adjusted_xyz')
+    xyshift_x=opt.adjusted_xyz(1);xyshift_y=opt.adjusted_xyz(2);
+end
 
 %% DETERMINE STARTING PLANE 
 
 if isfield(opt,'idx')
     ypix= stat{opt.idx}.med(1); %first is weirdly Y
-    crshift = get.crshift(ops,p); 
     %ypix = ypix-crshift(1); 
     curplane = ypix_zplane{p}; 
-    opt.default_plane=curplane(ypix); 
+    opt.default_plane=curplane(ypix)+opt.adjusted_xyz(3); 
 end
 
 %% CREATE VARIABLES
 hFigImg= NaN; fFigImg= NaN; aFigImg = NaN; hFigSlider = NaN;
 %% GET RED/GREENWIN
-[redwin,greenwin]= get.redgreen_images(opt.anatomical,opt.functional,ops,crshift); 
+[redwin,greenwin]= get.redgreen_images(opt.anatomical,opt.functional,ops,plane_crshift); 
 %% DEFINE IMAGE 
 if strcmp(opt.type,'rgb')
     image(:,:,1) = redwin; 
@@ -51,16 +56,20 @@ if strcmp(opt.type,'rgb')
 elseif strcmp(opt.type,'zstack')
     stack = true; 
     image = opt.zstack; 
-    [image,zx1,zy1,zstack_cutoff] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',opt.zstack_drit);
-    %-- normalize image
+    nzstack_drift = opt.zstack_drift +opt.adjusted_xyz([1 2]); 
     for i = 1:size(image,4)
-        for j=1:size(image,3)
-            image(:,:,j,i) = utils.normalize_img(image(:,:,j,i));
-        end
+       image(:,:,:,i) = utils.normalize_img(image(:,:,:,i));        
     end
-    redChannel = image(:, :, 1,1);greenChannel = image(:,:,2,1);    
+    if strcmp(opt.colororder,'grb')
+        image(:,:,[1 2],:)=rg; rg = image(:,:,[1 2],:);flip(rg,3); 
+    end
+
+    opt.zstack = image; % normalize zstack now before cropping 
+    [image,zx1,zy1] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',nzstack_drift);
+    %-- normalize image
+    redChannel = image(:, :, 1,opt.default_plane);greenChannel = image(:,:,2,opt.default_plane);    
     %-- Ref image 
-    [refimage,rx1,rx2,ref_cutoff] = get.roi_surround(opt.refimg,opt.idx,stat,opt.refsurround,ops,'plane',p); 
+    [refimage,rx1,ry1] = get.roi_surround(opt.refimg,opt.idx,stat,opt.refsurround,ops,'plane',p); 
 end
 
 %% CREATE FIGURES FOR COLOR/ BW IMAGES
@@ -70,37 +79,20 @@ if strcmp(opt.type,'rgb')
     hFigImg = figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',figs.rgb.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     hImg = imshow(image, 'Parent', hAx); hold on; 
-    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p),'masktype','outline');
+    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),plane_crshift,idxshifts(p),'masktype','outline');
   
 elseif strcmp(opt.type,'zstack')
     %--reference image 
-    refFig=figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',figs.ref.Position, 'Color', 'White');
-    hAx = axes('Parent', refFig, 'Position', [0.01, 0.01, 0.99, 0.99]);
-    hImg = imshow(refimage, 'Parent', hAx); hold on; 
-    plot.mask_boundaries(mask_colors(:,1),mask_coords(opt.idx),crshift,opt.idx,'idxtype','specified','masktype','outline','crop_x1y1',[rx1 rx2]);
+    %refFig=figure('Name', 'Reference Functional Image', 'NumberTitle', 'off', 'Position',figs.ref.Position, 'Color', 'White');
+    %hAx = axes('Parent', refFig, 'Position', [0.01, 0.01, 0.99, 0.99]);
+    %hImg = imshow(refimage, 'Parent', hAx); hold on; 
+    %plot.mask_boundaries(mask_colors(:,1),mask_coords(opt.idx),plane_crshift,opt.idx,'idxtype','specified','masktype','outline','crop_x1y1',[rx1 ry1],'image',refimage);
     %--zstack
     hFigImg = figure('Name', 'Z-Stack', 'NumberTitle', 'off', 'Position',figs.zstack.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
-    hImg = imshow(image(:,:,:,1), 'Parent', hAx); hold on; 
-    plot.mask_boundaries(mask_colors(:,1),stackmask_coords(opt.idx),crshift,opt.idx,"idxtype",'specified','masktype','mask','crop_x1y1',[zx1 zx2]);
+    hImg = imshow(image(:,:,:,opt.default_plane), 'Parent', hAx); hold on; 
+    plot.mask_boundaries(mask_colors(:,1),stackmask_coords(opt.idx),plane_crshift,opt.idx,"idxtype",'specified','masktype','outline','crop_x1y1',[zx1 zy1],'image',image(:,:,:,1));
 end
-
-% CODE FOR SEPARATE IMAGES 
-% elseif strcmp(opt.type,'separate')
-%     %Create functional channel image 
-%     fFigImg = figure('Name', 'Functional Image', 'NumberTitle', 'off', 'Position',figs.functional.Position, 'Color', 'White');
-%     fAx = axes('Parent', fFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
-%     fImg = imshow(fimage, 'Parent', fAx);
-%     hold on 
-%     plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
-% 
-%     % Create anatomical channel image 
-%     aFigImg = figure('Name', 'Anatomical Image', 'NumberTitle', 'off', 'Position',figs.anatomical.Position, 'Color', 'White');
-%     aAx = axes('Parent', aFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
-%     aImg = imshow(aimage, 'Parent', aAx);
-%     hold on 
-%     plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),crshift,idxshifts(p));
-% end
 
 %% CREATE SLIDER FIGURE WITH HISTOGRAMS
 % Create a second figure for the sliders and histogram
@@ -122,26 +114,25 @@ high_in_green = 1;
 gamma_green = 1;
 img_num = 1; 
 
-
 % Create sliders and labels for the Red channel (left side)
-uicontrol('Style', 'text', 'String', 'Red Channel - Low Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
+uicontrol('Style', 'text', 'String', 'Red- Low Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
 hLowInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_red, 'Units', 'normalized', 'Position', [0.05, 0.35, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
-uicontrol('Style', 'text', 'String', 'Red Channel - High Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.3, 0.2, 0.05], 'Parent', hFigSlider);
+uicontrol('Style', 'text', 'String', 'Red- High Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.3, 0.2, 0.05], 'Parent', hFigSlider);
 hHighInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_red, 'Units', 'normalized', 'Position', [0.05, 0.25, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
-uicontrol('Style', 'text', 'String', 'Red Channel - Gamma:', 'Units', 'normalized', 'Position', [0.05, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
+uicontrol('Style', 'text', 'String', 'Red- Gamma:', 'Units', 'normalized', 'Position', [0.05, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
 hGammaRed = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_red, 'Units', 'normalized', 'Position', [0.05, 0.15, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
 % Create sliders and labels for the Green channel (right side)
-uicontrol('Style', 'text', 'String', 'Green Channel - Low Thresh:', 'Units', 'normalized', 'Position', [0.55, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
-hLowInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_green, 'Units', 'normalized', 'Position', [0.55, 0.35, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
+uicontrol('Style', 'text', 'String', 'Green- Low Thresh:', 'Units', 'normalized', 'Position', [0.4, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
+hLowInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_green, 'Units', 'normalized', 'Position', [0.4, 0.35, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
-uicontrol('Style', 'text', 'String', 'Green Channel - High Thresh:', 'Units', 'normalized', 'Position', [0.55, 0.3, 0.2, 0.05], 'Parent', hFigSlider);
-hHighInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_green, 'Units', 'normalized', 'Position', [0.55, 0.25, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
+uicontrol('Style', 'text', 'String', 'Green- High Thresh:', 'Units', 'normalized', 'Position', [0.4, 0.3, 0.2, 0.05], 'Parent', hFigSlider);
+hHighInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_green, 'Units', 'normalized', 'Position', [0.4, 0.25, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
-uicontrol('Style', 'text', 'String', 'Green Channel - Gamma:', 'Units', 'normalized', 'Position', [0.55, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
-hGammaGreen = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_green, 'Units', 'normalized', 'Position', [0.55, 0.15, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
+uicontrol('Style', 'text', 'String', 'Green- Gamma:', 'Units', 'normalized', 'Position', [0.4, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
+hGammaGreen = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_green, 'Units', 'normalized', 'Position', [0.4, 0.15, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 
 % Z-stack plane selection 
 if stack
@@ -152,13 +143,13 @@ end
 
 % Position hXshift and hYshift sliders beneath hGammaGreen
 if stack 
-    uicontrol('Style', 'text', 'String', ['X Shift: (est=',num2str(opt.zstack_drift(1)),')'],'units','normalized', 'Position', [0.05, 0.11, 0.1, 0.05], 'Parent', hFigSlider);
-    hXShift = uicontrol('Style', 'slider', 'Min', -50, 'Max', 50, 'Value', opt.zstack_drift(1), 'Units', 'normalized', 'Position', [0.1, 0.07, 0.03, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
-    xshift_text = uicontrol('Style', 'text', 'String',[num2str(opt.zstack_drift(1))] , 'Units', 'normalized', 'Position', [0.05, 0.07, 0.04, 0.05], 'Parent', hFigSlider,'Callback', @updateImage);
+    uicontrol('Style', 'text', 'String', ['X Shift: (est=',num2str(nzstack_drift(1)),')'],'units','normalized', 'Position', [0.05, 0.11, 0.1, 0.05], 'Parent', hFigSlider);
+    hXShift = uicontrol('Style', 'slider', 'Min', -100, 'Max', 100, 'Value', nzstack_drift(1), 'Units', 'normalized', 'Position', [0.1, 0.07, 0.03, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
+    xshift_text = uicontrol('Style', 'text', 'String',[num2str(nzstack_drift(1))] , 'Units', 'normalized', 'Position', [0.05, 0.07, 0.04, 0.05], 'Parent', hFigSlider,'Callback', @updateImage);
 
-    uicontrol('Style', 'text', 'String', ['Y Shift: (est=',num2str(opt.zstack_drift(2)),')'],'units','normalized', 'Position', [0.05, .02, 0.1, 0.05], 'Parent', hFigSlider);
-    hYShift = uicontrol('Style', 'slider', 'Min', -50, 'Max', 50, 'Value', opt.zstack_drift(2), 'Units', 'normalized', 'Position', [0.1, -0.01, 0.03, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
-    yshift_text = uicontrol('Style', 'text', 'String', [num2str(opt.zstack_drift(2))], 'Units', 'normalized', 'Position', [0.05, -0.01, 0.05, 0.05], 'Parent', hFigSlider,'Callback', @updateImage);
+    uicontrol('Style', 'text', 'String', ['Y Shift: (est=',num2str(nzstack_drift(2)),')'],'units','normalized', 'Position', [0.05, .02, 0.1, 0.05], 'Parent', hFigSlider);
+    hYShift = uicontrol('Style', 'slider', 'Min', -100, 'Max', 100, 'Value', nzstack_drift(2), 'Units', 'normalized', 'Position', [0.1, -0.01, 0.03, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
+    yshift_text = uicontrol('Style', 'text', 'String', [num2str(nzstack_drift(2))], 'Units', 'normalized', 'Position', [0.05, -0.01, 0.05, 0.05], 'Parent', hFigSlider,'Callback', @updateImage);
 end
 
 
@@ -215,62 +206,48 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             low_in_green = high_in_green - 0.01;
         end
 
-        % ADJUST IMAGE BASED ON SLIDER VALS  
-        if strcmp(opt.type,'rgb') || strcmp(opt.type,'zstack') % why is this an OR statement? 
-            if stack 
-                % --- GET Z-STACK SLIDER VALS 
-                xyshift_x = get(hXShift, 'Value');
-                xyshift_y = get(hYShift, 'Value');
-                set(xshift_text, 'String', [num2str(xyshift_x)]);
-                set(yshift_text, 'String', [num2str(xyshift_y)]);
-                image = opt.zstack; 
-                [crimage, zx1, zy1] = get.roi_surround(image, opt.idx, stat, opt.surround, [xyshift_x, xyshift_y]);
-               % --- MAKE NEW IMAGE
-                adj_img = cat(3, ...
-                    imadjust(crimage(:, :, 1,img_num), [low_in_red, high_in_red], [], gamma_red), ...
-                    imadjust(crimage(:, :, 2,img_num), [low_in_green, high_in_green], [], gamma_green), ...
-                    crimage(:, :, 3,img_num));  % Blue channel is left unchanged
-                % --- UPDATE IMAGE 
-                set(hImg, 'CData', adj_img);
-                red = image(:,:,1,img_num); green = image(:,:,2,img_num); 
-                red(red==0)=[]; green(green==0)=[]; 
-                redc=histcounts(red,256); greenc=histcounts(green,256); 
-                maxred =max(redc(:)); maxgreen=max(greenc(:)); 
-                m= max([maxred,maxgreen]); 
-                set(h1,'Data',red(:))
-                set(h2,'Data',green(:))
-                set(hHistAx,'YLim',[0 m])
-
-            elseif ~stack 
-                % --- MAKE NEW IMAGE 
-                adj_img = cat(3, ...
-                    imadjust(image(:, :, 1), [low_in_red, high_in_red], [], gamma_red), ...
-                    imadjust(image(:, :, 2), [low_in_green, high_in_green], [], gamma_green), ...
-                    image(:, :, 3));  % Blue channel is left unchanged
-                % --- UPDATE IMAGE 
-                set(hImg, 'CData', adj_img);
-                red = image(:,:,1,img_num); green = image(:,:,2,img_num); 
-                red(red==0)=[]; green(green==0)=[]; 
-                redc=histcounts(red,256); greenc=histcounts(green,256); 
-                maxred =max(redc(:)); maxgreen=max(greenc(:)); 
-                m= max([maxred,maxgreen]); 
-            end
-
-
-        elseif strcmp(opt.type,'separate')
-            adj_fimg = imadjust(fimage,[low_in_green, high_in_green], [], gamma_green); 
-            adj_aimg = imadjust(aimage,[low_in_red, high_in_red], [], gamma_red); 
-            set(fImg,'CData',adj_fimg)
-            set(aImg,'CData',adj_aimg)
-            red = adj_aimg; green= adj_fimg; 
+        % ADJUST IMAGE BASED ON SLIDER VALS     
+        if stack 
+            % --- GET Z-STACK SLIDER VALS 
+            xyshift_x = get(hXShift, 'Value');
+            xyshift_y = get(hYShift, 'Value');
+            set(xshift_text, 'String', [num2str(xyshift_x)]);
+            set(yshift_text, 'String', [num2str(xyshift_y)]);
+            image = opt.zstack(:,:,:,img_num); 
+            [crimage, zx1, zy1] = get.roi_surround(image, opt.idx, stat, opt.surround,ops,'zstack_drift', [xyshift_x, xyshift_y]);
+            % --- MAKE NEW IMAGE
+            adj_img = cat(3, ...
+                imadjust(crimage(:,:,1), [low_in_red, high_in_red], [], gamma_red), ...
+                imadjust(crimage(:,:,2), [low_in_green, high_in_green], [], gamma_green), ...
+                crimage(:, :, 3));  % Blue channel is left unchanged
+            
+            %adj_img = utils.normalize_img(adj_img); 
+            % --- UPDATE IMAGE 
+            set(hImg, 'CData', adj_img);
+            red = image(:,:,1); green = image(:,:,2); 
+            red(red==0)=[]; green(green==0)=[]; 
+            redc=histcounts(red,256); greenc=histcounts(green,256); 
+            maxred =max(redc(:)); maxgreen=max(greenc(:)); 
+            m= max([maxred,maxgreen]); 
+            set(h1,'Data',red(:))
+            set(h2,'Data',green(:))
+            set(hHistAx,'YLim',[0 m])
+        elseif ~stack 
+            % --- MAKE NEW IMAGE 
+            adj_img = cat(3, ...
+                imadjust(image(:, :, 1), [low_in_red, high_in_red], [], gamma_red), ...
+                imadjust(image(:, :, 2), [low_in_green, high_in_green], [], gamma_green), ...
+                image(:, :, 3));  % Blue channel is left unchanged
+            % --- UPDATE IMAGE 
+            set(hImg, 'CData', adj_img);
+            red = image(:,:,1); green = image(:,:,2); % why is this 4D? 
             red(red==0)=[]; green(green==0)=[]; 
             redc=histcounts(red,256); greenc=histcounts(green,256); 
             maxred =max(redc(:)); maxgreen=max(greenc(:)); 
             m= max([maxred,maxgreen]); 
         end
-        
 
- % Update the intensity lines in the histogram
+        % Update the intensity lines in the histogram
         set(hLowRedLine, 'XData', [low_in_red, low_in_red],'YData',[0 m]);
         set(hHighRedLine, 'XData', [high_in_red, high_in_red],'YData',[0 m]);
         set(hLowGreenLine, 'XData', [low_in_green, low_in_green],'YData',[0 m]);
@@ -315,13 +292,15 @@ if strcmp(opt.type,'rgb')
     nfigs.slider = hFigSlider; 
     nfigs.zstack = figs.zstack; 
     nfigs.zslider = figs.zslider; 
-    nfigs.ref = figs.ref; 
+    %nfigs.ref = figs.ref; 
+    nadjusted_xyz = [0 0 0]; % THE FUNCTION SHOULD NOT ASSIGN THIS VARIABLE WHEN CALLED FOR RGB 
 elseif strcmp(opt.type,'zstack')
     nfigs.rgb = figs.rgb; 
-    nfigs.slider = figs. slider; 
+    nfigs.slider = figs.slider; 
     nfigs.zstack = hFigImg; 
     nfigs.zslider=hFigSlider;
-    nfigs.ref=refFig;
+    %nfigs.ref=refFig;
+    nadjusted_xyz = [nzstack_drift-xyshift_x,nzstack_drift-xyshift_y,opt.default_plane - img_num]; 
 end
 
 end

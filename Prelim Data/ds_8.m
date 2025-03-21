@@ -19,8 +19,6 @@ tpoints = cumsum(tseries_frames);
 tpoints =[0,tpoints];tpoints(end)=[]; % adjust to start with 0
 
 %%
-
-%%
 d.sdff=sdff; 
 d.tag =8;
 [grp_cm]= r.cmatrix(d,[stim.ttx,stim.cbx(3)]); 

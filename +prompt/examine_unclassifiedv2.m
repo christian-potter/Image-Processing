@@ -13,6 +13,7 @@ arguments
     opt.surround double = 200;  
     opt.refimg double 
     opt.specified_roi double 
+    opt.colororder string= 'rgb'; 
 end
 
 [roi_planeidx,~,~] = get.roipidx_shift(stat); 
@@ -35,7 +36,7 @@ while completion ~= 1
         disp(["All Unclassified ROIs in this plane have been sorted"])
     else   
         %-
-        [nfigs,~]= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack,'refimg',opt.refimg,'adjusted_xyz',adjusted_xyz);    
+        [nfigs,~]= adjustImagev2(p,stat,crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'surround',opt.surround,'idx',unc(i),'type','zstack','zstack',zstack,'refimg',opt.refimg,'adjusted_xyz',adjusted_xyz,'colororder',opt.colororder);    
         id_str=prompt.neuron_idstr(id_vect,unc(i)); 
         disp(id_str)
  

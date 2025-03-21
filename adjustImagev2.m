@@ -18,6 +18,7 @@ arguments
     opt.refsurround double = 100
     opt.default_plane (1,1) double = 1 % default plane in the z-stack
     opt.refimg
+    opt.colororder string = 'rgb'
 end 
 
 %% GET VARIABLES
@@ -55,10 +56,14 @@ if strcmp(opt.type,'rgb')
 elseif strcmp(opt.type,'zstack')
     stack = true; 
     image = opt.zstack; 
-    nzstack_drift = opt.zstack_drift +opt.adjusted_xyz([1 2]); 
+    nzstack_drift = opt.zstack_drift+opt.adjusted_xyz([1 2]); 
     for i = 1:size(image,4)
        image(:,:,:,i) = utils.normalize_img(image(:,:,:,i));        
     end
+    if strcmp(opt.colororder,'grb')
+        image(:,:,[1 2],:)=image(:,:,[2 1],:);
+    end
+
     opt.zstack = image; % normalize zstack now before cropping 
     [image,zx1,zy1] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',nzstack_drift);
     %-- normalize image
@@ -210,9 +215,6 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             set(yshift_text, 'String', [num2str(xyshift_y)]);
             image = opt.zstack(:,:,:,img_num); 
             [crimage, zx1, zy1] = get.roi_surround(image, opt.idx, stat, opt.surround,ops,'zstack_drift', [xyshift_x, xyshift_y]);
-            %size(crimage)
-            %size(image)
-            %ncrimage = utils.normalize_img(crimage(:,:,:,img_num)); 
             % --- MAKE NEW IMAGE
             adj_img = cat(3, ...
                 imadjust(crimage(:,:,1), [low_in_red, high_in_red], [], gamma_red), ...
@@ -294,7 +296,7 @@ if strcmp(opt.type,'rgb')
     nadjusted_xyz = [0 0 0]; % THE FUNCTION SHOULD NOT ASSIGN THIS VARIABLE WHEN CALLED FOR RGB 
 elseif strcmp(opt.type,'zstack')
     nfigs.rgb = figs.rgb; 
-    nfigs.slider = figs. slider; 
+    nfigs.slider = figs.slider; 
     nfigs.zstack = hFigImg; 
     nfigs.zslider=hFigSlider;
     %nfigs.ref=refFig;
