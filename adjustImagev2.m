@@ -65,7 +65,7 @@ elseif strcmp(opt.type,'zstack')
     end
 
     opt.zstack = image; % normalize zstack now before cropping 
-    [image,zx1,zy1] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',nzstack_drift);
+    [image,zx1,zy1] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',nzstack_drift,'plane',p);
     %-- normalize image
     redChannel = image(:, :, 1,opt.default_plane);greenChannel = image(:,:,2,opt.default_plane);    
     %-- Ref image 
@@ -214,7 +214,7 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             set(xshift_text, 'String', [num2str(xyshift_x)]);
             set(yshift_text, 'String', [num2str(xyshift_y)]);
             image = opt.zstack(:,:,:,img_num); 
-            [crimage, zx1, zy1] = get.roi_surround(image, opt.idx, stat, opt.surround,ops,'zstack_drift', [xyshift_x, xyshift_y]);
+            [crimage, zx1, zy1] = get.roi_surround(image, opt.idx, stat, opt.surround,ops,'zstack_drift', [xyshift_x, xyshift_y],'plane',p);
             % --- MAKE NEW IMAGE
             adj_img = cat(3, ...
                 imadjust(crimage(:,:,1), [low_in_red, high_in_red], [], gamma_red), ...

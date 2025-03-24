@@ -20,17 +20,19 @@ end
 
 %% Determine index of neuron for inspect_roi 
 
-unc = find(id_vect==3); % start with unclassified on the current plane 
+unc = find(id_vect==3); 
+roi_planeidx= roi_planeidx(id_vect==3); 
 
+unc=unc(roi_planeidx==p); % start with unclassified on the current plane 
 %% RUN WHILE LOOP 
-i = 1; 
+i =1; 
 completion = 0; 
 while completion ~= 1
     utils.closeFigureByName('Z-Stack')
     utils.closeFigureByName('Z-Stack Control')
 
     %- 
-    if i > length(unc) | roi_planeidx(unc(i))~=p % complete if you go onto ROI in the next plane 
+    if i > length(unc) % complete if you go onto ROI in the next plane 
         completion = 1; 
         nfigs=figs;
         disp(["All Unclassified ROIs in this plane have been sorted"])

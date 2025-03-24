@@ -1,6 +1,5 @@
 function [id_vect,figs] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zstack,colororder,zstack_drift)
 surround = 50; 
-
 %%
 padjusted_xyz = zeros(3,nplanes); 
 

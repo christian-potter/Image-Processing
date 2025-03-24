@@ -144,7 +144,8 @@ if strcmp(plot,'plot')
     
     xlabel('Y Pixel')
     ylabel('Z Location')
-    
+    yticks([0:.02:.14])
+    yticklabels(140:-20:0)
     title('Matching Y Pixel from Each Plane to Z-Stack Slice')
     
     utils.sf
