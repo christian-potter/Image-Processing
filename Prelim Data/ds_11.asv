@@ -1,0 +1,62 @@
+%% LOAD 
+load('/Volumes/Potter/#11/Split/suite2p/combined/Fall.mat')
+tlapse_path= '/Volumes/Potter/#11/Raw/#540_004/Experiment.xml'; 
+
+%% GET FRAMES PER TSERIES
+[tseries_frames]= de.tseries_frames(ops);nframes= sum(tseries_frames);
+tpoints = cumsum(tseries_frames);tpoints =[0,tpoints];tpoints(end) = []; % adjust to start with 0
+d.sdff = sdff; d.tag = 11; 
+
+%% GET DFF
+f= F(iscell(:,1)==1,:); fn = Fneu(iscell(:,1)==1,:); 
+dF_F = get.dF_F_rolling(f-fn*.7,300*13);
+sdff = sgolayfilt(dF_F,3,15,[],2); 
+
+%% GET STIMULUS INFO 
+%[stim] = de.enter_stimuli(tseries_frames,11,ops); 
+
+%%
+for i = 1:length(ops.filelist)
+    fnumber(i)=str2double(ops.filelist(i,end-10:end-8)); 
+end
+
+fnumber=unique(fnumber);
+%%
+
+[ttx_cm]= r.cmatrix(d,[stim.grp(1) stim.cbx(1)]);
+[cbx_cm]= r.cmatrix(d,[stim.cbx(1),stim.cbx(2)]);
+[ttxs_cm]= r.cmatrix(d,[stim.cbx(2),size(F,2)]);
+%%
+
+[idx,c,sumd,k]=clust.kmeans_opt(ttx_cm,10);
+%[idx,c,sumd,k]=clust.kmeans_opt(gcbx_cm,10);
+% can look at distances between centroids to compare how similar clusters
+% are 
+
+%% PLOT KMEANS 
+t= 'Clustering of correlation matrix for GRP ONLY'; 
+kcolors = utils.distinguishable_colors(k);
+plot.img_cmatrix(ttx_cm,d,t,'labels',idx,'colors',kcolors,'crameri',true);
+
+%%
+%%
+plot.cluster_traces(tpoints,sdff,idx, 3,kcolors)
+xline(stim.cbx,'LineWidth',2)
+xticks(tpoints)
+xticklabels(stim.strlist)
+%%
+
+mean(ttx_cm(:))
+mean(cbx_cm(:))
+mean(ttxs_cm(:))
+
+%%
+t = 13*60*5; 
+
+[ttx_cm]= r.cmatrix(d,[stim.oxo(1) stim.oxo(1)+t]);
+[cbx_cm]= r.cmatrix(d,[stim.oxo(2) stim.oxo(2)+t]);
+[ttxs_cm]= r.cmatrix(d,[stim.oxo(3) stim.oxo(3)+t]);
+%%
+[ttx_cm]= r.cmatrix(d,[stim.sp(1) stim.sp(1)+t]);
+[cbx_cm]= r.cmatrix(d,[stim.sp(2) stim.sp(2)+t]);
+[ttxs_cm]= r.cmatrix(d,[stim.sp(3) stim.sp(3)+t]);

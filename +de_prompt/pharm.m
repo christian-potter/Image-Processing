@@ -1,5 +1,7 @@
 function [stim]= pharm(i,tpoints,answer,stim)  
 
+
+
 % For input_str(1.1)
 
 % -- TTX START---------

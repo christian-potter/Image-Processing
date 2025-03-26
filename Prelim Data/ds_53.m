@@ -2,7 +2,7 @@ load('/Volumes/AbbyCui/#53_2.14.2025/split/suite2p/combined/Fall.mat')
 
 %% GET DFF
 f= F(iscell(:,1)==1,:); 
-dF_F = get.dF_F_rolling(f, 400);
+dF_F = get.dF_F_rolling(f, 400*8);
 sdff = sgolayfilt(dF_F,3,15,[],2); 
 %%
 [tseries_frames]= de.tseries_frames(ops); nframes= sum(tseries_frames);

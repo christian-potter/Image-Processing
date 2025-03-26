@@ -58,7 +58,7 @@ while i < length(fnumber)
         disp(bookend);disp(lligs)
         answer = input(['Enter Option from List',char(10),bookend,char(10)],"s");
         if ismember(answer,lligs) 
-            stim.(answer)=tpoints(i);  
+            stim.(answer)=[stim.(answer),tpoints(i)];  
             stim.strlist{i}=answer; 
         else 
             disp('Incorrect Selection') % change so that it loops back to ask you to enter another option 
