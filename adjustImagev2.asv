@@ -23,7 +23,7 @@ end
 %% DESCRIPTION
 % options:
 % opt.type = 'functional'/'zstack' => 
-% opt.idx = '
+% 
 
 %% GET VARIABLES
 [roi_planeidx,idxshifts,~] = get.roipidx_shift(stat);

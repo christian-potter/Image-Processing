@@ -1,4 +1,16 @@
-function [zs,tlapse,zstack,tsync,s2p,ypix_zplane,id_vect] = load_drgs(dsnum,plot)
+function [zstack,tlapse,zstack_md,tsync,s2p,ypix_zplane] = load_drgs(dsnum,plot)
+%% DESCRIPTION
+% loads DRGS datasets
+% ** gives only the iscell == 1 output for relevant variables
+
+% OUTPUTS
+% zstack: 
+% tlapse: 
+% zstack_md: 
+% tsync: 
+% s2p: suite2p path to load all suite2p data 
+% ypix_zplane: vector that connects every ypixel row to a zplane in the
+%   zstack
 
 
 %% GET PATHNAMES
@@ -32,9 +44,9 @@ tlapse_xml=md.importxml(tlapse_path);
 [tlapse] = md.extract_metadata(tlapse_xml);
 
 zstack_xml = md.importxml(zstack_mdpath); 
-[zstack]=md.extract_metadata(zstack_xml);
+[zstack_md]=md.extract_metadata(zstack_xml);
 
-zs= get.zstack(zstack_path);
+zstack= get.zstack(zstack_path);
 
 [tsync]= md.read_h5(thorsync_h5); 
 
@@ -78,20 +90,18 @@ for p = 1:5
 end
 
 %% GET POSITION OF EACH Z FRAME 
-zlocs = nan(1,zstack.nplanes);
+zlocs = nan(1,zstack_md.nplanes);
 %get zloc of each plane 
 
-for z =  1:zstack.nplanes
-    zlocs(z)= zstack.startPos + 1/1000*z; 
+for z =  1:zstack_md.nplanes
+    zlocs(z)= zstack_md.startPos + 1/1000*z; 
 end
-
 
 %% GET CLOSEST Z PLANE FOR EACH ROW OF YPIXELS 
 
 ypix_zplane = cell(1,tlapse.nplanes);
 
 % assign each ypix to a plane 
-
 for p = 1:tlapse.nplanes
     y_zmap = nan(1,tlapse.ypix); 
     curypix_zdist = ypix_zdist{p}; 
@@ -106,15 +116,8 @@ for p = 1:tlapse.nplanes
 end
 %% GET ID VECT 
 load(s2p)
-sample_rcthresh= prctile(redcell(:,2),75); 
-red_vect = redcell(:,2)>sample_rcthresh; 
-in_vect = red_vect; 
-ex_vect = ~in_vect; 
-
-id_vect= zeros(length(red_vect),1); 
-id_vect(ex_vect)=1; 
-id_vect(in_vect)=2; 
-
+%id_vect = ones(sum(iscell(:,1)==1))*4; 
+%cellstat = stat(iscell(:,1)==1); 
 
 %% 511 adjustment
 if dsnum == 511
@@ -126,10 +129,8 @@ if dsnum == 511
 end
 
 
-
 %% PLOT RELATIONSHIP BETWEEN TLAPSE AND ZSTACK
 if strcmp(plot,'plot')
-    
     figure
     hold on 
     

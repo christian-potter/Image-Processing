@@ -15,11 +15,12 @@ arguments
     opt.specified_roi double 
     opt.colororder string= 'rgb'; 
 end
+%% DESCRIPTION
 
-[roi_planeidx,~,~] = get.roipidx_shift(stat); 
 
 %% Determine index of neuron for inspect_roi 
 
+[roi_planeidx,~,~] = get.roipidx_shift(stat);
 unc = find(id_vect==3); 
 roi_planeidx= roi_planeidx(id_vect==3); 
 
