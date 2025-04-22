@@ -49,7 +49,7 @@ hFigImg= NaN; fFigImg= NaN; aFigImg = NaN; hFigSlider = NaN;
 %% GET RED/GREENWIN
 [redwin,greenwin]= get.redgreen_images(opt.anatomical,opt.functional,ops,plane_crshift); 
 %% DEFINE IMAGE 
-if strcmp(opt.type,'rgb')
+if strcmp(opt.type,'functional')
     image(:,:,1) = redwin; 
     image(:,:,2) = greenwin;
     image(:,:,3) = zeros(size(redwin,1),size(redwin,2)); 
@@ -78,7 +78,7 @@ end
 
 %% CREATE FIGURES FOR COLOR/ BW IMAGES
 % Create a figure for the image display
-if strcmp(opt.type,'rgb')
+if strcmp(opt.type,'functional')
     %Create RGB image 
     hFigImg = figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',figs.rgb.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);

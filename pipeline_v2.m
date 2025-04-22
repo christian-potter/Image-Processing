@@ -10,11 +10,12 @@ figs.zstack = figs.rgb;
 figs.zslider=figs.slider;
 figs.ref=figs.rgb; 
 %% RUN MAIN MENU
-
+id_vect = ones(sum(iscell(:,1)==1),1)*4; 
+cellstat = stat(iscell(:,1)==1);
+zstack = zs; 
 p = 1; 
-%idvect([2])=3; 
 atype= 'mean';ftype='max'; 
-img_mode='rgb'; 
+img_mode='functional'; 
 nplanes=5;
 xyshift = [ops.xoff(end) ops.yoff(end)];
 [id_vect,figs] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zstack,'rgb',xyshift);
