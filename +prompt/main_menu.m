@@ -60,7 +60,7 @@ while p ~= -1
 
         elseif strcmp(answer,'r')
             answer = input('Select a cell as reference:'); 
-            [padjusted_xyz(p,:)] = prompt.align_zstack(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',50,'refimg',refimg,'specified_roi',answer);
+            [padjusted_xyz(p,:)] = prompt.align_zstack(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',0,'refimg',refimg,'specified_roi',answer);
         end
    %-- 
     end

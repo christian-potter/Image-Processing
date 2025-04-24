@@ -4,15 +4,16 @@ arguments
     roi double % idx of ROI to crop around 
     stat cell 
     surround double % scalar for how much to grab in each direction around median   
-    ops % for crshift
+    ops % for crshift coordinates 
     opt.zstack_drift double = [0,0]; % if plotting the zstack, this aligns offset to functional 
-    opt.plane double 
+    opt.plane double % current plane 
+  
 end
 
 %-- outputs
 % nimage: cropped image 
 % x1: leftmost coordinate
-% y1: rightmost coordinate
+% y1: topmost coordinate
 % cutoff: (x,y) to report if there was any image that was cropped
     % * use these to recenter ROI on cutoff image
     % (-) = cutoff left or above ROI 
@@ -66,7 +67,16 @@ for i = 1:size(image,3)
     end
 end
 
-nimage = squeeze(nimage); 
+
+%% DECIDE IF CROPPED OR NOT 
+
+if surround > 0 
+    nimage = squeeze(nimage); 
+elseif surround == 0
+    nimage= image; 
+    x1 = 0; y1= 0; 
+end
+
 %%
 
 

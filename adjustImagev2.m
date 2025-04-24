@@ -27,8 +27,8 @@ end
 
 %% GET VARIABLES
 [roi_planeidx,idxshifts,~] = get.roipidx_shift(stat);
-[mask_coords]=get.mask_coordinates(stat,'type','outline');
-[stackmask_coords]=get.mask_coordinates(stat,'type','outline');% filled out masks for zstack 
+[mask_coords]=get.mask_coordinates(stat,'type','outline'); % functional coords 
+[stackmask_coords]=get.mask_coordinates(stat,'type','outline');% zstack coords
 [mask_colors] = get.mask_colors(id_vect); 
 
 if isfield(opt,'adjusted_xyz')
@@ -72,8 +72,6 @@ elseif strcmp(opt.type,'zstack')
     [image,zx1,zy1] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',nzstack_drift,'plane',p);
     %-- normalize image
     redChannel = image(:, :, 1,opt.default_plane);greenChannel = image(:,:,2,opt.default_plane);    
-    %-- Ref image 
-    [refimage,rx1,ry1] = get.roi_surround(opt.refimg,opt.idx,stat,opt.refsurround,ops,'plane',p); 
 end
 
 %% CREATE FIGURES FOR COLOR/ BW IMAGES
@@ -83,7 +81,7 @@ if strcmp(opt.type,'functional')
     hFigImg = figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',figs.rgb.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     hImg = imshow(image, 'Parent', hAx); hold on; 
-    plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),plane_crshift,idxshifts(p),'masktype','outline');
+    masks=plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),plane_crshift,idxshifts(p),'masktype','outline');
   
 elseif strcmp(opt.type,'zstack')
     %--reference image 
@@ -95,7 +93,11 @@ elseif strcmp(opt.type,'zstack')
     hFigImg = figure('Name', 'Z-Stack', 'NumberTitle', 'off', 'Position',figs.zstack.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     hImg = imshow(image(:,:,:,opt.default_plane), 'Parent', hAx); hold on; 
-    plot.mask_boundaries(mask_colors(:,1),stackmask_coords(opt.idx),plane_crshift,opt.idx,"idxtype",'specified','masktype','outline','crop_x1y1',[zx1 zy1],'image',image(:,:,:,1));
+    [masks,texts] = plot.mask_boundaries(mask_colors(:,1),stackmask_coords(opt.idx),plane_crshift,opt.idx,"idxtype",'specified','masktype','outline','crop_x1y1',[zx1 zy1],'image',image(:,:,:,1));
+    masks.XData = masks.XData+nzstack_drift(1); 
+    orig_maskx = masks.XData;orig_textx= texts.Position(1); 
+    masks.YData = masks.YData+nzstack_drift(2); 
+    orig_masky=masks.YData; orig_texty= texts.Position(2); 
 end
 
 %% CREATE SLIDER FIGURE WITH HISTOGRAMS
@@ -227,6 +229,9 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             
             %adj_img = utils.normalize_img(adj_img); 
             % --- UPDATE IMAGE 
+            set(masks,'XData',orig_maskx+xyshift_x,'YData',orig_masky+xyshift_y)
+            set(texts,'Position',[orig_textx,orig_texty,0])
+            %set(masks,'YData',orig_masky+xyshift_y)
             set(hImg, 'CData', adj_img);
             red = image(:,:,1); green = image(:,:,2); 
             red(red==0)=[]; green(green==0)=[]; 
@@ -296,14 +301,12 @@ if strcmp(opt.type,'functional')
     nfigs.slider = hFigSlider; 
     nfigs.zstack = figs.zstack; 
     nfigs.zslider = figs.zslider; 
-    %nfigs.ref = figs.ref; 
-    nadjusted_xyz = [0 0 0]; % THE FUNCTION SHOULD NOT ASSIGN THIS VARIABLE WHEN CALLED FOR RGB 
+    nadjusted_xyz = [0 0 0]; 
 elseif strcmp(opt.type,'zstack')
     nfigs.rgb = figs.rgb; 
     nfigs.slider = figs.slider; 
     nfigs.zstack = hFigImg; 
     nfigs.zslider=hFigSlider;
-    %nfigs.ref=refFig;
     nadjusted_xyz = [nzstack_drift-xyshift_x,nzstack_drift-xyshift_y,opt.default_plane - img_num]; 
 end
 

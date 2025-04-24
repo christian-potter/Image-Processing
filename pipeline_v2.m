@@ -11,8 +11,8 @@ figs.zslider=figs.slider;
 figs.ref=figs.rgb; 
 %% RUN MAIN MENU
 id_vect = ones(sum(iscell(:,1)==1),1)*4; 
-cellstat = stat(iscell(:,1)==1);
-zstack = zs; 
+%cellstat = stat(iscell(:,1)==1);
+%zstack = zs; 
 p = 1; 
 atype= 'mean';ftype='max'; 
 img_mode='functional'; 
