@@ -17,14 +17,14 @@ arguments
     opt.surround double = 100
     opt.refsurround double = 100
     opt.default_plane (1,1) double = 1 % default plane in the z-stack
-    opt.refimg
     opt.colororder string = 'rgb'
 end 
 %% DESCRIPTION
 % options:
 % opt.type = 'functional'/'zstack' => 
 % opt.idx = '
-
+%% NOTES
+%* eventually need to remove 
 %% GET VARIABLES
 [roi_planeidx,idxshifts,~] = get.roipidx_shift(stat);
 [mask_coords]=get.mask_coordinates(stat,'type','outline'); % functional coords 
@@ -42,6 +42,8 @@ if isfield(opt,'idx')
     %ypix = ypix-crshift(1); 
     curplane = ypix_zplane{p}; 
     opt.default_plane=curplane(ypix)+opt.adjusted_xyz(3); 
+else 
+    opt.idx = 1:length(stat); 
 end
 
 %% CREATE VARIABLES
@@ -67,9 +69,12 @@ elseif strcmp(opt.type,'zstack')
     if strcmp(opt.colororder,'grb')
         image(:,:,[1 2],:)=image(:,:,[2 1],:);
     end
-
     opt.zstack = image; % normalize zstack now before cropping 
-    [image,zx1,zy1] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',nzstack_drift,'plane',p);
+    if isscalar(opt.idx)
+        [image,zx1,zy1] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',nzstack_drift,'plane',p);
+    else
+        zx1=0; zy1=0; 
+    end
     %-- normalize image
     redChannel = image(:, :, 1,opt.default_plane);greenChannel = image(:,:,2,opt.default_plane);    
 end
@@ -84,20 +89,23 @@ if strcmp(opt.type,'functional')
     masks=plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),plane_crshift,idxshifts(p),'masktype','outline');
   
 elseif strcmp(opt.type,'zstack')
-    %--reference image 
-    %refFig=figure('Name', 'Reference Functional Image', 'NumberTitle', 'off', 'Position',figs.ref.Position, 'Color', 'White');
-    %hAx = axes('Parent', refFig, 'Position', [0.01, 0.01, 0.99, 0.99]);
-    %hImg = imshow(refimage, 'Parent', hAx); hold on; 
-    %plot.mask_boundaries(mask_colors(:,1),mask_coords(opt.idx),plane_crshift,opt.idx,'idxtype','specified','masktype','outline','crop_x1y1',[rx1 ry1],'image',refimage);
-    %--zstack
     hFigImg = figure('Name', 'Z-Stack', 'NumberTitle', 'off', 'Position',figs.zstack.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     hImg = imshow(image(:,:,:,opt.default_plane), 'Parent', hAx); hold on; 
-    [masks,texts] = plot.mask_boundaries(mask_colors(:,1),stackmask_coords(opt.idx),plane_crshift,opt.idx,"idxtype",'specified','masktype','outline','crop_x1y1',[zx1 zy1],'image',image(:,:,:,1));
-    masks.XData = masks.XData+nzstack_drift(1); 
-    orig_maskx = masks.XData;orig_textx= texts.Position(1); 
-    masks.YData = masks.YData+nzstack_drift(2); 
-    orig_masky=masks.YData; orig_texty= texts.Position(2); 
+    if isscalar(opt.idx)
+        [masks,texts] = plot.mask_boundaries(mask_colors(:,1),stackmask_coords(opt.idx),plane_crshift,opt.idx,"idxtype",'specified','masktype','outline','crop_x1y1',[zx1 zy1],'image',image(:,:,:,1));
+    else
+        [masks,texts]=plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),plane_crshift,idxshifts(p),'masktype','outline');
+    end
+    orig_maskx=cell(length(masks),1);orig_masky=cell(length(masks),1);
+    orig_textx=cell(length(masks),1);orig_texty=cell(length(masks),1);
+    for n = 1:length(masks)
+        masks{n}.XData = masks{n}.XData+nzstack_drift(1); 
+        orig_maskx{n} = masks{n}.XData;orig_textx{n}= texts{n}.Position(1); 
+        masks{n}.YData = masks{n}.YData+nzstack_drift(2); 
+        orig_masky{n}= masks{n}.YData; orig_texty{n}= texts{n}.Position(2); 
+    end
+
 end
 
 %% CREATE SLIDER FIGURE WITH HISTOGRAMS
@@ -220,7 +228,12 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             set(xshift_text, 'String', [num2str(xyshift_x)]);
             set(yshift_text, 'String', [num2str(xyshift_y)]);
             image = opt.zstack(:,:,:,img_num); 
-            [crimage, zx1, zy1] = get.roi_surround(image, opt.idx, stat, opt.surround,ops,'zstack_drift', [xyshift_x, xyshift_y],'plane',p);
+            if isscalar(opt.idx)
+                [crimage, zx1, zy1] = get.roi_surround(image, opt.idx, stat, opt.surround,ops,'zstack_drift', [xyshift_x, xyshift_y],'plane',p);
+            else
+                crimage = image; zx1=0;zy1=0;
+            end
+
             % --- MAKE NEW IMAGE
             adj_img = cat(3, ...
                 imadjust(crimage(:,:,1), [low_in_red, high_in_red], [], gamma_red), ...
@@ -229,8 +242,11 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             
             %adj_img = utils.normalize_img(adj_img); 
             % --- UPDATE IMAGE 
-            set(masks,'XData',orig_maskx+xyshift_x,'YData',orig_masky+xyshift_y)
-            set(texts,'Position',[orig_textx,orig_texty,0])
+            for m = 1:length(masks)
+                set(masks{m},'XData',orig_maskx{m}+xyshift_x,'YData',orig_masky{m}+xyshift_y)
+                set(texts{m},'Position',[orig_textx{m}+xyshift_x,orig_texty{m}+xyshift_y,0]) % third coordinate is 0
+            end
+
             %set(masks,'YData',orig_masky+xyshift_y)
             set(hImg, 'CData', adj_img);
             red = image(:,:,1); green = image(:,:,2); 

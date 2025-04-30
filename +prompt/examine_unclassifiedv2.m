@@ -31,7 +31,6 @@ completion = 0;
 while completion ~= 1
     utils.closeFigureByName('Z-Stack')
     utils.closeFigureByName('Z-Stack Control')
-
     %- 
     if i > length(unc) % complete if you go onto ROI in the next plane 
         completion = 1; 

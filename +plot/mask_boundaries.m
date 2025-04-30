@@ -5,14 +5,19 @@ arguments
     maskcoords cell  
     planeshift double %correct s2p coordinates to individual image(functional or z-stack)
     idxstart double 
-    opt.idxtype string = 'shifted'
+    opt.idxtype string = 'shifted' % default to shifted 
     opt.masktype string = 'outline'
     opt.crop_x1y1 double =[0, 0]; % gives top-left point of cropped image relative to individual image 
     opt.image
-    
 end
 
-%% DESCRIPTION 
+%% DESCRIPTION
+% if idxtype is 'shifted'
+    % code plots all masks and uses 'planeshift' to determine idx
+% if idx type is 'specified'
+    % still takes planeshift but onlyu plots one mask 
+%% NOTES
+% * need to change so that num/mask are matrices
 
 %% DETERMINE PLOT TYPE 
 
@@ -22,6 +27,11 @@ if strcmp(opt.masktype,'outline')
 elseif strcmp(opt.masktype,'mask')
     marker='.';
     ls ='none'; 
+end
+
+if strcmp(opt.idxtype,'shifted')
+    mask = cell(length(maskcoords),1); 
+    num = cell(length(maskcoords),1); 
 end
 
 %% DETERMINE TOTAL SHIFT 
@@ -34,8 +44,8 @@ for i = 1:length(maskcoords)
     adj_xc = xcoords+totalshift(1); adj_yc= ycoords+totalshift(2); 
     
     if strcmp(opt.idxtype,'shifted')
-        mask=plot(adj_xc,adj_yc,'Color',mask_colors(:,i+idxstart),'LineWidth',2,'Marker',marker,'LineStyle',ls);
-        num =text(max(adj_xc)+1,max(adj_yc)+1,num2str(i+idxstart),'Color',mask_colors(:,i+idxstart),'FontSize',12,'FontWeight','bold'); % make text of ROI index
+        mask{i}=plot(adj_xc,adj_yc,'Color',mask_colors(:,i+idxstart),'LineWidth',2,'Marker',marker,'LineStyle',ls);
+        num{i} =text(max(adj_xc)+1,max(adj_yc)+1,num2str(i+idxstart),'Color',mask_colors(:,i+idxstart),'FontSize',12,'FontWeight','bold'); % make text of ROI index
         
     elseif strcmp(opt.idxtype,'specified')
         mask=plot(adj_xc,adj_yc,'Color',mask_colors(:,i),'LineWidth',2,'Marker',marker,'LineStyle',ls);
