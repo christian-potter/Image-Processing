@@ -1,5 +1,5 @@
 %% LOAD 
-[zstack,tlapse,zstack_md,tsync,s2p,ypix_zplane] = utils.load_drgs(511,'noplot'); 
+[zstack,tlapse,zstack_md,tsync,s2p,ypix_zplane] = utils.load_drgs(545,'plot'); 
 load(s2p); 
 %%
 id_vect = ones(sum(iscell(:,1)==1),1)*4; 
@@ -13,7 +13,7 @@ figs.ref=figs.rgb;
 %% RUN MAIN MENU
 id_vect = ones(sum(iscell(:,1)==1),1)*4; 
 %cellstat = stat(iscell(:,1)==1);
-zstack = zs; 
+%zstack = zs; 
 p = 1; 
 atype= 'mean';ftype='max'; 
 img_mode='functional'; 

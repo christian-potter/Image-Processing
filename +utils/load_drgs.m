@@ -1,4 +1,4 @@
-function [zstack,tlapse,zstack_md,tsync,s2p,ypix_zplane] = load_drgs(dsnum,plot)
+function [zstack,tlapse,zstack_md,tsync,s2p,ypix_zplane] = load_drgs(dsnum,plotstr)
 %% DESCRIPTION
 % loads DRGS datasets
 % ** gives only the iscell == 1 output for relevant variables
@@ -34,12 +34,15 @@ elseif dsnum == 518
     
 elseif dsnum == 519 
     disp('not ready')
-
+elseif dsnum == 545
+    s2p='/Volumes/Warwick/DRGS project/#545 4-4-25/Final FOV/Functional/Split/suite2p/combined/Fall.mat';
+    tlapse_path ='/Volumes/Warwick/DRGS project/#545 4-4-25/Final FOV/Functional/Raw/#545_002/Experiment.xml';
+    zstack_mdpath = '/Volumes/Warwick/DRGS project/#545 4-4-25/Final FOV/Structural/#545 post z_002/Experiment.xml';
+    zstack_path = '/Volumes/Warwick/DRGS project/#545 4-4-25/Final FOV/Structural/#545 Final Structural Ref.tif'; 
+    thorsync_h5='/Volumes/Warwick/DRGS project/#545 4-4-25/Final FOV/ThorSync/Raw/#545_TS_0002.h5'; 
 end
 
-
 %% LOAD DATA
-
 tlapse_xml=md.importxml(tlapse_path);
 [tlapse] = md.extract_metadata(tlapse_xml);
 
@@ -50,7 +53,7 @@ zstack= get.zstack(zstack_path);
 
 [tsync]= md.read_h5(thorsync_h5); 
 
-%% PLOT ZSTACK TO CONFIRM
+%% GET PIEZO MOVEMENT FROM TSYNC
 
 a = 1:tlapse.nplanes; b = tsync.framecount; 
 allplanes = find(ismember(b,a));% get indices for the first nplanes 
@@ -60,16 +63,17 @@ totalzdist =  tlapse.stepSize*tlapse.nplanes/1000;
 
 plane_zranges = nan(tlapse.nplanes,2); 
 piezoprop = 0; 
+%- get distance moved by the piezo for first frames 
 for p = 1:tlapse.nplanes
     curframes = tsync.framecount==p; 
     curpiezo = tsync.piezo(curframes); 
-    curpdist = curpiezo(end)-curpiezo(1); 
-    piezoprop(p+1) = curpdist/totalpdist; 
+    curpdist = curpiezo(end)-curpiezo(1); % distance at beginning and end of frame 
+    piezoprop(p+1) = curpdist/totalpdist; % proprotion of the total distance covered 
 
 end
 
 covered_range = 0; 
-for p = 1:5 
+for p = 1:tlapse.nplanes
     planezdist= tlapse.startPos + totalzdist*piezoprop(p);  
     plane_zranges(p,1)= covered_range; 
     plane_zranges(p,2)= piezoprop(p+1)*totalzdist+covered_range; 
@@ -81,11 +85,11 @@ plane_zranges = plane_zranges+tlapse.setupPosition;
 
 ypix_zdist = cell(1,tlapse.nplanes);  
 
-for p = 1:5
+for p = 1:tlapse.nplanes
     curzdists = nan(1,tlapse.ypix); 
     zrange = plane_zranges(p,:); 
     zvals = linspace(zrange(1),zrange(2),tlapse.ypix); 
-    ypix_zdist{p}= zvals; 
+    ypix_zdist{p}= zvals; % gives z-distance in 
 
 end
 
@@ -130,7 +134,7 @@ end
 
 
 %% PLOT RELATIONSHIP BETWEEN TLAPSE AND ZSTACK
-if strcmp(plot,'plot')
+if strcmp(plotstr,'plot')
     figure
     hold on 
     
@@ -150,6 +154,23 @@ if strcmp(plot,'plot')
     title('Matching Y Pixel from Each Plane to Z-Stack Slice')
     
     utils.sf
+%% MAKE PLOT OF PIEZO POSITION 
+    figure 
+    hold on 
+    for p = 1:tlapse.nplanes+tlapse.flybackFrames
+        curframes = find(tsync.framecount==p); 
+        curpiezo = tsync.piezo(curframes); 
+        plot(curframes,curpiezo,'LineWidth',2)     
+    end
+    
+    xticklabels([])
+    ylabel('Z Position')
+    xlabel('Timepoint')
+    
+    title('#545 Piezo Frame Acquisition')
+    legend({'frame 1','frame 2','frame 3','frame 4','fb1','fb2'},'location','northwest')
+    utils.sf 
+
 end
 
 

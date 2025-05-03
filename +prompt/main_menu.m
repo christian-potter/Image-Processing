@@ -6,7 +6,7 @@ padjusted_xyz = zeros(3,nplanes);
 while p ~= -1   
     close all 
     [plane_crshift]=get.crshift(ops,p);
-    [nfigs] = adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'functional',ftype,'anatomical',atype,'type',img_mode); 
+    [figs] = adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'functional',ftype,'anatomical',atype,'type',img_mode); 
     [nfigs,~]= adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'surround',0,'type','zstack','zstack',zstack,'adjusted_xyz',padjusted_xyz(p,:),'colororder',colororder);    
     input_str=prompt.menu_str(1); 
     answer = input (input_str,"s"); 

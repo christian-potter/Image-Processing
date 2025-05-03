@@ -23,16 +23,11 @@ legend({'Force','Length'})
 %% MAKE PLOT OF 
 figure 
 hold on 
-for p = 1:tlapse.nplanes+tlapse.flybackFrames
+for p = tlapse.nframes+tlapse.flybackFrames
     curframes = find(tsync.framecount==p); 
     curpiezo = tsync.piezo(curframes); 
-    plot(curframes,curpiezo,'LineWidth',2)
+    plot(curframes,curpiezo)
     
-end
 
-xticklabels([])
-ylabel('Z Position')
-xlabel('Timepoint')
-utils.sf 
-title('#545 Piezo Frame Acquisition')
-legend({'frame 1','frame 2','frame 3','frame 4','fb1','fb2'})
+
+end

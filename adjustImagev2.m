@@ -35,15 +35,23 @@ if isfield(opt,'adjusted_xyz')
     xyshift_x=opt.adjusted_xyz(1);xyshift_y=opt.adjusted_xyz(2);
 end
 
-%% DETERMINE STARTING PLANE 
+%% DETERMINE STARTING Z-PLANE 
 
-if isfield(opt,'idx')
+if isfield(opt,'idx')&&isfield(opt,'adjusted_xyz')
     ypix= stat{opt.idx}.med(1); %first is weirdly Y
     %ypix = ypix-crshift(1); 
     curplane = ypix_zplane{p}; 
     opt.default_plane=curplane(ypix)+opt.adjusted_xyz(3); 
-else 
+elseif isfield(opt,'adjusted_xyz')
     opt.idx = 1:length(stat); 
+    count =1; iplane =-1; 
+    while iplane~=p
+        iplane=stat{count}.iplane; 
+        count =count+1; 
+    end
+    ypix = stat{count}.med(1); % first ROI in plane 
+    curplane = ypix_zplane{p} +opt.adjusted_xyz(3); 
+    opt.default_plane=curplane(ypix)+opt.adjusted_xyz(3); 
 end
 
 %% CREATE VARIABLES
@@ -75,8 +83,9 @@ elseif strcmp(opt.type,'zstack')
     else
         zx1=0; zy1=0; 
     end
-    %-- normalize image
+ 
     redChannel = image(:, :, 1,opt.default_plane);greenChannel = image(:,:,2,opt.default_plane);    
+
 end
 
 %% CREATE FIGURES FOR COLOR/ BW IMAGES
@@ -105,6 +114,9 @@ elseif strcmp(opt.type,'zstack')
         masks{n}.YData = masks{n}.YData+nzstack_drift(2); 
         orig_masky{n}= masks{n}.YData; orig_texty{n}= texts{n}.Position(2); 
     end
+    arrow = annotation('arrow','Color','r'); 
+    arrow.Parent = gca; 
+    arrow.X= ([-2 5]);arrow.Y=([0 0]);
 
 end
 
@@ -131,30 +143,23 @@ img_num = 1;
 % Create sliders and labels for the Red channel (left side)
 uicontrol('Style', 'text', 'String', 'Red- Low Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
 hLowInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_red, 'Units', 'normalized', 'Position', [0.05, 0.35, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
-
 uicontrol('Style', 'text', 'String', 'Red- High Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.3, 0.2, 0.05], 'Parent', hFigSlider);
 hHighInRed = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_red, 'Units', 'normalized', 'Position', [0.05, 0.25, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
-
 uicontrol('Style', 'text', 'String', 'Red- Gamma:', 'Units', 'normalized', 'Position', [0.05, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
 hGammaRed = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_red, 'Units', 'normalized', 'Position', [0.05, 0.15, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
-
 % Create sliders and labels for the Green channel (right side)
 uicontrol('Style', 'text', 'String', 'Green- Low Thresh:', 'Units', 'normalized', 'Position', [0.4, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
 hLowInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', low_in_green, 'Units', 'normalized', 'Position', [0.4, 0.35, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
-
 uicontrol('Style', 'text', 'String', 'Green- High Thresh:', 'Units', 'normalized', 'Position', [0.4, 0.3, 0.2, 0.05], 'Parent', hFigSlider);
 hHighInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_green, 'Units', 'normalized', 'Position', [0.4, 0.25, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
-
 uicontrol('Style', 'text', 'String', 'Green- Gamma:', 'Units', 'normalized', 'Position', [0.4, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
 hGammaGreen = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_green, 'Units', 'normalized', 'Position', [0.4, 0.15, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
-
 % Z-stack plane selection 
 if stack
     uicontrol('Style', 'text', 'String', ['Z-Stack Plane ','(est=',num2str(opt.default_plane),'):'], 'Units', 'normalized', 'Position', [0.2, 0.07, 0.15, 0.05],'Parent', hFigSlider);
     img_slidern = uicontrol('Style', 'slider', 'Min', 1, 'Max', size(image, 4), 'SliderStep', [1/(size(image, 4)-1), 1/(size(image, 4)-1)], 'Value', opt.default_plane, 'Units', 'normalized', 'Position', [0.25, 0.03, 0.05, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
     plane_text = uicontrol('Style', 'text', 'String', num2str(opt.default_plane), 'Units', 'normalized', 'Position', [0.2, 0.03, 0.05, 0.03], 'Parent', hFigSlider);
 end
-
 % Position hXshift and hYshift sliders beneath hGammaGreen
 if stack 
     uicontrol('Style', 'text', 'String', ['X Shift: (est=',num2str(nzstack_drift(1)),')'],'units','normalized', 'Position', [0.05, 0.11, 0.1, 0.05], 'Parent', hFigSlider);
@@ -165,8 +170,6 @@ if stack
     hYShift = uicontrol('Style', 'slider', 'Min', -100, 'Max', 100, 'Value', nzstack_drift(2), 'Units', 'normalized', 'Position', [0.1, -0.01, 0.03, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
     yshift_text = uicontrol('Style', 'text', 'String', [num2str(nzstack_drift(2))], 'Units', 'normalized', 'Position', [0.05, -0.01, 0.05, 0.05], 'Parent', hFigSlider,'Callback', @updateImage);
 end
-
-
 % Create an axes for displaying the histogram
 hHistAx = axes('Parent', hFigSlider, 'Position', [0.1, 0.5, 0.8, 0.4]);
 
@@ -239,16 +242,25 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
                 imadjust(crimage(:,:,1), [low_in_red, high_in_red], [], gamma_red), ...
                 imadjust(crimage(:,:,2), [low_in_green, high_in_green], [], gamma_green), ...
                 crimage(:, :, 3));  % Blue channel is left unchanged
-            
-            %adj_img = utils.normalize_img(adj_img); 
-            % --- UPDATE IMAGE 
+            set(hImg, 'CData', adj_img);
+            % --- UPDATE MASKS/TEXT 
             for m = 1:length(masks)
                 set(masks{m},'XData',orig_maskx{m}+xyshift_x,'YData',orig_masky{m}+xyshift_y)
                 set(texts{m},'Position',[orig_textx{m}+xyshift_x,orig_texty{m}+xyshift_y,0]) % third coordinate is 0
             end
-
-            %set(masks,'YData',orig_masky+xyshift_y)
-            set(hImg, 'CData', adj_img);
+            %--- ARROW POSITION
+            narrowy= mean(find(curplane==img_num)); 
+            if narrowy<1
+                set(arrow,'Y',[1 1])
+                disp('less than 1')
+            elseif narrowy>size(image,2)
+                set(arrow,'Y',[size(image,2),size(image,2)])
+                disp('greater than max')
+            else
+                set(arrow,'Y',[narrowy narrowy])
+                
+            end
+            %--- HISTOGRAM       
             red = image(:,:,1); green = image(:,:,2); 
             red(red==0)=[]; green(green==0)=[]; 
             redc=histcounts(red,256); greenc=histcounts(green,256); 
@@ -271,7 +283,7 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             maxred =max(redc(:)); maxgreen=max(greenc(:)); 
             m= max([maxred,maxgreen]); 
         end
-
+        %----- HISTOGRAM
         % Update the intensity lines in the histogram
         set(hLowRedLine, 'XData', [low_in_red, low_in_red],'YData',[0 m]);
         set(hHighRedLine, 'XData', [high_in_red, high_in_red],'YData',[0 m]);
