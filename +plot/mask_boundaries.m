@@ -45,11 +45,11 @@ for i = 1:length(maskcoords)
     
     if strcmp(opt.idxtype,'shifted')
         mask{i}=plot(adj_xc,adj_yc,'Color',mask_colors(:,i+idxstart),'LineWidth',2,'Marker',marker,'LineStyle',ls);
-        num{i} =text(max(adj_xc)+1,max(adj_yc)+1,num2str(i+idxstart),'Color',mask_colors(:,i+idxstart),'FontSize',12,'FontWeight','bold'); % make text of ROI index
+        num{i} =text(max(adj_xc)+1,max(adj_yc)+1,num2str(i+idxstart),'Color',mask_colors(:,i+idxstart),'FontSize',20,'FontWeight','bold'); % make text of ROI index
         
     elseif strcmp(opt.idxtype,'specified')
         mask=plot(adj_xc,adj_yc,'Color',mask_colors(:,i),'LineWidth',2,'Marker',marker,'LineStyle',ls);
-        num=text(max(adj_xc)+1,max(adj_yc)+1,max(ycoords)+1-totalshift(2),num2str(idxstart),'Color',mask_colors(:,i),'FontSize',12,'FontWeight','bold'); % make text of ROI index
+        num=text(max(adj_xc)+1,max(adj_yc)+1,max(ycoords)+1-totalshift(2),num2str(idxstart),'Color',mask_colors(:,i),'FontSize',20,'FontWeight','bold'); % make text of ROI index
     end
 
 end

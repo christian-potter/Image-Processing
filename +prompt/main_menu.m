@@ -6,8 +6,8 @@ padjusted_xyz = zeros(3,nplanes);
 while p ~= -1   
     close all 
     [plane_crshift]=get.crshift(ops,p);
-    [figs] = adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'functional',ftype,'anatomical',atype,'type',img_mode); 
-    [nfigs,~]= adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'surround',0,'type','zstack','zstack',zstack,'adjusted_xyz',padjusted_xyz(p,:),'colororder',colororder);    
+    [nffigs] = adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'functional',ftype,'anatomical',atype,'type',img_mode); 
+    [nzfigs,~]= adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'surround',0,'type','zstack','zstack',zstack,'adjusted_xyz',padjusted_xyz(:,p),'colororder',colororder);    
     input_str=prompt.menu_str(1); 
     answer = input (input_str,"s"); 
     
@@ -40,13 +40,13 @@ while p ~= -1
             disp('No ROIs currently unclassified.',char(10))
             unc_vect = input('Enter neurons you wish to unclassify:'); 
             id_vect(unc_vect)=3;         
-            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',surround,'refimg',refimg,'colororder',colororder); 
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(:,p),'surround',surround,'refimg',refimg,'colororder',colororder); 
         else 
-            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',surround,'refimg',refimg,'colororder',colororder); 
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(:,p),'surround',surround,'refimg',refimg,'colororder',colororder); 
         end
     %--Save Figure Positions -----------------------------------
     elseif strcmp(answer,'w')
-        figs = utils.save_positions(nfigs,figs); 
+        figs = utils.save_positions(nffigs,nzfigs,figs); 
     %--Save Current id_vect  -----------------------------------
     elseif strcmp(answer,'e')
         p = -1; 
@@ -61,7 +61,7 @@ while p ~= -1
 
         elseif strcmp(answer,'r')
             answer = input('Select a cell as reference:'); 
-            [padjusted_xyz(p,:)] = prompt.align_zstack(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(p,:),'surround',0,'refimg',refimg,'specified_roi',answer);
+            [padjusted_xyz(p,:)] = prompt.align_zstack(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(:,p),'surround',0,'refimg',refimg,'specified_roi',answer);
         end
    %-- 
     end

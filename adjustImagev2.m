@@ -46,12 +46,12 @@ elseif isfield(opt,'adjusted_xyz')
     opt.idx = 1:length(stat); 
     count =1; iplane =-1; 
     while iplane~=p
-        iplane=stat{count}.iplane; 
+        iplane=stat{count}.iplane+1; 
         count =count+1; 
     end
     ypix = stat{count}.med(1); % first ROI in plane 
     curplane = ypix_zplane{p} +opt.adjusted_xyz(3); 
-    opt.default_plane=curplane(ypix)+opt.adjusted_xyz(3); 
+    opt.default_plane=curplane(ypix-plane_crshift(2))+opt.adjusted_xyz(3); 
 end
 
 %% CREATE VARIABLES
@@ -70,7 +70,7 @@ if strcmp(opt.type,'functional')
 elseif strcmp(opt.type,'zstack')
     stack = true; 
     image = opt.zstack; 
-    nzstack_drift = opt.zstack_drift+opt.adjusted_xyz([1 2]); 
+    nzstack_drift = opt.zstack_drift+opt.adjusted_xyz([1 2])'; 
     for i = 1:size(image,4)
        image(:,:,:,i) = utils.normalize_img(image(:,:,:,i));        
     end
@@ -114,9 +114,9 @@ elseif strcmp(opt.type,'zstack')
         masks{n}.YData = masks{n}.YData+nzstack_drift(2); 
         orig_masky{n}= masks{n}.YData; orig_texty{n}= texts{n}.Position(2); 
     end
-    arrow = annotation('arrow','Color','r'); 
+    arrow = annotation('arrow','Color','r','LineWidth',.25); 
     arrow.Parent = gca; 
-    arrow.X= ([-2 5]);arrow.Y=([0 0]);
+    arrow.X= ([1 size(image,2)]);arrow.Y=([0 0]);
 
 end
 
@@ -250,12 +250,10 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             end
             %--- ARROW POSITION
             narrowy= mean(find(curplane==img_num)); 
-            if narrowy<1
+            if img_num<min(curplane)
                 set(arrow,'Y',[1 1])
-                disp('less than 1')
-            elseif narrowy>size(image,2)
-                set(arrow,'Y',[size(image,2),size(image,2)])
-                disp('greater than max')
+            elseif img_num>max(curplane)
+                set(arrow,'Y',[size(image,2)-1,size(image,2)-1])
             else
                 set(arrow,'Y',[narrowy narrowy])
                 
