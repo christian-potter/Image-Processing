@@ -53,11 +53,11 @@ elseif dsnum == 542
    %zstack_path='/Volumes/Warwick/DRGS project/#542 3-25-25/Final FOV/Structural/#542 post z stack.tif';
     thorsync_h5 = '/Volumes/Warwick/DRGS project/#542 3-25-25/Final FOV/ThorSync/Raw/#542_TS_0005.h5';
 elseif dsnum == 541 
-    s2p = '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/Split/Split/suite2p-2 removed/combined/Fall.mat'; 
+    s2p = '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/Split/Split/suite2p/combined/Fall.mat';
     tlapse_path= '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/raw/raw Doubles/#541_003/Experiment.xml';
     zstack_path= '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/Split/Final Suite2p copy/Reference Zstack/#541 Structural Ref.tif';
     zstack_mdpath = '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/Split/Final Suite2p copy/Reference Zstack/Experiment.xml'; 
-    thorsync_h5 = '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/ThorSync/Original Files/#541_TS_0000/Episode_0000.h5'; 
+    
 
 end
 

@@ -24,7 +24,7 @@ end
 % opt.type = 'functional'/'zstack' => 
 % opt.idx = '
 %% NOTES
-%* eventually need to remove 
+%* 
 %% GET VARIABLES
 [roi_planeidx,idxshifts,~] = get.roipidx_shift(stat);
 [mask_coords]=get.mask_coordinates(stat,'type','outline'); % functional coords 
@@ -109,10 +109,10 @@ elseif strcmp(opt.type,'zstack')
     orig_maskx=cell(length(masks),1);orig_masky=cell(length(masks),1);
     orig_textx=cell(length(masks),1);orig_texty=cell(length(masks),1);
     for n = 1:length(masks)
-        masks{n}.XData = masks{n}.XData+nzstack_drift(1); 
-        orig_maskx{n} = masks{n}.XData;orig_textx{n}= texts{n}.Position(1); 
-        masks{n}.YData = masks{n}.YData+nzstack_drift(2); 
-        orig_masky{n}= masks{n}.YData; orig_texty{n}= texts{n}.Position(2); 
+        masks{n}.XData = masks{n}.XData+nzstack_drift(1); texts{n}.Position(1) = texts{n}.Position(1)+nzstack_drift(1); 
+        orig_maskx{n} = masks{n}.XData;orig_textx{n}= texts{n}.Position(1)+nzstack_drift(1); 
+        masks{n}.YData = masks{n}.YData+nzstack_drift(2); texts{n}.Position(2) = texts{n}.Position(2)+nzstack_drift(2); 
+        orig_masky{n}= masks{n}.YData; orig_texty{n}= texts{n}.Position(2)+nzstack_drift(2); 
     end
     arrow = annotation('arrow','Color','r','LineWidth',.25); 
     arrow.Parent = gca; 
@@ -255,8 +255,7 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             elseif img_num>max(curplane)
                 set(arrow,'Y',[size(image,2)-1,size(image,2)-1])
             else
-                set(arrow,'Y',[narrowy narrowy])
-                
+                set(arrow,'Y',[narrowy narrowy])         
             end
             %--- HISTOGRAM       
             red = image(:,:,1); green = image(:,:,2); 
