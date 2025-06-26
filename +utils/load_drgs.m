@@ -58,6 +58,12 @@ elseif dsnum == 541
     zstack_path= '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/Split/Final Suite2p copy/Reference Zstack/#541 Structural Ref.tif';
     zstack_mdpath = '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/Split/Final Suite2p copy/Reference Zstack/Experiment.xml'; 
     thorsync_h5 = '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/ThorSync/Original Files/#541_TS_0000/Episode_0000.h5'; 
+elseif dsnum == 1 % ABBY 
+    % PUT YOUR DATASET HERE BUT USE WINDOWS FILE FORMAT 
+    s2p = ; % Fall file that you save as your suite2p output (need to do file->save to mat in suite2p)
+    tlapse_path =; % choose any experiment.xml file from one of the tseries. they should all be the same in the variables that m 
+    zstack_path = ; % find the tif of 
+    
 
 end
 
