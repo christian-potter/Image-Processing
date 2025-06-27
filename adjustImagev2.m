@@ -10,40 +10,40 @@ arguments
     opt.adjusted_xyz double 
     opt.zstack_drift double % option to specify the amount of drift between functional and z-stack  
     opt.type string = 'functional'% can be functional or zstack  
-    opt.functional string = 'mean'
-    opt.anatomical string = 'mean'
-    opt.idx (1,1) double % individual idx if examining an individual neuron 
+    opt.functional string = 'mean' % image type 
+    opt.anatomical string = 'mean' 
     opt.zstack double = 0
-    opt.surround double = 100
+    opt.surround double = 0 % if 0, no cropping is done 
     opt.refsurround double = 100
     opt.default_plane (1,1) double = 1 % default plane in the z-stack
     opt.colororder string = 'rgb'
 end 
 %% DESCRIPTION
-% options:
-% opt.type = 'functional'/'zstack' => 
-% opt.idx = '
+
+% INPUTS 
+% p = current selected plane 
+% stat =  contains mask information for each cell (iscell ==1) 
+% plane_crshift = offset for the given plane w/r/t the larger image 
+% figs = structure containing figure positions 
+% ops = suite2p output with reference images etc 
+% id_vect =  1 x n vector with neuron identity 
+% ypix_zplane = estimated mapping between a y-row location in image and
+    % the zplane it's located on 
+
 %% NOTES
 %* 
 %% GET VARIABLES
 [roi_planeidx,idxshifts,~] = get.roipidx_shift(stat);
 [mask_coords]=get.mask_coordinates(stat,'type','outline'); % functional coords 
-[stackmask_coords]=get.mask_coordinates(stat,'type','outline');% zstack coords
 [mask_colors] = get.mask_colors(id_vect); 
 
 if isfield(opt,'adjusted_xyz')
     xyshift_x=opt.adjusted_xyz(1);xyshift_y=opt.adjusted_xyz(2);
 end
 
-%% DETERMINE STARTING Z-PLANE 
+%% IF ZSTACK, DETERMINE STARTING Z-PLANE 
 
-if isfield(opt,'idx')&&isfield(opt,'adjusted_xyz')
-    ypix= stat{opt.idx}.med(1); %first is weirdly Y
-    %ypix = ypix-crshift(1); 
-    curplane = ypix_zplane{p}; 
-    opt.default_plane=curplane(ypix)+opt.adjusted_xyz(3); 
-elseif isfield(opt,'adjusted_xyz')
-    opt.idx = 1:length(stat); 
+if isfield(opt,'adjusted_xyz')
     count =1; iplane =-1; 
     while iplane~=p
         iplane=stat{count}.iplane+1; 
@@ -55,7 +55,7 @@ elseif isfield(opt,'adjusted_xyz')
 end
 
 %% CREATE VARIABLES
-hFigImg= NaN; fFigImg= NaN; aFigImg = NaN; hFigSlider = NaN;
+hFigImg= NaN; hFigSlider = NaN;
 %% GET RED/GREENWIN
 [redwin,greenwin]= get.redgreen_images(opt.anatomical,opt.functional,ops,plane_crshift); 
 %% DEFINE IMAGE 
@@ -74,16 +74,10 @@ elseif strcmp(opt.type,'zstack')
     for i = 1:size(image,4)
        image(:,:,:,i) = utils.normalize_img(image(:,:,:,i));        
     end
-    if strcmp(opt.colororder,'grb')
+    if strcmp(opt.colororder,'grb') % do nothing if rgb
         image(:,:,[1 2],:)=image(:,:,[2 1],:);
     end
     opt.zstack = image; % normalize zstack now before cropping 
-    if isscalar(opt.idx)
-        [image,zx1,zy1] = get.roi_surround(image,opt.idx,stat,opt.surround,ops,'zstack_drift',nzstack_drift,'plane',p);
-    else
-        zx1=0; zy1=0; 
-    end
- 
     redChannel = image(:, :, 1,opt.default_plane);greenChannel = image(:,:,2,opt.default_plane);    
 
 end
@@ -100,12 +94,8 @@ if strcmp(opt.type,'functional')
 elseif strcmp(opt.type,'zstack')
     hFigImg = figure('Name', 'Z-Stack', 'NumberTitle', 'off', 'Position',figs.zstack.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
-    hImg = imshow(image(:,:,:,opt.default_plane), 'Parent', hAx); hold on; 
-    if isscalar(opt.idx)
-        [masks,texts] = plot.mask_boundaries(mask_colors(:,1),stackmask_coords(opt.idx),plane_crshift,opt.idx,"idxtype",'specified','masktype','outline','crop_x1y1',[zx1 zy1],'image',image(:,:,:,1));
-    else
-        [masks,texts]=plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),plane_crshift,idxshifts(p),'masktype','outline');
-    end
+    hImg = imshow(image(:,:,:,opt.default_plane), 'Parent', hAx); hold on;
+    [masks,texts]=plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),plane_crshift,idxshifts(p),'masktype','outline');
     orig_maskx=cell(length(masks),1);orig_masky=cell(length(masks),1);
     orig_textx=cell(length(masks),1);orig_texty=cell(length(masks),1);
     for n = 1:length(masks)
@@ -154,6 +144,7 @@ uicontrol('Style', 'text', 'String', 'Green- High Thresh:', 'Units', 'normalized
 hHighInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_green, 'Units', 'normalized', 'Position', [0.4, 0.25, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 uicontrol('Style', 'text', 'String', 'Green- Gamma:', 'Units', 'normalized', 'Position', [0.4, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
 hGammaGreen = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_green, 'Units', 'normalized', 'Position', [0.4, 0.15, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
+
 % Z-stack plane selection 
 if stack
     uicontrol('Style', 'text', 'String', ['Z-Stack Plane ','(est=',num2str(opt.default_plane),'):'], 'Units', 'normalized', 'Position', [0.2, 0.07, 0.15, 0.05],'Parent', hFigSlider);
@@ -231,11 +222,7 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             set(xshift_text, 'String', [num2str(xyshift_x)]);
             set(yshift_text, 'String', [num2str(xyshift_y)]);
             image = opt.zstack(:,:,:,img_num); 
-            if isscalar(opt.idx)
-                [crimage, zx1, zy1] = get.roi_surround(image, opt.idx, stat, opt.surround,ops,'zstack_drift', [xyshift_x, xyshift_y],'plane',p);
-            else
-                crimage = image; zx1=0;zy1=0;
-            end
+            crimage = image;
 
             % --- MAKE NEW IMAGE
             adj_img = cat(3, ...

@@ -1,4 +1,5 @@
 function [nimage,x1,y1,cutoff] = roi_surround(image,roi,stat,surround,ops,opt)
+% IF SURROUND == 0, DOES NOT CROP, ONLY GIVES PLANE W/R/T REFERENCE IMAGE 
 arguments 
     image double % individual rgb image. Either one plane or zstack
     roi double % idx of ROI to crop around 
@@ -14,12 +15,7 @@ end
 % nimage: cropped image 
 % x1: leftmost coordinate
 % y1: topmost coordinate
-% cutoff: (x,y) to report if there was any image that was cropped
-    % * use these to recenter ROI on cutoff image
-    % (-) = cutoff left or above ROI 
-    % (+) = cutoff right or below ROI 
-    % ** will need at some point if you want to center ROI on the cropped
-    % image when there is cutoff 
+
 %% DESCRIPTION 
 % function that takes either single plane image or z-stack and crops it 
 

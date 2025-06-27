@@ -1,4 +1,4 @@
-function [id_vect,figs] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zstack,colororder,zstack_drift)
+function [id_vect,figs] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,img_mode,nplanes,ypix_zplane,zstack,colororder,zstack_drift)
 %% DESCRIPTION 
 % INPUTS 
 % id_vect: vector 1 x neurons
@@ -24,11 +24,9 @@ while p ~= -1   % loop function until user exits
     close all 
     [plane_crshift]=get.crshift(ops,p);
     %-- generate functional image/ control panel 
-    [nffigs] = adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'functional',ftype,'anatomical',atype,'type','functional'); 
+    [nffigs] = adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'functional',ftype,'anatomical',atype,'type',img_mode); 
     %-- generate zstack image/ control panel 
     [nzfigs,~]= adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'type','zstack','zstack',zstack,'adjusted_xyz',padjusted_xyz(:,p),'colororder',colororder);    
-    
-    % --- PROMPT USER --------------------------------------- 
     input_str=prompt.menu_str(1); 
     answer = input (input_str,"s"); 
     
@@ -53,6 +51,18 @@ while p ~= -1   % loop function until user exits
     %--Change Image Type  --------------------------------------
     elseif strcmp(answer,'r')
         [ftype,atype]=prompt.img_type(atype,ftype); 
+    %--Examine Uncertain ---------------------------------------
+    elseif strcmp (answer,'q')
+         refimg = get.imagefromFigure(nfigs);
+         %close all 
+        if sum(id_vect==3)<0
+            disp('No ROIs currently unclassified.',char(10))
+            unc_vect = input('Enter neurons you wish to unclassify:'); 
+            id_vect(unc_vect)=3;         
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(:,p),'surround',surround,'refimg',refimg,'colororder',colororder); 
+        else 
+            [id_vect,~,figs] = prompt.examine_unclassifiedv2(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(:,p),'surround',surround,'refimg',refimg,'colororder',colororder); 
+        end
     %--Save Figure Positions -----------------------------------
     elseif strcmp(answer,'w')
         figs = utils.save_positions(nffigs,nzfigs,figs); 
@@ -72,7 +82,7 @@ while p ~= -1   % loop function until user exits
             answer = input('Select a cell as reference:'); 
             [padjusted_xyz(p,:)] = prompt.align_zstack(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(:,p),'surround',0,'refimg',refimg,'specified_roi',answer);
         end
-
+   %-- 
     end
     
 

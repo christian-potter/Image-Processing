@@ -1,7 +1,10 @@
 function [redwin,greenwin]= redgreen_images(anatomical,functional,ops,crshift) 
-
-% makes imaging planes based on string arguments 
+%% DESCRIPTION 
+% takes ops file and returns redwin/ greenwin based on what image type is
+% requested and the crshift for that given plane 
+%% CREATE VARIABLES 
 planesize= [size(ops.refImg,1) size(ops.refImg,2)]; 
+%% FUNCTIONAL IMAGE 
 
 if strcmp(anatomical,'mean')
     redwin= ops.meanImg_chan2(crshift(2)+1:crshift(2)+planesize(1),crshift(1)+1:crshift(1)+planesize(2)); 
@@ -11,6 +14,7 @@ else
     disp(['Input not recognized, defaulting to mean',char(10)])
     redwin= ops.meanImg_chan2(crshift(2)+1:crshift(2)+planesize(1),crshift(1)+1:crshift(1)+planesize(2)); 
 end
+%% ANATOMICAL IMAGE 
 
 if strcmp(functional,'mean')
     greenwin= ops.meanImg(crshift(2)+1:crshift(2)+planesize(1),crshift(1)+1:crshift(1)+planesize(2)) ; 

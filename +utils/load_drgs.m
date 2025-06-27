@@ -1,14 +1,19 @@
-function [zstack,tlapse,zstack_md,tsync,s2p,ypix_zplane] = load_drgs(dsnum,plotstr)
+function [zstack,tlapse_md,zstack_md,tsync,s2p,ypix_zplane] = load_drgs(dsnum,plotstr)
 %% DESCRIPTION
 % loads DRGS datasets
 % ** gives only the iscell == 1 output for relevant variables
 
+% INPUTS 
+% dsnum: number of dataset 
+% plotstr: will plot image of functional images w/r/t 
+
 % OUTPUTS
-% zstack: 
-% tlapse: 
-% zstack_md: 
-% tsync: 
-% s2p: suite2p path to load all suite2p data 
+% zstack: X x Y x RGB x Z matrix 
+% tlapse_md: structure with time series metadata
+% zstack_md: structure with z stack metadata
+% tsync: individual thorsync file 
+% s2p: suite2p path to load all suite2p data (needs to be loaded outside of
+    % function) 
 % ypix_zplane: vector that connects every ypixel row to a zplane in the
 %   zstack
 
@@ -60,16 +65,15 @@ elseif dsnum == 541
     thorsync_h5 = '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/ThorSync/Original Files/#541_TS_0000/Episode_0000.h5'; 
 elseif dsnum == 1 % ABBY 
     % PUT YOUR DATASET HERE BUT USE WINDOWS FILE FORMAT 
-    s2p = ; % Fall file that you save as your suite2p output (need to do file->save to mat in suite2p)
-    tlapse_path =; % choose any experiment.xml file from one of the tseries. they should all be the same in the variables that m 
-    zstack_path = ; % find the tif of 
-    
-
+    %s2p = ; % Fall file that you save as your suite2p output (need to do file->save to mat in suite2p)
+    %tlapse_path =; % choose any experiment.xml file from one of the tseries. they should all be the same in the variables that m 
+    %zstack_path = ; % find the tif of 
+   
 end
 
 %% LOAD DATA
 tlapse_xml=md.importxml(tlapse_path);
-[tlapse] = md.extract_metadata(tlapse_xml);
+[tlapse_md] = md.extract_metadata(tlapse_xml);
 
 zstack_xml = md.importxml(zstack_mdpath); 
 [zstack_md]=md.extract_metadata(zstack_xml);
@@ -80,16 +84,16 @@ zstack= get.zstack(zstack_path);
 
 %% GET PIEZO MOVEMENT FROM TSYNC
 
-a = 1:tlapse.nplanes; b = tsync.framecount; 
+a = 1:tlapse_md.nplanes; b = tsync.framecount; 
 allplanes = find(ismember(b,a));% get indices for the first nplanes 
 
 totalpdist = tsync.piezo(allplanes(end))-tsync.piezo(allplanes(1)); 
-totalzdist =  tlapse.stepSize*tlapse.nplanes/1000;
+totalzdist =  tlapse_md.stepSize*tlapse_md.nplanes/1000;
 
-plane_zranges = nan(tlapse.nplanes,2); 
+plane_zranges = nan(tlapse_md.nplanes,2); 
 piezoprop = 0; 
 %- get distance moved by the piezo for first frames 
-for p = 1:tlapse.nplanes
+for p = 1:tlapse_md.nplanes
     curframes = tsync.framecount==p; 
     curpiezo = tsync.piezo(curframes); 
     curpdist = curpiezo(end)-curpiezo(1); % distance at beginning and end of frame 
@@ -97,22 +101,22 @@ for p = 1:tlapse.nplanes
 end
 
 covered_range = 0; 
-for p = 1:tlapse.nplanes
-    planezdist= tlapse.startPos + totalzdist*piezoprop(p);  
+for p = 1:tlapse_md.nplanes
+    planezdist= tlapse_md.startPos + totalzdist*piezoprop(p);  
     plane_zranges(p,1)= covered_range; 
     plane_zranges(p,2)= piezoprop(p+1)*totalzdist+covered_range; 
     covered_range = plane_zranges(p,2);
 end
 
-plane_zranges = plane_zranges+tlapse.setupPosition; 
+plane_zranges = plane_zranges+tlapse_md.setupPosition; 
 %%
 
-ypix_zdist = cell(1,tlapse.nplanes);  
+ypix_zdist = cell(1,tlapse_md.nplanes);  
 
-for p = 1:tlapse.nplanes
-    curzdists = nan(1,tlapse.ypix); 
+for p = 1:tlapse_md.nplanes
+    curzdists = nan(1,tlapse_md.ypix); 
     zrange = plane_zranges(p,:); 
-    zvals = linspace(zrange(1),zrange(2),tlapse.ypix); 
+    zvals = linspace(zrange(1),zrange(2),tlapse_md.ypix); 
     ypix_zdist{p}= zvals; % gives z-distance in 
 
 end
@@ -127,14 +131,14 @@ end
 
 %% GET CLOSEST Z PLANE FOR EACH ROW OF YPIXELS 
 
-ypix_zplane = cell(1,tlapse.nplanes);
+ypix_zplane = cell(1,tlapse_md.nplanes);
 
 % assign each ypix to a plane 
-for p = 1:tlapse.nplanes
-    y_zmap = nan(1,tlapse.ypix); 
+for p = 1:tlapse_md.nplanes
+    y_zmap = nan(1,tlapse_md.ypix); 
     curypix_zdist = ypix_zdist{p}; 
     
-    for y = 1:tlapse.ypix
+    for y = 1:tlapse_md.ypix
         offsets=abs(zlocs-curypix_zdist(y)); 
         zloc = find(offsets==min(offsets)); 
         y_zmap(y) = zloc; 
@@ -163,10 +167,10 @@ if strcmp(plotstr,'plot')
     hold on 
     
     for z = 1:length(zlocs)
-        plot([1 tlapse.ypix],[max(zlocs)-zlocs(z) max(zlocs)-zlocs(z)],'color','k')
+        plot([1 tlapse_md.ypix],[max(zlocs)-zlocs(z) max(zlocs)-zlocs(z)],'color','k')
     end
     
-    for p = 1:tlapse.nplanes
+    for p = 1:tlapse_md.nplanes
         plot(max(zlocs)-ypix_zdist{p},'LineWidth',3)
         leg{p}= ['Plane ', num2str(p)];
     end
@@ -181,7 +185,7 @@ if strcmp(plotstr,'plot')
 %% MAKE PLOT OF PIEZO POSITION 
     figure 
     hold on 
-    for p = 1:tlapse.nplanes+tlapse.flybackFrames
+    for p = 1:tlapse_md.nplanes+tlapse_md.flybackFrames
         curframes = find(tsync.framecount==p); 
         curpiezo = tsync.piezo(curframes); 
         plot(curframes,curpiezo,'LineWidth',2)     

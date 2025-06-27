@@ -1,36 +1,33 @@
 function [nimage,x1,y1,cutoff] = roi_surround(image,roi,stat,surround,ops,opt)
+% IF SURROUND == 0, DOES NOT CROP, ONLY GIVES PLANE W/R/T LARGER IMAGE 
 arguments 
     image double % individual rgb image. Either one plane or zstack
     roi double % idx of ROI to crop around 
     stat cell 
     surround double % scalar for how much to grab in each direction around median   
-    ops % for crshift
+    ops % for crshift coordinates 
     opt.zstack_drift double = [0,0]; % if plotting the zstack, this aligns offset to functional 
-    opt.plane double 
+    opt.plane double % current plane 
+  
 end
 
 %-- outputs
 % nimage: cropped image 
 % x1: leftmost coordinate
-% y1: rightmost coordinate
-% cutoff: (x,y) to report if there was any image that was cropped
-    % * use these to recenter ROI on cutoff image
-    % (-) = cutoff left or above ROI 
-    % (+) = cutoff right or below ROI 
-    % ** will need at some point if you want to center ROI on the cropped
-    % image wh
+% y1: topmost coordinate
+
 %% DESCRIPTION 
-% function that takes 
+% function that takes either single plane image or z-stack and crops it 
 
 %% MAKE VARIABLES 
 zs_xshift = opt.zstack_drift(1); zs_yshift = opt.zstack_drift(2); % z-stack adjustment, if it exists 
 image_plane = image(:,:,1,1);
-dims = size(image_plane); % max dimensions to correct for if surround is off 
+dims = size(image_plane);dims =flip(dims); % max dimensions to correct for if surround is off 
 cstat=stat{roi};
 cutoff =[0,0]; % assume surround does not require a cutoff 
 
 if isfield(opt,'plane')
-    [plane_crshift]=get.crshift(ops,p);
+    [plane_crshift]=get.crshift(ops,opt.plane);
 else
     plane_crshift=[0,0]; 
 end
@@ -66,7 +63,16 @@ for i = 1:size(image,3)
     end
 end
 
-nimage = squeeze(nimage); 
+
+%% DECIDE IF CROPPED OR NOT 
+
+if surround > 0 
+    nimage = squeeze(nimage); 
+elseif surround == 0
+    nimage= image; 
+    x1 = 0; y1= 0; 
+end
+
 %%
 
 
