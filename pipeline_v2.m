@@ -2,9 +2,9 @@
 % edit function 
 [zstack,tlapse_md,zstack_md,tsync,s2p,ypix_zplane] = utils.load_drgs(541,'plot'); 
 load(s2p); 
+cellstat = stat(iscell(:,1)==1);
 %% DEFAULT ID_VECT
 id_vect = ones(sum(iscell(:,1)==1),1)*3; 
-cellstat = stat(iscell(:,1)==1);
 
 %% LOAD FIGURE POSITIONS 
 load('work-positions.mat')
