@@ -1,9 +1,10 @@
-function [nfigs,nadjusted_xyz] = adjustImagev2(p,stat,plane_crshift,figs,ops,id_vect,ypix_zplane,opt)
+function [nfigs,nadjusted_xyz,hFigSlider] = adjustImagev2(p,stat,plane_crshift,figs,slider,ops,id_vect,ypix_zplane,opt)
 arguments 
     p double 
     stat cell 
     plane_crshift double 
     figs struct 
+    slider struct 
     ops struct 
     id_vect double 
     ypix_zplane cell % mapping between y pixel value and the z-stack plane it should be on 
@@ -30,8 +31,8 @@ end
 % ypix_zplane = estimated mapping between a y-row location in image and
     % the zplane it's located on 
 
-%% NOTES
-%* 
+
+
 %% GET VARIABLES
 [roi_planeidx,idxshifts,~] = get.roipidx_shift(stat);
 [mask_coords]=get.mask_coordinates(stat,'type','outline'); % functional coords 
@@ -50,7 +51,7 @@ if isfield(opt,'adjusted_xyz')
         count =count+1; 
     end
     ypix = stat{count}.med(1); % first ROI in plane 
-    curplane = ypix_zplane{p} +opt.adjusted_xyz(3); 
+    curplane = ypix_zplane{p} + opt.adjusted_xyz(3); 
     opt.default_plane=curplane(ypix-plane_crshift(2))+opt.adjusted_xyz(3); 
 end
 
@@ -107,6 +108,7 @@ elseif strcmp(opt.type,'zstack')
     arrow = annotation('arrow','Color','r','LineWidth',.25); 
     arrow.Parent = gca; 
     arrow.X= ([1 size(image,2)]);arrow.Y=([0 0]);
+    t = title(['Plane: ',num2str(opt.default_plane)],'FontSize',25); 
 
 end
 
@@ -121,14 +123,14 @@ elseif ~stack
 end
 
 % Set default values for sliders
-low_in_red = 0;
-high_in_red = 1;
-gamma_red = 1;
+low_in_red = slider.lowred; 
+high_in_red = slider.highred; 
+gamma_red = slider.gammared; 
 
-low_in_green = 0;
-high_in_green = 1;
-gamma_green = 1;
-img_num = 1; 
+low_in_green = slider.lowgreen;
+high_in_green = slider.highgreen; 
+gamma_green = slider.gammagreen; 
+img_num = opt.default_plane; 
 
 % Create sliders and labels for the Red channel (left side)
 uicontrol('Style', 'text', 'String', 'Red- Low Thresh:', 'Units', 'normalized', 'Position', [0.05, 0.4, 0.2, 0.05], 'Parent', hFigSlider);
@@ -253,6 +255,9 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             set(h1,'Data',red(:))
             set(h2,'Data',green(:))
             set(hHistAx,'YLim',[0 m])
+            t.String = ['Plane: ',num2str(img_num)]; 
+
+
         elseif ~stack 
             % --- MAKE NEW IMAGE 
             adj_img = cat(3, ...
@@ -261,7 +266,7 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
                 image(:, :, 3));  % Blue channel is left unchanged
             % --- UPDATE IMAGE 
             set(hImg, 'CData', adj_img);
-            red = image(:,:,1); green = image(:,:,2); % why is this 4D? 
+            red = image(:,:,1); green = image(:,:,2);
             red(red==0)=[]; green(green==0)=[]; 
             redc=histcounts(red,256); greenc=histcounts(green,256); 
             maxred =max(redc(:)); maxgreen=max(greenc(:)); 
@@ -292,7 +297,7 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             hold(hHistAx, 'on');
             h2= histogram(hHistAx, greenChannel(:), 256, 'FaceColor', 'g', 'EdgeColor', 'k', 'FaceAlpha', 0.5);
   
-            title(hHistAx, 'Histogram of Red and Green Channels');
+            title(hHistAx, 'Histogram of Red and Green Channels','FontSize',25);
             xlabel(hHistAx, 'Intensity');
             ylabel(hHistAx, 'Pixel Count');
        
@@ -314,12 +319,27 @@ if strcmp(opt.type,'functional')
     nfigs.zstack = figs.zstack; 
     nfigs.zslider = figs.zslider; 
     nadjusted_xyz = [0 0 0]; 
+    %--- slider settings 
+    nslider.lowred = get(hLowInRed, 'Value');
+    nslider.highred = get(hHighInRed, 'Value');
+    nslider.gammared= get(hGammaRed, 'Value');
+    nslider.lowgreen = get(hLowInGreen, 'Value');
+    nslider.highgreen = get(hHighInGreen, 'Value');
+    nslider.gammagreen = get(hGammaGreen, 'Value');
 elseif strcmp(opt.type,'zstack')
     nfigs.rgb = figs.rgb; 
     nfigs.slider = figs.slider; 
     nfigs.zstack = hFigImg; 
     nfigs.zslider=hFigSlider;
     nadjusted_xyz = [nzstack_drift-xyshift_x,nzstack_drift-xyshift_y,opt.default_plane - img_num]; 
+    %--- slider settings 
+    nslider.lowred = get(hLowInRed, 'Value');
+    nslider.highred = get(hHighInRed, 'Value');
+    nslider.gammared= get(hGammaRed, 'Value');
+    nslider.lowgreen = get(hLowInGreen, 'Value');
+    nslider.highgreen = get(hHighInGreen, 'Value');
+    nslider.gammagreen = get(hGammaGreen, 'Value');
+ 
 end
 
 end

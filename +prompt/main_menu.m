@@ -16,17 +16,47 @@ function [id_vect,figs] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,npla
 % zstack_drift: updated mapping estimate between zstack and functional
     % images 
 
-%%
+%% INITIALIZE SETTINGS 
 padjusted_xyz = zeros(3,nplanes); % updated to contain user-adjusted mapping between zstack and functional images 
+fslider.lowred = 0; zslider.lowred = 0; 
+fslider.highred = .5; zslider.highred = .5; 
+fslider.gammared= 1; zslider.gammared= 1; 
+fslider.lowgreen = 0; zslider.lowgreen = 0; 
+fslider.highgreen = .5;zslider.highgreen = .5;
+fslider.gammagreen = 1; zslider.gammagreen = 1; 
 
 
+%%
 while p ~= -1   % loop function until user exits 
-    close all 
+    
     [plane_crshift]=get.crshift(ops,p);
+    
+    if exist("fslider_fig") == 1 %only trigger if there are existing figures
+        fslider.gammagreen = fslider_fig.Children(1).Value; 
+        fslider.highgreen = fslider_fig.Children(3).Value; 
+        fslider.lowgreen= fslider_fig.Children(5).Value; 
+        
+        fslider.gammared = fslider_fig.Children(7).Value; 
+        fslider.highred = fslider_fig.Children(9).Value; 
+        fslider.lowred= fslider_fig.Children(11).Value; 
+    
+        zslider.y = zslider_fig.Children(2).Value;
+        zslider.x =zslider_fig.Children(5).Value; 
+        %zslider.z = zslider_fig.Children(8).Value; 
+    
+        zslider.gammagreen = zslider_fig.Children(10).Value; 
+        zslider.highgreen = zslider_fig.Children(12).Value; 
+        zslider.lowgreen= zslider_fig.Children(14).Value; 
+        zslider.gammared = zslider_fig.Children(16).Value; 
+        zslider.highred = zslider_fig.Children(18).Value; 
+        zslider.lowred= zslider_fig.Children(20).Value; 
+    end 
+
+    close all 
     %-- generate functional image/ control panel 
-    [nffigs] = adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'functional',ftype,'anatomical',atype,'type','functional'); 
+    [nffigs,~,fslider_fig] = adjustImagev2(p,cellstat,plane_crshift,figs,fslider,ops,id_vect,ypix_zplane,'functional',ftype,'anatomical',atype,'type','functional'); 
     %-- generate zstack image/ control panel 
-    [nzfigs,~]= adjustImagev2(p,cellstat,plane_crshift,figs,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'type','zstack','zstack',zstack,'adjusted_xyz',padjusted_xyz(:,p),'colororder',colororder);    
+    [nzfigs,~,zslider_fig]= adjustImagev2(p,cellstat,plane_crshift,figs,zslider,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'type','zstack','zstack',zstack,'adjusted_xyz',padjusted_xyz(:,p),'colororder',colororder);    
     
     % --- PROMPT USER --------------------------------------- 
     input_str=prompt.menu_str(1); 

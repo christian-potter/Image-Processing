@@ -1,9 +1,10 @@
-function [nfigs,nadjusted_xyz] = adjustImagev2(p,stat,plane_crshift,figs,ops,id_vect,ypix_zplane,opt)
+function [nfigs,nadjusted_xyz,slider] = adjustImagev2(p,stat,plane_crshift,figs,slider,ops,id_vect,ypix_zplane,opt)
 arguments 
     p double 
     stat cell 
     plane_crshift double 
     figs struct 
+    slider struct 
     ops struct 
     id_vect double 
     ypix_zplane cell % mapping between y pixel value and the z-stack plane it should be on 
@@ -11,8 +12,7 @@ arguments
     opt.zstack_drift double % option to specify the amount of drift between functional and z-stack  
     opt.type string = 'functional'% can be functional or zstack  
     opt.functional string = 'mean' % image type 
-    opt.anatomical string = 'mean'
-    opt.idx (1,1) double % individual idx if examining an individual neuron 
+    opt.anatomical string = 'mean' 
     opt.zstack double = 0
     opt.surround double = 0 % if 0, no cropping is done 
     opt.refsurround double = 100
@@ -31,8 +31,8 @@ end
 % ypix_zplane = estimated mapping between a y-row location in image and
     % the zplane it's located on 
 
-%% NOTES
-%* 
+
+
 %% GET VARIABLES
 [roi_planeidx,idxshifts,~] = get.roipidx_shift(stat);
 [mask_coords]=get.mask_coordinates(stat,'type','outline'); % functional coords 
@@ -42,17 +42,16 @@ if isfield(opt,'adjusted_xyz')
     xyshift_x=opt.adjusted_xyz(1);xyshift_y=opt.adjusted_xyz(2);
 end
 
-%% DETERMINE STARTING Z-PLANE 
+%% IF ZSTACK, DETERMINE STARTING Z-PLANE 
 
 if isfield(opt,'adjusted_xyz')
-    opt.idx = 1:length(stat); 
     count =1; iplane =-1; 
     while iplane~=p
         iplane=stat{count}.iplane+1; 
         count =count+1; 
     end
     ypix = stat{count}.med(1); % first ROI in plane 
-    curplane = ypix_zplane{p} +opt.adjusted_xyz(3); 
+    curplane = ypix_zplane{p} + opt.adjusted_xyz(3); 
     opt.default_plane=curplane(ypix-plane_crshift(2))+opt.adjusted_xyz(3); 
 end
 
@@ -80,7 +79,6 @@ elseif strcmp(opt.type,'zstack')
         image(:,:,[1 2],:)=image(:,:,[2 1],:);
     end
     opt.zstack = image; % normalize zstack now before cropping 
-    zx1=0; zy1=0; 
     redChannel = image(:, :, 1,opt.default_plane);greenChannel = image(:,:,2,opt.default_plane);    
 
 end
@@ -110,6 +108,7 @@ elseif strcmp(opt.type,'zstack')
     arrow = annotation('arrow','Color','r','LineWidth',.25); 
     arrow.Parent = gca; 
     arrow.X= ([1 size(image,2)]);arrow.Y=([0 0]);
+    t = title(['Plane: ',num2str(opt.default_plane)],'FontSize',25); 
 
 end
 
@@ -125,11 +124,11 @@ end
 
 % Set default values for sliders
 low_in_red = 0;
-high_in_red = 1;
+high_in_red = .5;
 gamma_red = 1;
 
 low_in_green = 0;
-high_in_green = 1;
+high_in_green = .5;
 gamma_green = 1;
 img_num = 1; 
 
@@ -147,7 +146,6 @@ uicontrol('Style', 'text', 'String', 'Green- High Thresh:', 'Units', 'normalized
 hHighInGreen = uicontrol('Style', 'slider', 'Min', 0, 'Max', 1, 'Value', high_in_green, 'Units', 'normalized', 'Position', [0.4, 0.25, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
 uicontrol('Style', 'text', 'String', 'Green- Gamma:', 'Units', 'normalized', 'Position', [0.4, 0.2, 0.2, 0.05], 'Parent', hFigSlider);
 hGammaGreen = uicontrol('Style', 'slider', 'Min', 0.1, 'Max', 2, 'Value', gamma_green, 'Units', 'normalized', 'Position', [0.4, 0.15, 0.3, 0.05], 'Parent', hFigSlider, 'Callback', @updateImage);
-
 
 % Z-stack plane selection 
 if stack
@@ -226,8 +224,7 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             set(xshift_text, 'String', [num2str(xyshift_x)]);
             set(yshift_text, 'String', [num2str(xyshift_y)]);
             image = opt.zstack(:,:,:,img_num); 
-    
-            crimage = image; zx1=0;zy1=0;
+            crimage = image;
 
             % --- MAKE NEW IMAGE
             adj_img = cat(3, ...
@@ -258,6 +255,9 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             set(h1,'Data',red(:))
             set(h2,'Data',green(:))
             set(hHistAx,'YLim',[0 m])
+            t.String = ['Plane: ',num2str(img_num)]; 
+
+
         elseif ~stack 
             % --- MAKE NEW IMAGE 
             adj_img = cat(3, ...
@@ -297,7 +297,7 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
             hold(hHistAx, 'on');
             h2= histogram(hHistAx, greenChannel(:), 256, 'FaceColor', 'g', 'EdgeColor', 'k', 'FaceAlpha', 0.5);
   
-            title(hHistAx, 'Histogram of Red and Green Channels');
+            title(hHistAx, 'Histogram of Red and Green Channels','FontSize',25);
             xlabel(hHistAx, 'Intensity');
             ylabel(hHistAx, 'Pixel Count');
        
@@ -319,12 +319,25 @@ if strcmp(opt.type,'functional')
     nfigs.zstack = figs.zstack; 
     nfigs.zslider = figs.zslider; 
     nadjusted_xyz = [0 0 0]; 
+    nslider.lowred = get(hLowInRed, 'Value');
+    nslider.highred = get(hHighInRed, 'Value');
+    nslider.gammared= get(hGammaRed, 'Value');
+    nslider.lowgreen = get(hLowInGreen, 'Value');
+    nslider.highgreen = get(hHighInGreen, 'Value');
+    nslider.gammagreen = get(hGammaGreen, 'Value');
 elseif strcmp(opt.type,'zstack')
     nfigs.rgb = figs.rgb; 
     nfigs.slider = figs.slider; 
     nfigs.zstack = hFigImg; 
     nfigs.zslider=hFigSlider;
     nadjusted_xyz = [nzstack_drift-xyshift_x,nzstack_drift-xyshift_y,opt.default_plane - img_num]; 
+    nslider.lowred = get(hLowInRed, 'Value');
+    nslider.highred = get(hHighInRed, 'Value');
+    nslider.gammared= get(hGammaRed, 'Value');
+    slider.lowgreen = get(hLowInGreen, 'Value');
+    slider.highgreen = get(hHighInGreen, 'Value');
+    slider.gammagreen = get(hGammaGreen, 'Value');
+    slider.imgnum = img_num; 
 end
 
 end
