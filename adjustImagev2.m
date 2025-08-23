@@ -281,9 +281,9 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
 
         % Update the Gamma Line Values
         rGammaX = low_in_red:.0001:high_in_red; 
-        rGammaY= imadjust(rGammaX,[],[],gamma_red);
+        rGammaY= imadjust(rGammaX,[low_in_red high_in_red],[],gamma_red);
         gGammaX = low_in_green:.0001:high_in_green; 
-        gGammaY= imadjust(gGammaX,[],[],gamma_green);
+        gGammaY= imadjust(gGammaX,[low_in_green high_in_green],[],gamma_green);
 
         % Set Gamma Lines 
         set(GammaRedLine,'XData',rGammaX,'YData',rGammaY*m)

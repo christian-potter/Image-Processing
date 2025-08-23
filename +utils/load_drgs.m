@@ -25,14 +25,14 @@ if dsnum == 505
 
 elseif dsnum == 511
     s2p= '/Volumes/Potter/DRGS/#511/Final FOV/Time Series/SDH/Split/suite2p/combined/Fall.mat';
-    tlapse_path='/Volumes/Potter/DRGS/#511/Final FOV/Time Series/SDH/SDH#510_000/Experiment.xml'; 
+    tlapsemd_path='/Volumes/Potter/DRGS/#511/Final FOV/Time Series/SDH/SDH#510_000/Experiment.xml'; 
     zstack_mdpath = '/Volumes/Potter/DRGS/#511/Final FOV/Structural/1x resolution (26)/SDH#511_026/Experiment.xml';
     zstack_path = '/Volumes/Potter/DRGS/#511/Final FOV/Structural/#511 1x resolution final.tif';
     thorsync_h5 = '/Volumes/Potter/DRGS/#511/Final FOV/ThorSync/SDH/TS_DRG#511_000/Episode_0000.h5'; 
     
 elseif dsnum == 518
     s2p='/Volumes/Potter/DRGS/#518/Final FOV/TimeLapse/Finished new/suite2p/combined/Fall.mat'; 
-    tlapse_path='/Volumes/Potter/DRGS/#518/Final FOV/TimeLapse/#518_000/Experiment.xml'; 
+    tlapsemd_path='/Volumes/Potter/DRGS/#518/Final FOV/TimeLapse/#518_000/Experiment.xml'; 
     zstack_mdpath = '/Volumes/Potter/DRGS/#518/Final FOV/Structural/#518_032/Experiment.xml'; 
     zstack_path = '/Volumes/Potter/DRGS/#518/Final FOV/TimeLapse/Finished new/oldsuite2p/#518 Suite2p/Depth Files/Zstack 512 8bit RGB.tif';
     thorsync_h5='/Volumes/Potter/DRGS/#518/Final FOV/ThorSync/TS_SDH#518/Episode_0000.h5'; 
@@ -41,14 +41,14 @@ elseif dsnum == 519
     disp('not ready')
 elseif dsnum == 545
     s2p='/Volumes/Warwick/DRGS project/#545 4-4-25/Final FOV/Functional/Split/suite2p/combined/Fall.mat';
-    tlapse_path ='/Volumes/Warwick/DRGS project/#545 4-4-25/Final FOV/Functional/Raw/#545_002/Experiment.xml';
+    tlapsemd_path ='/Volumes/Warwick/DRGS project/#545 4-4-25/Final FOV/Functional/Raw/#545_002/Experiment.xml';
     zstack_mdpath = '/Volumes/Warwick/DRGS project/#545 4-4-25/Final FOV/Structural/#545 post z_002/Experiment.xml';
     zstack_path = '/Volumes/Warwick/DRGS project/#545 4-4-25/Final FOV/Structural/#545 Final Structural Ref.tif'; 
     thorsync_h5='/Volumes/Warwick/DRGS project/#545 4-4-25/Final FOV/ThorSync/Raw/#545_TS_0002.h5'; 
     
 elseif dsnum == 542
     s2p = '/Volumes/Warwick/DRGS project/#542 3-25-25/Final FOV/Functional/Split/suite2p/combined/Fall.mat';
-    tlapse_path='/Volumes/Warwick/DRGS project/#542 3-25-25/Final FOV/Functional/Raw Files/#542_000/Experiment.xml'; 
+    tlapsemd_path='/Volumes/Warwick/DRGS project/#542 3-25-25/Final FOV/Functional/Raw Files/#542_000/Experiment.xml'; 
     zstack_mdpath='/Volumes/Warwick/DRGS project/#542 3-25-25/Final FOV/Structural/#542 post z stack_002 (100pct 1040)/Experiment.xml';
     %zstack_mdpath= '/Volumes/Warwick/DRGS project/#542 3-25-25/Final FOV/Structural/#542 post z stack/Experiment.xml';
     
@@ -59,20 +59,23 @@ elseif dsnum == 542
     thorsync_h5 = '/Volumes/Warwick/DRGS project/#542 3-25-25/Final FOV/ThorSync/Raw/#542_TS_0005.h5';
 elseif dsnum == 541 
     s2p = '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/Split/Split/suite2p-2 removed/combined/Fall.mat'; 
-    tlapse_path= '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/raw/raw Doubles/#541_003/Experiment.xml';
+    tlapsemd_path= '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/raw/raw Doubles/#541_003/Experiment.xml';
     zstack_path= '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/Split/Final Suite2p copy/Reference Zstack/#541 Structural Ref.tif';
     zstack_mdpath = '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/Functional/Split/Final Suite2p copy/Reference Zstack/Experiment.xml'; 
     thorsync_h5 = '/Volumes/Warwick/DRGS project/#541 3-22-25/Time Lapse/Final FOV/ThorSync/Original Files/#541_TS_0000/Episode_0000.h5'; 
-elseif dsnum == 1 % ABBY 
-    % PUT YOUR DATASET HERE BUT USE WINDOWS FILE FORMAT 
-    %s2p = ; % Fall file that you save as your suite2p output (need to do file->save to mat in suite2p)
-    %tlapse_path =; % choose any experiment.xml file from one of the tseries. they should all be the same in the variables that m 
-    %zstack_path = ; % find the tif of 
+elseif dsnum == 548
+    s2p = '/Volumes/Warwick/DRGS project/#548 8-8-25/Final FOV/Split/suite2p/combined/Fall.mat';
+    tlapsemd_path  = '/Volumes/Warwick/DRGS project/#548 8-8-25/Final FOV/Raw/#548_001/Experiment.xml';
+    zstack_path = '/Volumes/Warwick/DRGS project/#548 8-8-25/structural/#548 pre 1030_Smoothed.tif'; 
+    zstack_mdpath =  '/Volumes/Warwick/DRGS project/#548 8-8-25/Final FOV/Structural/#547 post 1033/Experiment.xml';
+    thorsync_h5 = '/Volumes/Warwick/DRGS project/#548 8-8-25/Final FOV/ThorSync/Exp#548_001/Episode_0000.h5'; 
+
+
    
 end
 
 %% LOAD DATA
-tlapse_xml=md.importxml(tlapse_path);
+tlapse_xml=md.importxml(tlapsemd_path);
 [tlapse_md] = md.extract_metadata(tlapse_xml);
 
 zstack_xml = md.importxml(zstack_mdpath); 

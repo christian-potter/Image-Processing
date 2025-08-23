@@ -3,9 +3,6 @@ function[tlh5]= read_h5(folder)
 % takes name of folder from one of the thorsync acquisition sessions and
 % returns table with appropriate variables 
 
-%% NOTES
-% ** need to verify new channel names post new computer 
-
 
 %% READ H5 FILE 
 % if error, use h5disp(folder) to determine what names actually are 
@@ -38,36 +35,24 @@ catch
 end 
 
 piezo = h5read(folder,'//AI/PiezoMonitor');
-try 
-    pockels= h5read(folder,'//AI/PockelsMonitor');
-catch 
-    pockels = h5read(folder,'//AI/Pockels1Monitor'); 
-end
-
+pockels= h5read(folder,'//AI/PockelsMonitor');
 
 framecount = h5read(folder,'//CI/FrameCounter');
 
-try 
-    frames =h5read(folder,'//DI/2pFrames');
-catch 
-    frames =h5read(folder,'//DI/FrameIn');
-end
+frames =h5read(folder,'//DI/2pFrames');
+captureactive = h5read(folder,'//DI/CaptureActive');
+pandaframes = h5read(folder,'//DI/PandaFrames');
 
-
-
-%captureactive = h5read(folder,'//DI/CaptureActive');
-%pandaframes = h5read(folder,'//DI/PandaFrames');
-
-%fithz = h5read(folder,'//Freq/FitHz');%also all zeros 
+fithz = h5read(folder,'//Freq/FitHz');%also all zeros 
 %hz = h5read(folder,'//Freq/Hz'); %all zeros for some reason 
 
-%gctr = h5read(folder,'//Global/GCtr');
+gctr = h5read(folder,'//Global/GCtr');
 
 %% MAKE TABLE, NAME VARIABLES
 
-tlh5= table(estim',mforce',mlength',pedal',peltier',piezo',pockels',framecount',frames'); %; ,captureactive',pandaframes',gctr'); 
+tlh5= table(estim',mforce',mlength',pedal',peltier',piezo',pockels',framecount',frames',captureactive',pandaframes',gctr'); 
 
-tlh5.Properties.VariableNames={'estim','mforce','mlength','pedal','peltier','piezo','pockels','framecount','frames'};%,'captureactive','pandaframes','gctr'}; 
+tlh5.Properties.VariableNames={'estim','mforce','mlength','pedal','peltier','piezo','pockels','framecount','frames','captureactive','pandaframes','gctr'}; 
 
 
 %% TO ADD TO THIS FUNCTION 
