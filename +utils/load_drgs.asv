@@ -66,12 +66,14 @@ elseif dsnum == 541
 
 elseif dsnum == 547
     s2p = '/Volumes/Warwick/DRGS project/#547- 8-6-25/#547 8-6-25/final FOV/Time Lapse/Split/suite2p/combined/Fall.mat'; 
-    tlapsemd_path = '/Volumes/Warwick/DRGS project/#547- 8-6-25/#547 8-6-25/final FOV/Time Lapse/Raw/#547_000/Experiment.xml';  
+    tlapsemd_path = '/Volumes/Warwick/DRGS project/#547- 8-6-25/#547 8-6-25/final FOV/Time Lapse/Raw/#547_000/Experiment.xml'; 
+    
     zstack_path = '/Volumes/Warwick/DRGS project/#547- 8-6-25/#547 8-6-25/final FOV/Structural Images/#547 Pre Structural 1030_Smoothed Cropped and downscaled to match post (Final).tif';
-    zstack_mdpath = '/Volumes/Warwick/DRGS project/#547- 8-6-25/#547 8-6-25/final FOV/Structural Images/#547 Pre Structural 1030 /Experiment.xml'; 
+    zstack_mdpath = '/Volumes/Warwick/DRGS project/#547- 8-6-25/#547 8-6-25/final FOV/Structural Images/#547 Pre Structural 1030 (0.812 um-px)'; 
+
     %zstack_path= '/Volumes/Warwick/DRGS project/#547- 8-6-25/#547 8-6-25/final FOV/Structural Images/#547 Post Structural 1030_Smoothed (Final).tif'; 
     %zstack_mdpath = '/Volumes/Warwick/DRGS project/#547- 8-6-25/#547 8-6-25/final FOV/Structural Images/#547 Post Structural 1030/Experiment.xml';
-    thorsync_h5 ='/Volumes/Warwick/DRGS project/#547- 8-6-25/#547 8-6-25/final FOV/ThorSync/Raw/TS#547_000.h5';
+    thorsync_h5 = '/Volumes/Warwick/DRGS project/#547- 8-6-25/#547 8-6-25/final FOV/ThorSync/Raw/Exp#547_000.h5';
 
 
 elseif dsnum == 548
@@ -80,6 +82,8 @@ elseif dsnum == 548
     zstack_path ='/Volumes/Warwick/DRGS project/#548 8-8-25/Final FOV/Structural/#548 post 1033_Smoothed 1xy 2z (Final CAW 8-23-25).tif';
     zstack_mdpath =  '/Volumes/Warwick/DRGS project/#548 8-8-25/Final FOV/Structural/#548 post 1033/Experiment.xml';
     thorsync_h5 = '/Volumes/Warwick/DRGS project/#548 8-8-25/Final FOV/ThorSync/Exp#548_001/Episode_0000.h5'; 
+
+
    
 end
 
