@@ -4,7 +4,7 @@ arguments
     stat cell 
     plane_crshift double 
     figs struct 
-    slider struct 
+    slider struct % contains current slider values 
     ops struct 
     id_vect double 
     ypix_zplane cell % mapping between y pixel value and the z-stack plane it should be on 
@@ -18,6 +18,7 @@ arguments
     opt.refsurround double = 100
     opt.default_plane (1,1) double = 1 % default plane in the z-stack
     opt.colororder string = 'rgb'
+   
 end 
 %% DESCRIPTION
 
@@ -51,13 +52,15 @@ if isfield(opt,'adjusted_xyz')
         count =count+1; 
     end
     ypix = stat{count}.med(1); % first ROI in plane 
-    curplane = ypix_zplane{p} + opt.adjusted_xyz(3); 
-    opt.default_plane=curplane(ypix-plane_crshift(2))+opt.adjusted_xyz(3); 
+    cur_ypixz = ypix_zplane{p} + opt.adjusted_xyz(3); 
+    opt.default_plane=cur_ypixz(ypix-plane_crshift(2))+opt.adjusted_xyz(3); 
 end
 
 %% CREATE VARIABLES
 hFigImg= NaN; hFigSlider = NaN;
 %% GET RED/GREENWIN
+% takes appropriate functional images based on user selection, adjusted for the current plane and xy
+% offset 
 [redwin,greenwin]= get.redgreen_images(opt.anatomical,opt.functional,ops,plane_crshift); 
 %% DEFINE IMAGE 
 if strcmp(opt.type,'functional')
@@ -90,12 +93,14 @@ if strcmp(opt.type,'functional')
     hFigImg = figure('Name', 'RGB Image', 'NumberTitle', 'off', 'Position',figs.rgb.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     hImg = imshow(image, 'Parent', hAx); hold on; 
+    % draw masks 
     masks=plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),plane_crshift,idxshifts(p),'masktype','outline');
   
 elseif strcmp(opt.type,'zstack')
     hFigImg = figure('Name', 'Z-Stack', 'NumberTitle', 'off', 'Position',figs.zstack.Position, 'Color', 'White');
     hAx = axes('Parent', hFigImg, 'Position', [0.01, 0.01, 0.99, 0.99]);
     hImg = imshow(image(:,:,:,opt.default_plane), 'Parent', hAx); hold on;
+    % draw masks and ajust them 
     [masks,texts]=plot.mask_boundaries(mask_colors,mask_coords(roi_planeidx==p),plane_crshift,idxshifts(p),'masktype','outline');
     orig_maskx=cell(length(masks),1);orig_masky=cell(length(masks),1);
     orig_textx=cell(length(masks),1);orig_texty=cell(length(masks),1);
@@ -105,7 +110,8 @@ elseif strcmp(opt.type,'zstack')
         masks{n}.YData = masks{n}.YData+nzstack_drift(2); texts{n}.Position(2) = texts{n}.Position(2)+nzstack_drift(2); 
         orig_masky{n}= masks{n}.YData; orig_texty{n}= texts{n}.Position(2)+nzstack_drift(2); 
     end
-    arrow = annotation('arrow','Color','r','LineWidth',.25); 
+    % draw red guidance arrow 
+    arrow = annotation('arrow','Color','r','LineWidth',.5); 
     arrow.Parent = gca; 
     arrow.X= ([1 size(image,2)]);arrow.Y=([0 0]);
     t = title(['Plane: ',num2str(opt.default_plane)],'FontSize',25); 
@@ -238,10 +244,10 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
                 set(texts{m},'Position',[orig_textx{m}+xyshift_x,orig_texty{m}+xyshift_y,0]) % third coordinate is 0
             end
             %--- ARROW POSITION
-            narrowy= mean(find(curplane==img_num)); 
-            if img_num<min(curplane)
+            narrowy= mean(find(cur_ypixz==img_num)); 
+            if img_num<min(cur_ypixz)
                 set(arrow,'Y',[1 1])
-            elseif img_num>max(curplane)
+            elseif img_num>max(cur_ypixz)
                 set(arrow,'Y',[size(image,2)-1,size(image,2)-1])
             else
                 set(arrow,'Y',[narrowy narrowy])         

@@ -15,7 +15,8 @@ if menu == 1
     w = ['W: Lock Figure Positions',char(10)]; 
     e = ['E: Save id_vect/ Current Figure Positions',char(10)]; 
     z = ['Z: Align Z-Stack for Selected Plane',char(10)];
-    inputstr= [titleinput,a,s,d,r,w,e,z]; 
+    v = ['V: Set Depth',char(10)]; 
+    inputstr= [titleinput,a,s,d,r,w,e,z,v]; 
 
 % MENU 2.5 
 % used in prompt.change_rois 
@@ -54,6 +55,16 @@ elseif menu == 5
      e = ['E: Manually Enter Correction ',char(10)]; 
      r= ['R: Find With ROI',char(10)];
      inputstr=[titleinput,e,r]; 
+
+% used in set_depth 
+elseif menu == 6
+    a = ['A: Enter Values for X Reference Bands',char(10)];
+    s = ['S: Enter Values for Y Reference Bands',char(10)];
+    q = ['Q: Quit and Return to Main Menu',char(10)];
+    inputstr = [titleinput, a,s, q];
+
+elseif menu == 7
+
 end
 
 end

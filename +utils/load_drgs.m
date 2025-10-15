@@ -163,15 +163,6 @@ load(s2p)
 %id_vect = ones(sum(iscell(:,1)==1))*4; 
 %cellstat = stat(iscell(:,1)==1); 
 
-%% 511 adjustment
-if dsnum == 511
-    for i = 1:length(ypix_zplane)
-        curplane = ypix_zplane{i};
-        curplane = curplane+34; 
-        ypix_zplane{i}=curplane; 
-    end
-end
-
 
 %% PLOT RELATIONSHIP BETWEEN TLAPSE AND ZSTACK
 if strcmp(plotstr,'plot')
@@ -208,7 +199,14 @@ if strcmp(plotstr,'plot')
     xlabel('Timepoint')
     
     title(['#',num2str(dsnum),' Piezo Frame Acquisition'])
-    legend({'frame 1','frame 2','frame 3','frame 4','fb1','fb2'},'location','northwest')
+    
+    if tlapse_md.nplanes == 4
+        legend({'frame 1','frame 2','frame 3','frame 4','fb1','fb2'},'location','northwest')
+    elseif tlapse_md.nplanes == 5
+        legend({'frame 1','frame 2','frame 3','frame 4','frame 5','fb1','fb2'},'location','northwest')
+    end
+
+
     utils.sf 
 
 end

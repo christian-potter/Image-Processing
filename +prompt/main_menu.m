@@ -1,4 +1,4 @@
-function [id_vect,figs] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zstack,colororder,zstack_drift)
+function [id_vect,figs,ref_bands] = main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zstack,colororder,zstack_drift)
 %% DESCRIPTION 
 % INPUTS 
 % id_vect: vector 1 x neurons
@@ -25,31 +25,14 @@ fslider.lowgreen = 0; zslider.lowgreen = 0;
 fslider.highgreen = .5;zslider.highgreen = .5;
 fslider.gammagreen = 1; zslider.gammagreen = 1; 
 
-
-%%
+ref_bands = []; 
+%% RUN MAIN MENU 
 while p ~= -1   % loop function until user exits 
     
     [plane_crshift]=get.crshift(ops,p);
     
     if exist("fslider_fig") == 1 %only trigger if there are existing figures
-        fslider.gammagreen = fslider_fig.Children(1).Value; 
-        fslider.highgreen = fslider_fig.Children(3).Value; 
-        fslider.lowgreen= fslider_fig.Children(5).Value; 
-        
-        fslider.gammared = fslider_fig.Children(7).Value; 
-        fslider.highred = fslider_fig.Children(9).Value; 
-        fslider.lowred= fslider_fig.Children(11).Value; 
-    
-        zslider.y = zslider_fig.Children(2).Value;
-        zslider.x =zslider_fig.Children(5).Value; 
-        %zslider.z = zslider_fig.Children(8).Value; 
-    
-        zslider.gammagreen = zslider_fig.Children(10).Value; 
-        zslider.highgreen = zslider_fig.Children(12).Value; 
-        zslider.lowgreen= zslider_fig.Children(14).Value; 
-        zslider.gammared = zslider_fig.Children(16).Value; 
-        zslider.highred = zslider_fig.Children(18).Value; 
-        zslider.lowred= zslider_fig.Children(20).Value; 
+      [fslider,zslider] = utils.save_slidervals(fslider_fig,zslider_fig); 
     end 
 
     close all 
@@ -91,19 +74,52 @@ while p ~= -1   % loop function until user exits
         p = -1; 
     %--Align Z-Stack  -------------------------------------------
     elseif strcmp(answer,'z')
-        refimg = get.imagefromFigure(nfigs);
-        input_str =prompt.menu_str(5); 
-        answer = input(input_str,"s");
-        if strcmp(answer,'e')
-            answer = input('Enter X,Y,Z-Plane Vector:'); 
-            padjusted_xyz(p,:)=answer; 
+        % *** NEEDS TO BE UPDATED TO NEW FIGURE CONVENTIONS **** 
+        % refimg = get.imagefromFigure(nfigs);
+        % input_str =prompt.menu_str(5); 
+        % answer = input(input_str,"s");
+        % if strcmp(answer,'e')
+        %     answer = input('Enter X,Y,Z-Plane Vector:'); 
+        %     padjusted_xyz(p,:)=answer; 
+        % 
+        % elseif strcmp(answer,'r')
+        %     answer = input('Select a cell as reference:'); 
+        %     [padjusted_xyz(p,:)] = prompt.align_zstack(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(:,p),'surround',0,'refimg',refimg,'specified_roi',answer);
+        % end
+    
+    % ---- Set Depth ---------------------------------------------
+    elseif strcmp(answer,'v')
+        % save slider values and clear figures so conditional at beginning
+        % is not triggered 
+        [fslider,zslider] = utils.save_slidervals(fslider_fig,zslider_fig); 
+        clear fslider_fig zslider_fig
+        start  = 1; 
+        
+        while start~=0
+            close all
+            % create depth figure/ slider 
+            set_depth(figs,zslider,ypix_zplane,'zstack',zstack,'colororder',colororder)
+            % prompt user     
+            input_str=prompt.menu_str(6); 
+            answer = input (input_str,"s"); 
 
-        elseif strcmp(answer,'r')
-            answer = input('Select a cell as reference:'); 
-            [padjusted_xyz(p,:)] = prompt.align_zstack(p,zstack,id_vect,ops,cellstat,plane_crshift,figs,ypix_zplane,zstack_drift,padjusted_xyz(:,p),'surround',0,'refimg',refimg,'specified_roi',answer);
+            if strcmp(answer,'a') % if "enter values for reference bands'
+                cprompt = ['Enter z-stack plane that first intersects with X reference bands :',char(10),'(If first plane has already broken, enter 0 for corresponding entry)',char(10)];
+                ref_bands.x= input(cprompt);
+
+            elseif strcmp(answer,'s') % if "enter values for reference bands'
+                cprompt = ['Enter z-stack plane that first intersects with Y reference bands :',char(10),'(If first plane has already broken, enter 0 for corresponding entry)',char(10)];
+                ref_bands.y= input(cprompt); 
+
+            elseif strcmp(answer,'q') % if "quit"
+                start = 0; 
+            end
+
         end
 
     end
-    
+    %---- END MENU OPTIONS 
+
+
 
 end
