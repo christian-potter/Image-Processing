@@ -16,7 +16,13 @@ function [avgPlane, avgGreen, avgRed, meta] = make_reference(tifPath, nPlanes)
 % Example:
 %   [avgP, avgG, avgR, meta] = avgPlanesFromInterleavedTiff('stack.tif', 6);
 %   figure; montage(avgP, 'Size', [ceil(sqrt(meta.nPlanes)) NaN]); title('Avg per plane (combined)');
+%% DESCRIPTION
+% Makes new reference image based on given frames. Used when there is a
+% period of the t-series that is acquired with a different wavelength to
+% highlight red cells 
 
+
+%%
     info = imfinfo(tifPath);
     nFrames = numel(info);
     if nFrames < 2*nPlanes

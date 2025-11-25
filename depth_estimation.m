@@ -1,13 +1,41 @@
-%% DEPTH ESTIMATION 
+%% LOAD 
+[zstack,tlapse_md,zstack_md,tsync,s2p,ypix_zplane] = utils.load_drgs(511,'plot'); 
+
+
+%% LOAD FIGURE POSITIONS 
+load('work-positions.mat')
+figs.zstack = figs.rgb; 
+figs.zslider=figs.slider;
+figs.ref=figs.rgb; 
+%% SETTINGS 
+%zstack=zs;
+p = 1;% Choose Plane 
+atype= 'mean';ftype='max'; %choose default anatomical and functional image types 
+nplanes=5;
+zstack_drift = [ops.xoff(end) ops.yoff(end)]; % estimates the x/y coordinates of the z-stack by taking last value of x and y offset 
+colororder = 'grb'; % change between 'grb' and 'rgb' if your z-stack channels are switched 
+
+%% CREATE ZSTACK VIEWER
+[id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zstack,'rgb',zstack_drift);
+
+%% DEPTH ESTIMATION
+zs = zstack; 
+
 %%
 stack_size = 50; 
 dorsal_stack = squeeze(mean(zs(:,:,[1 2],1:stack_size),[3 4])); 
-%%
+%% BAR GRAPH 
 figure
 bar3(dorsal_stack)
 xlabel('X-axis');
 ylabel('Y-axis');
 zlabel('Z-axis');
+% Set the edge color of the bar graph to transparent
+set(get(gca, 'Children'), 'EdgeColor', 'none');
+%% VIEW ZSTACK 
+[id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zstack,'grb',zstack_drift);
+%% EXCLUDE PORTION FOR DORSAL ROOT 
+
 
 %%
 figure
@@ -39,7 +67,6 @@ ylabel('Pixel Intensity')
 legend({'Data','Fit'})
 sgtitle('Red And Green Averaged Together')
 %% 
-
 rel_surface = [find(x_fit==max(x_fit)) find(y_fit==max(y_fit))]; 
 abs_surface = 1; % first plane where spinal cord is visible ( selected by user)
 
@@ -51,7 +78,7 @@ rb.x(:,2)= ref_xs;
 rb.y(:,1)= ref_bands.y; 
 rb.y(:,2)= ref_ys; 
 
-%%
+%% GENERATE GRID 
 
 [X,Y] = meshgrid(1:length(x),1:length(y)); 
 
@@ -64,8 +91,7 @@ for i = 1:size(Z,1)
 end
 
 
-%%
-% Plotting the surface
+%% Plotting the surface
 figure;
 
 s = surf(X, Y, Z); % Create a surface plot
@@ -97,7 +123,7 @@ plot3(X(end,:),Y(end,:),Z(end,:)*0,'color','k','LineWidth',3)
 %- 
 colorbar
 
-%%
+%% ROTATE 
 
 %axis tight % Adjusts axis limits to the data range.
 %axis vis3d % Freezes the aspect ratio to prevent distortion.

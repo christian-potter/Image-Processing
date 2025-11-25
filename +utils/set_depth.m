@@ -1,20 +1,18 @@
 function [] = set_depth(figs,slider,ypix_zplane,opt)
 arguments
- 
     figs struct 
     slider struct % contains current slider values for reference z-stack 
     ypix_zplane cell 
     opt.zstack double % needs to be specified w/ name-value argument pair. legacy code shortcut 
     opt.type string = 'zstack' % used this for convenience with copying old code 
     opt.colororder string
-
-
 end
 
 
 %% DESCRIPTION 
 % clone of adjustImageV2 with unneccessary components removed for setting
 % depth 
+% ** used to validate automatic depth processing** 
 
 %% CREATE VARIABLES
 %hFigImg= NaN; hFigSlider = NaN;
