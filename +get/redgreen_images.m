@@ -1,9 +1,17 @@
 function [redwin,greenwin]= redgreen_images(anatomical,functional,ops,crshift) 
+
+
 %% DESCRIPTION 
 % takes ops file and returns redwin/ greenwin based on what image type is
 % requested and the crshift for that given plane 
+
+
+
 %% CREATE VARIABLES 
 planesize= [size(ops.refImg,1) size(ops.refImg,2)]; 
+
+
+
 %% FUNCTIONAL IMAGE 
 
 if strcmp(anatomical,'mean')

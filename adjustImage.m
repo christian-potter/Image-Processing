@@ -1,4 +1,5 @@
-function [nfigs,nadjusted_xyz,hFigSlider] = adjustImagev2(p,stat,plane_crshift,figs,slider,ops,id_vect,ypix_zplane,opt)
+
+function [nfigs,nadjusted_xyz,hFigSlider] = adjustImage(p,stat,plane_crshift,figs,slider,ops,id_vect,ypix_zplane,opt)
 arguments 
     p double 
     stat cell 

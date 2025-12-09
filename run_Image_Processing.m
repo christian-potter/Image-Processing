@@ -9,7 +9,7 @@ cellstat = stat(iscell(:,1)==1);
 %%
 load('/Volumes/ross/Christian/DRGS/#548/Fall.mat')
 %% LOAD FIGURE POSITIONS 
-load('work-positions.mat')
+load('home-positions.mat')
 figs.zstack = figs.rgb; 
 figs.zslider=figs.slider;
 figs.ref=figs.rgb; 
@@ -28,3 +28,6 @@ colororder = 'grb'; % change between 'grb' and 'rgb' if your z-stack channels ar
 
 
 %% CONVERT REFERENCE BANDS INTO NEW COORDINATES 
+
+%% SAVE FILES
+
