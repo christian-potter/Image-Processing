@@ -37,9 +37,9 @@ while p ~= -1   % loop function until user exits
 
     close all 
     %-- generate functional image/ control panel 
-    [nffigs,~,fslider_fig] = adjustImagev2(p,cellstat,plane_crshift,figs,fslider,ops,id_vect,ypix_zplane,'functional',ftype,'anatomical',atype,'type','functional'); 
+    [nffigs,~,fslider_fig] = adjustImage(p,cellstat,plane_crshift,figs,fslider,ops,id_vect,ypix_zplane,'functional',ftype,'anatomical',atype,'type','functional'); 
     %-- generate zstack image/ control panel 
-    [nzfigs,~,zslider_fig]= adjustImagev2(p,cellstat,plane_crshift,figs,zslider,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'type','zstack','zstack',zstack,'adjusted_xyz',padjusted_xyz(:,p),'colororder',colororder);    
+    [nzfigs,~,zslider_fig]= adjustImage(p,cellstat,plane_crshift,figs,zslider,ops,id_vect,ypix_zplane,'zstack_drift',zstack_drift,'type','zstack','zstack',zstack,'adjusted_xyz',padjusted_xyz(:,p),'colororder',colororder);    
     
     % --- PROMPT USER --------------------------------------- 
     input_str=prompt.menu_str(1); 
@@ -98,7 +98,7 @@ while p ~= -1   % loop function until user exits
         while start~=0
             close all
             % create depth figure/ slider 
-            set_depth(figs,zslider,ypix_zplane,'zstack',zstack,'colororder',colororder)
+            utils.set_depth(figs,zslider,ypix_zplane,'zstack',zstack,'colororder',colororder)
             % prompt user     
             input_str=prompt.menu_str(6); 
             answer = input (input_str,"s"); 

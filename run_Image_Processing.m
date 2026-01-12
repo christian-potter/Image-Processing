@@ -9,7 +9,7 @@ cellstat = stat(iscell(:,1)==1);
 %%
 load('/Volumes/ross/Christian/DRGS/#548/Fall.mat')
 %% LOAD FIGURE POSITIONS 
-load('home-positions.mat')
+load('home_positions.mat')
 figs.zstack = figs.rgb; 
 figs.zslider=figs.slider;
 figs.ref=figs.rgb; 
@@ -22,7 +22,7 @@ zstack_drift = [ops.xoff(end) ops.yoff(end)]; % estimates the x/y coordinates of
 colororder = 'grb'; % change between 'grb' and 'rgb' if your z-stack channels are switched 
 
 %% RUN MAIN MENU
-[id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zstack,'rgb',zstack_drift);
+[id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zs,'rgb',zstack_drift);
 
 %% ADJUST YPIX_ZPLANE
 

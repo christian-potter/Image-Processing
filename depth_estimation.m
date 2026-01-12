@@ -1,9 +1,8 @@
 %% LOAD 
 [zstack,tlapse_md,zstack_md,tsync,s2p,ypix_zplane] = utils.load_drgs(511,'plot'); 
 
-
 %% LOAD FIGURE POSITIONS 
-load('work-positions.mat')
+%load('work-positions.mat')
 figs.zstack = figs.rgb; 
 figs.zslider=figs.slider;
 figs.ref=figs.rgb; 
@@ -13,28 +12,40 @@ p = 1;% Choose Plane
 atype= 'mean';ftype='max'; %choose default anatomical and functional image types 
 nplanes=5;
 zstack_drift = [ops.xoff(end) ops.yoff(end)]; % estimates the x/y coordinates of the z-stack by taking last value of x and y offset 
-colororder = 'grb'; % change between 'grb' and 'rgb' if your z-stack channels are switched 
-
+colororder = 'rgb'; % change between 'grb' and 'rgb' if your z-stack channels are switched 
+%id_vect = ones(sum(iscell(:,1)==1),1)*3; 
+%cellstat = stat(iscell(:,1)==1);
 %% CREATE ZSTACK VIEWER
-[id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zstack,'rgb',zstack_drift);
+[id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,stat,ftype,atype,nplanes,ypix_zplane,zstack,'rgb',zstack_drift);
 
 %% DEPTH ESTIMATION
-zs = zstack; 
-
+%zs = zstack; 
+d.smoothSigma = 4; 
+out = estimatePerPixelEntryDepth(zs,1,d); 
 %%
-stack_size = 50; 
-dorsal_stack = squeeze(mean(zs(:,:,[1 2],1:stack_size),[3 4])); 
+figure;
+imagesc(out.zEntryUm);
+axis image; colorbar;
+title('Per-pixel entry depth (um)');
+%%
+zs = zstack; 
+stack_size = 100; 
+%dorsal_stack = squeeze(mean(zs(:,:,[1 2],1:stack_size),[3 4])); 
+dorsal_stack = nan(size(zs,1),size(zs,2)); 
+
 %% BAR GRAPH 
 figure
-bar3(dorsal_stack)
+bar3(dorsal_stack,10)
 xlabel('X-axis');
 ylabel('Y-axis');
-zlabel('Z-axis');
+zlabel('Pixel Sum');
+title('Sum of Pixels in First 50 Z-Stack Slices')
+
 % Set the edge color of the bar graph to transparent
-set(get(gca, 'Children'), 'EdgeColor', 'none');
+set(get(gca, 'Children'), 'EdgeColor', 'k');
+utils.sf
 %% VIEW ZSTACK 
-[id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zstack,'grb',zstack_drift);
-%% EXCLUDE PORTION FOR DORSAL ROOT 
+[id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zs,'rgb',zstack_drift);
 
 
 %%
@@ -69,7 +80,10 @@ sgtitle('Red And Green Averaged Together')
 %% 
 rel_surface = [find(x_fit==max(x_fit)) find(y_fit==max(y_fit))]; 
 abs_surface = 1; % first plane where spinal cord is visible ( selected by user)
-
+%%
+raw = xpixels(1):xpixels(end); 
+nx_fit = (x_fit-min(x_fit))
+warped = raw*x_fit; 
 
 %% CONVERT REFERENCE BANDS INTO NEW COORDINATES 
 
@@ -97,7 +111,7 @@ figure;
 s = surf(X, Y, Z); % Create a surface plot
 xlabel('X-axis');
 ylabel('Y-axis');
-zlabel('Z-axis');
+zlabel('Pixel intensity');
 title('Estimate of Spinal Cord Curvature');
 view(3); % Set the view to 3D
 s.EdgeColor='none'; 
@@ -123,27 +137,33 @@ plot3(X(end,:),Y(end,:),Z(end,:)*0,'color','k','LineWidth',3)
 %- 
 colorbar
 
+%% MAP TO OBSERVED DEPTH 
+
+
+
+
+
 %% ROTATE 
-
-%axis tight % Adjusts axis limits to the data range.
-%axis vis3d % Freezes the aspect ratio to prevent distortion.
-axis equal
-% 2. Get the current axis handle.
-ax = gca;
-
-% 3. Loop through a sequence of azimuth angles to create a rotation animation.
-azimuths = 0:1:360; % Define a range of azimuth angles (0 to 360 in 5-degree steps).
-for az = azimuths
-    % Change the camera view.
-    % The elevation (vertical angle) is kept constant at 30 degrees.
-    view(ax, az, 20);
-    
-    % Force MATLAB to update the plot window.
-    drawnow;
-    
-    % Optional: Add a short pause for a smoother animation.
-    % pause(0.01);
-end
+% 
+% %axis tight % Adjusts axis limits to the data range.
+% %axis vis3d % Freezes the aspect ratio to prevent distortion.
+% axis equal
+% % 2. Get the current axis handle.
+% ax = gca;
+% 
+% % 3. Loop through a sequence of azimuth angles to create a rotation animation.
+% azimuths = 0:1:360; % Define a range of azimuth angles (0 to 360 in 5-degree steps).
+% for az = azimuths
+%     % Change the camera view.
+%     % The elevation (vertical angle) is kept constant at 30 degrees.
+%     view(ax, az, 20);
+% 
+%     % Force MATLAB to update the plot window.
+%     drawnow;
+% 
+%     % Optional: Add a short pause for a smoother animation.
+%     % pause(0.01);
+% end
 %%
 % Display the current view angle on the figure
 view_angle = view(ax); % Get the current view angle
