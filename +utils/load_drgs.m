@@ -17,6 +17,9 @@ function [zstack,tseries_md,zstack_md,tsync,s2p,ypix_zplane] = load_drgs(dsnum,p
 % ypix_zplane: vector that connects every ypixel row to a zplane in the
 %   zstack
 
+%% NOTES 
+% THIS IS LEGACY CODE THAT LOADS WITHOUT FILE STRUCTURE AND 
+
 
 %% GET PATHNAMES
 
@@ -81,7 +84,6 @@ elseif dsnum == 548
 end
 
 %% LOAD DATA
-
 if contains(tseriesmd_path,'.mat')
     t = load(tseriesmd_path); 
     tseries_md = t.tseries_md;
@@ -89,25 +91,24 @@ else
     tseries_xml=md.importxml(tseriesmd_path);
     [tseries_md] = md.extract_metadata(tseries_xml);
 end
-
 zstack_xml = md.importxml(zstack_mdpath); 
 [zstack_md]=md.extract_metadata(zstack_xml);
 
 zstack= get.zstack(zstack_path);
-
 [tsync]= md.read_h5(thorsync_h5); 
 
 %% GET PIEZO MOVEMENT FROM TSYNC
-
+%% UNCOMPRESSED TSYNC, SO GET THOUSANDS OF FRAMES FOR DISTANCE 
 a = 1:tseries_md.nplanes; b = tsync.framecount; 
 allplanes = find(ismember(b,a));% get indices for the first nplanes 
 
-totalpdist = tsync.piezo(allplanes(end))-tsync.piezo(allplanes(1)); 
-totalzdist =  tseries_md.stepSize*tseries_md.nplanes/1000;
-
+totalpdist = tsync.piezo(allplanes(end))-tsync.piezo(allplanes(1));% distance of functional planes 
+totalzdist =  tseries_md.stepSize*tseries_md.nplanes/1000; %total distance of z-stack (stepsize * nplanes)
+%%
 plane_zranges = nan(tseries_md.nplanes,2); 
 piezoprop = 0; 
 %- get distance moved by the piezo for first frames 
+% ** this assumes piezo moves at linear rate** 
 for p = 1:tseries_md.nplanes
     curframes = tsync.framecount==p; 
     curpiezo = tsync.piezo(curframes); 
@@ -115,28 +116,28 @@ for p = 1:tseries_md.nplanes
     piezoprop(p+1) = curpdist/totalpdist; % proprotion of the total distance covered 
 end
 
-covered_range = 0; 
+%------ DISTANCE COVERED BY THE PIEZO PER FRAME 
+covered_range = 0;% cumulative distance over frames 
 for p = 1:tseries_md.nplanes
-    planezdist= tseries_md.startPos + totalzdist*piezoprop(p);  
+    planezdist= tseries_md.startPos + totalzdist*piezoprop(p); % starting point + proportion of covered distance per frame (first frame is less)
     plane_zranges(p,1)= covered_range; 
     plane_zranges(p,2)= piezoprop(p+1)*totalzdist+covered_range; 
     covered_range = plane_zranges(p,2);
 end
 
-plane_zranges = plane_zranges+tseries_md.setupPosition; 
-%%
+plane_zranges = plane_zranges+tseries_md.startPos; % this is vulnerable to user error if the tseries_md and zstack_md do not aline
+%% GIVES TSERIES POSITION IN TERMS OF TSEREIS Y PIXELS ONLY
 
 ypix_zdist = cell(1,tseries_md.nplanes);  
-
 for p = 1:tseries_md.nplanes
     curzdists = nan(1,tseries_md.ypix); 
     zrange = plane_zranges(p,:); 
-    zvals = linspace(zrange(1),zrange(2),tseries_md.ypix); 
+    zvals = linspace(zrange(1),zrange(2),tseries_md.ypix);% generate line between endpoints for each ypixel  
     ypix_zdist{p}= zvals; % gives z-distance in 
 
 end
 
-%% GET POSITION OF EACH Z FRAME 
+%% GET POSITION OF EACH ZSTACK FRAME 
 zlocs = nan(1,zstack_md.nplanes);
 %get zloc of each plane 
 
@@ -144,8 +145,7 @@ for z =  1:zstack_md.nplanes
     zlocs(z)= zstack_md.startPos + 1/1000*z; 
 end
 
-%% GET CLOSEST Z PLANE FOR EACH ROW OF YPIXELS 
-
+%% GET CLOSEST ZSTACK PLANE FOR EACH ROW OF TSERIES YPIXELS 
 ypix_zplane = cell(1,tseries_md.nplanes);
 
 % assign each ypix to a plane 
@@ -154,7 +154,7 @@ for p = 1:tseries_md.nplanes
     curypix_zdist = ypix_zdist{p}; 
     
     for y = 1:tseries_md.ypix
-        offsets=abs(zlocs-curypix_zdist(y)); 
+        offsets=abs(zlocs-curypix_zdist(y)); % difference between plane 
         zloc = find(offsets==min(offsets)); 
         y_zmap(y) = zloc; 
     end
@@ -168,7 +168,7 @@ load(s2p)
 
 
 %% PLOT RELATIONSHIP BETWEEN TLAPSE AND ZSTACK
-if strcmp(plotstr,'plot')
+%if strcmp(plotstr,'plot')
     figure
     hold on 
     
@@ -212,7 +212,7 @@ if strcmp(plotstr,'plot')
 
     utils.sf 
 
-end
+%end
 
 
 

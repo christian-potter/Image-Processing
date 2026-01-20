@@ -45,7 +45,7 @@ t = title(['Plane: ',num2str(opt.default_plane)],'FontSize',25);
 
 
 %-- ADD REFERENCE BANDS
-ny = 10; nx = 6; % divide up X and Y into N segments 
+ny = 10; nx = 10; % divide up X and Y into N segments 
 ref_ys  = size(image,1)/ny : size(image,1)/ny : size(image,1)-1; 
 ref_xs = size(image,2)/nx : size(image,2)/nx : size(image,2)-1;
 yline(ref_ys,'color','c')

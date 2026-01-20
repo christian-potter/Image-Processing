@@ -19,15 +19,19 @@ p = 1;% Choose Plane
 atype= 'mean';ftype='max'; %choose default anatomical and functional image types 
 nplanes=5;
 zstack_drift = [ops.xoff(end) ops.yoff(end)]; % estimates the x/y coordinates of the z-stack by taking last value of x and y offset 
-colororder = 'grb'; % change between 'grb' and 'rgb' if your z-stack channels are switched 
+colororder = 'rgb'; % change between 'grb' and 'rgb' if your z-stack channels are switched 
 
 %% RUN MAIN MENU
-[id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zs,'rgb',zstack_drift);
+zs=zstack;
+[id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zs,colororder,zstack_drift);
 
 %% ADJUST YPIX_ZPLANE
 
 
+
 %% CONVERT REFERENCE BANDS INTO NEW COORDINATES 
+
+
 
 %% SAVE FILES
 

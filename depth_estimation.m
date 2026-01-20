@@ -19,6 +19,11 @@ colororder = 'rgb'; % change between 'grb' and 'rgb' if your z-stack channels ar
 [id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,stat,ftype,atype,nplanes,ypix_zplane,zstack,'rgb',zstack_drift);
 
 %% DEPTH ESTIMATION
+first_full_x = 104; first_x= 1; 
+first_full_y = 83; first_y = 1; 
+
+
+%%
 %zs = zstack; 
 d.smoothSigma = 4; 
 out = estimatePerPixelEntryDepth(zs,1,d); 
