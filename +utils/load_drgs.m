@@ -18,8 +18,7 @@ function [zstack,tseries_md,zstack_md,tsync,s2p,ypix_zplane] = load_drgs(dsnum,p
 %   zstack
 
 %% NOTES 
-% THIS IS LEGACY CODE THAT LOADS WITHOUT FILE STRUCTURE AND 
-
+% THIS IS LEGACY CODE THAT LOADS WITHOUT FILE STRUCTURE 
 
 %% GET PATHNAMES
 if ismac 
