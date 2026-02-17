@@ -1,12 +1,11 @@
-function[ypix_zplane] = functional_anatomical_zmap(ts,zs,tsync,opt)
+function[ypix_zplane] = functional_anatomical_zmap(dsnum,ts,zs,tsync,opt)
 
 arguments 
+    dsnum double 
     ts struct % metadata from one of the tseries
     zs struct % metadata from chosen z-stack 
     tsync table % uncompressed thorsync file from one imaging session 
     opt.plot logical = false 
-
-
 end
 
 %% DESCRIPTION
@@ -52,27 +51,45 @@ end
 plane_zranges = plane_zranges+ts.setupPosition; 
 
 
-%%
+%% 
 
-ypix_zdist = cell(1,tlapse_md.nplanes);  
+ypix_zdist = cell(1,ts.nplanes);  
 
-for p = 1:tlapse_md.nplanes
-    curzdists = nan(1,tlapse_md.ypix); 
+for p = 1:ts.nplanes
+    curzdists = nan(1,ts.ypix); 
     zrange = plane_zranges(p,:); 
-    zvals = linspace(zrange(1),zrange(2),tlapse_md.ypix); 
+    zvals = linspace(zrange(1),zrange(2),ts.ypix); 
     ypix_zdist{p}= zvals; % gives z-distance in arbitrary z-units 
 
 end
 
 
 %% GET POSITION OF EACH Z FRAME 
-zlocs = nan(1,zstack.nplanes);
+zlocs = nan(1,zs.nplanes);
 %get zloc of each plane 
 
-for z =  1:zstack.nplanes
-    zlocs(z)= zstack.startPos + 1/1000*z; 
+for z =  1:zs.nplanes
+    zlocs(z)= zs.startPos + 1/1000*z; 
 end
 
+%% GET CLOSEST ZSTACK PLANE FOR EACH ROW OF TSERIES YPIXELS 
+%ypix_zplane = cell(1,ts.nplanes);
+ypix_zplane = cell(1,4);
+ts.nplanes=4; % FIX THIS, UNCLEAR WHY UNABLE TO RESOLVE TSERIES_MD.NPLANES 
+
+% assign each ypix to a plane 
+for p = 1:ts.nplanes
+    y_zmap = nan(1,ts.ypix); 
+    curypix_zdist = ypix_zdist{p}; 
+
+    for y = 1:ts.ypix
+        offsets=abs(zlocs-curypix_zdist(y)); % difference between plane 
+        zloc = find(offsets==min(offsets)); 
+        y_zmap(y) = zloc; 
+    end
+    ypix_zplane{p}=y_zmap;
+
+end
 
 %% PLOT FUNCTIONAL VS ZSTACK
 if opt.plot 
@@ -80,10 +97,10 @@ if opt.plot
     hold on 
     
     for z = 1:length(zlocs)
-        plot([1 tlapse_md.ypix],[max(zlocs)-zlocs(z) max(zlocs)-zlocs(z)],'color','k')
+        plot([1 ts.ypix],[max(zlocs)-zlocs(z) max(zlocs)-zlocs(z)],'color','k')
     end
     
-    for p = 1:tlapse_md.nplanes
+    for p = 1:ts.nplanes
         plot(max(zlocs)-ypix_zdist{p},'LineWidth',3)
         leg{p}= ['Plane ', num2str(p)];
     end
@@ -98,8 +115,8 @@ if opt.plot
     %% MAKE PLOT OF PIEZO POSITION 
     figure 
     hold on 
-    plot([80000 80000],[ 2 2],'HandleVisibility','off')% to set color sequence the same as zstack
-    for p = 1:tlapse_md.nplanes+tlapse_md.flybackFrames
+    plot([80000 80000],[ 2 2],'HandleVisibility','off')% to set color sequence the same as zs
+    for p = 1:ts.nplanes+ts.flybackFrames
         curframes = find(tsync.framecount==p); 
         curpiezo = tsync.piezo(curframes); 
         plot(curframes,curpiezo,'LineWidth',4)     
@@ -112,9 +129,9 @@ if opt.plot
     
     title(['#',num2str(518),' Piezo Frame Acquisition'])
     
-    if tlapse_md.nplanes == 4
+    if ts.nplanes == 4
         legend({'frame 1','frame 2','frame 3','frame 4','fb1','fb2'},'location','northwest')
-    elseif tlapse_md.nplanes == 5
+    elseif ts.nplanes == 5
         legend({'frame 1','frame 2','frame 3','frame 4','frame 5','flyback 1','flyback 2'},'location','northwest')
     end
     

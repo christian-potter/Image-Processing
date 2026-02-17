@@ -27,7 +27,7 @@ totalpdist = tsync.piezo(allplanes(end))-tsync.piezo(allplanes(1));% distance of
 %% 
 
 
-
+ypix_zplane = functional_anatomical_zmap(tseries_md,zstack_md,raw_tsync,'plot',true); 
 
 %% REFERENCE POSITION OF ZSTACK 
 refcell_xy = stat{new_coordmap(1)}.med; 
