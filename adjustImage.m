@@ -87,6 +87,8 @@ elseif strcmp(opt.type,'zstack')
 
 end
 
+
+
 %% CREATE FIGURES FOR COLOR/ BW IMAGES
 % Create a figure for the image display
 if strcmp(opt.type,'functional')
@@ -221,6 +223,14 @@ GammaGreenLine= line(gGammaX,gGammaY,'color',[0 .5 0],'Parent',hHistAx);
         end
         if low_in_green >= high_in_green
             low_in_green = high_in_green - 0.01;
+        end
+
+        if low_in_red <=0 
+            low_in_red = .01; 
+        end
+
+        if low_in_green <=0 
+            low_in_green = .01; 
         end
 
         % ADJUST IMAGE BASED ON SLIDER VALS     

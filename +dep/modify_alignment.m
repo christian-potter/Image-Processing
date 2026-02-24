@@ -17,6 +17,8 @@ end
 %% NOTES
 %* need to make this work on multiple cells across multiple planes 
 
+%%
+
 
 %% GET REFERENCE CELL COORDINATES 
 s = stat{ref_cell(1)}; % open stat for ref_cell 
@@ -37,6 +39,10 @@ zlocs = zlocs - dif;
 
 ypix_zplane = dep.fa_alignment(ypix_zdist,zlocs,tseries_md,zstack_md); 
 
+%% 
 
 
+
+
+%%
 

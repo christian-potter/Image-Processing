@@ -1,4 +1,4 @@
-function [ypix_zdist,zlocs] = fa_zstack_maps(tseries_md,zstack_md,tsync)
+function [ypix_zdist,zlocs] = fa_zdist(tseries_md,zstack_md,tsync)
 arguments 
     tseries_md struct % metadata from tseries 
     zstack_md struct 
@@ -18,7 +18,7 @@ end
 
 %%
 totalzdist =  tseries_md.stepSize*tseries_md.nplanes/1000; %total distance of z-stack (stepsize * nplanes)
-
+totalpdist = tsync.piezo(tseries_md.nplanes)-tsync.piezo(1) ;
 %% 
 plane_zranges = nan(tseries_md.nplanes,2); 
 piezoprop = 0; 
@@ -58,7 +58,7 @@ zlocs = nan(1,zstack_md.nplanes);
 %get zloc of each plane 
 
 for z =  1:zstack_md.nplanes
-    zlocs(z)= zstack_md.startPos + 1/1000*z*zstack_md.step_size; % step size needs to be coverted to mm with 1/1000 
+    zlocs(z)= zstack_md.startPos + 1/1000*z*zstack_md.stepSize; % step size needs to be coverted to mm with 1/1000 
 end
 
 
