@@ -2,7 +2,12 @@
 % edit function 
 [zstack,tlapse_md,zstack_md,tsync,s2p,ypix_zplane] = utils.load_drgs(541,'plot'); 
 load(s2p); 
+%%
 
+zstack_path = '/Volumes/Ross/Christian/DRGS/#550/Final Z-Stack (0.25XY 1Z Gaus Blur).tif' ;
+%zstack_path = '/Volumes/Ross/Christian/DRGS/#550/Final Z-Stack (raw).tif'; 
+%zstack= get.zstack(zstack_path);
+zstack_blur = get.zstack(zstack_path);
 %% DEFAULT ID_VECT
 id_vect = ones(sum(iscell(:,1)==1),1)*3; 
 cellstat = stat(iscell(:,1)==1);
@@ -13,7 +18,7 @@ ypix_zplane = functional_anatomical_zmap(dsnum,tseries_md,zstack_md,raw_tsync,'p
 %% FIX YPIX_ZPLANE 
 ref_cell = [82 37 ]; % cell id, zplane  
 
-[ypix_zdist,zlocs] = dep.fa_zdist(tseries_md,zstack_md,tsync); 
+[ypix_zdist,zlocs,totalpdist] = dep.fa_zdist(tseries_md,zstack_md,raw_tsync); 
 [ypix_zplane] = dep.modify_alignment(zlocs,ypix_zdist,stat,ref_cell,tseries_md,zstack_md); 
 
 
@@ -31,7 +36,7 @@ zstack_drift = [ops.xoff(end) ops.yoff(end)]; % estimates the x/y coordinates of
 colororder = 'grb'; % change between 'grb' and 'rgb' if your z-stack channels are switched 
 
 %% RUN MAIN MENU
-%zs=zstack;
+zs=zstack_blur;
 [id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,ops,cellstat,ftype,atype,nplanes,ypix_zplane,zs,colororder,zstack_drift);
 
 %% CREATE ID VARIABLES
@@ -55,8 +60,7 @@ del1 = [26 60 55 15 22 9 24 13 20 14 18 38 40 43 78 1 2 4 6 66 69 42 77 64 79 80
 ex2 = [236 184 190 198 236  132 83 125 115 99 108 102 155 146 144 131 130 113 159 170 168 169 185 192 173 197 204 160 118 124 141 156 109 87 92 
     ]; 
 
-in2 = [226 211 209 200 213 82 93 136 157 138 132 91 142 152 130 150 228 174 183 160 163 
-    180 191 167]; 
+in2 = [226 211 209 200 213 82 93 136 157 138 132 91 142 152 130 150 228 174 183 160 163 180 191 167]; 
 
 spbn2 = [217 175 90 
     ];

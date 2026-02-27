@@ -1,4 +1,4 @@
-function [ypix_zdist,zlocs] = fa_zdist(tseries_md,zstack_md,tsync)
+function [ypix_zdist,zlocs,totalpdist] = fa_zdist(tseries_md,zstack_md,tsync)
 arguments 
     tseries_md struct % metadata from tseries 
     zstack_md struct 
@@ -17,7 +17,12 @@ end
 % zlocs : initial estimate of zstack depth based on microscope metadata
 
 %%
-totalzdist =  tseries_md.stepSize*tseries_md.nplanes/1000; %total distance of z-stack (stepsize * nplanes)
+%-- TSERIES ESTIMATE 
+%%
+totalzdist =  tseries_md.stepSize*tseries_md.nplanes/1000; %total distance of tseries (stepsize * nplanes)
+
+first_plane = find(tsync.framecount==1); % tsync idxs on the first frame 
+last_plane = find(tsync.framecount ==tseries_md.nplanes); 
 totalpdist = tsync.piezo(tseries_md.nplanes)-tsync.piezo(1) ;
 %% 
 plane_zranges = nan(tseries_md.nplanes,2); 
