@@ -3,7 +3,7 @@ arguments
     ypix_zdist cell % 
     zlocs double % vector where each entry is the estimated distance of 
     tseries_md struct 
-    zstack_md struct 
+    %zstack_md struct 
 end
 
 %% DESCRIPTION 

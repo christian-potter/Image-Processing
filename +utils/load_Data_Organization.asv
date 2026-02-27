@@ -1,25 +1,46 @@
-function [Fall] = load_Data_Organization(dsnum)
+function [Fall,tseries_md,zstack,zstack_md,tsync] = load_Data_Organization(dsnum)
+arguments
+    dsnum 
+
+end
+
+
+dsnum = num2str(dsnum); 
+
+%% IF FVARIABLES EXISTS 
+
 
 if ispc 
-    base = ['\\Shadowfax\Warwick\DRGS project\',dsnum,'\'];
-    f_variables =[base,'Processed\Fall.mat'];
+    base = ['\\Shadowfax\Warwick\DRGS\#',dsnum,'\SDH\'];
+    f_variables =[base,'Processed\Fall_variables.mat'];
     tseries_md = [base,'Processed\tseries_md.mat']; 
     zstack_md = [base,'Processed\zstack_md.mat'];
     tsync = [base,'Processed\tsync.mat']; 
+    zstack = [base,'Processed\zstack.mat'];
 elseif ismac
-    base = ['/Volumes/Shadowfax/Warwick/DRGS project/', dsnum, '/'];
-    f_variables= [base, 'Split/suite2p/Fall.mat'];
+    base = ['/Volumes/Warwick/DRGS/#', dsnum, '/SDH/'];
+    f_variables= [base, 'Processed/Fall_variables.mat'];
     tseries_md = [base, 'Processed/tseries_md.mat'];
     zstack_md = [base, 'Processed/zstack_md.mat'];
     tsync = [base, 'Processed/tsync.mat'];
+    zstack = [base,'Processed/zstack.mat'];
 end
 
-% Load the data files
+% Load the data filesfall
 load(f_variables); % 
+
+if exist('tlapse_md')
+    
+
+
+end
+
 load(tseries_md);
 load(zstack_md);
 load(tsync);
+load(zstack); 
 
 %%
 
 
+end
