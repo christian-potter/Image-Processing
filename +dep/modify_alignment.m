@@ -1,4 +1,4 @@
-function [ypix_zplane] = modify_alignment(zlocs,ypix_zdist,stat,ref_cell,tseries_md,zstack_md)
+function [ypix_zplane,zlocs] = modify_alignment(zlocs,ypix_zdist,stat,ref_cell,tseries_md,zstack_md)
 arguments 
     zlocs double  % unaligned output of fa_zstack_maps
     ypix_zdist cell  % "" "" for tseries
@@ -12,8 +12,10 @@ end
 %% DESCRIPTION
 % additional step in the pipeline that adjusts the mapping between
 % functional and anatomical distance based on the observed locations of
-% neurons in the zstack 
+% neurons in the zstack
 
+%OUTPUTS
+% zlocs = updated version of zlocs that aligns with the relative depth of 
 %% NOTES
 %* need to make this work on multiple cells across multiple planes 
 
@@ -37,7 +39,7 @@ dif = anat_ref - rc_z ;
 
 zlocs = zlocs - dif; 
 
-ypix_zplane = dep.fa_alignment(ypix_zdist,zlocs,tseries_md,zstack_md); 
+ypix_zplane = dep.fa_alignment(ypix_zdist,zlocs,tseries_md); 
 
 %% 
 

@@ -1,4 +1,4 @@
-function [ypix_zplane] = fa_alignment(ypix_zdist,zlocs,tseries_md,zstack_md)
+function [ypix_zplane] = fa_alignment(ypix_zdist,zlocs,tseries_md)
 arguments
     ypix_zdist cell % 
     zlocs double % vector where each entry is the estimated distance of 

@@ -1,7 +1,9 @@
 %% LOAD 
 % edit function 
-[zstack,tlapse_md,zstack_md,tsync,s2p,ypix_zplane] = utils.load_drgs(541,'plot'); 
+[zstack,tlapse_md,zstack_md,tsync,s2p,ypix_zplane] = utils.load_drgs(550,'plot'); 
 load(s2p); 
+%%
+[Fall,tseries_md,zstack,zstack_md,tsync] = utils.load_Data_Organization(550); 
 %%
 
 zstack_path = '/Volumes/Ross/Christian/DRGS/#550/Final Z-Stack (0.25XY 1Z Gaus Blur).tif' ;
@@ -16,10 +18,12 @@ tseries_md.nplanes = 4;
 ypix_zplane = functional_anatomical_zmap(dsnum,tseries_md,zstack_md,raw_tsync,'plot',true); 
 
 %% FIX YPIX_ZPLANE 
+stat = Fall.stat; 
+stat = stat(Fall.iscell(:,1)==1); 
 ref_cell = [82 37 ]; % cell id, zplane  
 
-[ypix_zdist,zlocs,totalpdist] = dep.fa_zdist(tseries_md,zstack_md,raw_tsync); 
-[ypix_zplane] = dep.modify_alignment(zlocs,ypix_zdist,stat,ref_cell,tseries_md,zstack_md); 
+%[ypix_zdist,zlocs,totalpdist] = dep.fa_zdist(tseries_md,zstack_md,raw_tsync); 
+[ypix_zplane,zlocs] = dep.modify_alignment(zlocs,ypix_zdist,stat,ref_cell,tseries_md,zstack_md); 
 
 
 %% LOAD FIGURE POSITIONS 
