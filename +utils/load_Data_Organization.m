@@ -27,7 +27,12 @@ elseif ismac
 end
 
 % Load the data filesfall
-load(f_variables); % 
+try 
+    load(f_variables); % 
+catch 
+    fall_path = [base, 'Processed/Fall.mat'];
+
+    
 load(tseries_md);
 
 if exist('tlapse_md')

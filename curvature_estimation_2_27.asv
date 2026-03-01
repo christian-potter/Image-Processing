@@ -29,24 +29,7 @@ zs=zstack;
 [id_vect,figs,ref_bands] = prompt.main_menu(id_vect,figs,p,Fall.ops,cellstat,ftype,atype,nplanes,ypix_zplane,zs,colororder,zstack_drift);
 
 
-
-
-%% DEPTH ESTIMATION
-% based on pia completely disappearing from at least one block in the first
-% or last X or Y row 
-first_full_x = ; first_x= 9; 
-first_full_y = ; first_y = 10; 
-
-%%
-% based first cell body in at least one block in the first
-% or last X or Y row 
-first_x= 1; first_full_x = 40;
-first_y =1; first_full_y =11; 
-
-%%
-
 %% DETERMINE BINARY THRESHOLD 
-zs = zstack
 thresh = prctile(zstack(:),70); 
 
 
@@ -65,6 +48,21 @@ dorsal_stack = squeeze(mean(zs(:,:,[1 2],1:stack_size),[3 4]));
 %dorsal_stack = nan(size(zs,1),size(zs,2)); 
 
 
+%% DEPTH ESTIMATION
+% based on pia completely disappearing from at least one block in the first
+% or last X or Y row 
+first_full_x = ; first_x= 9; 
+first_full_y = ; first_y = 10; 
+
+%%
+% based first cell body in at least one block in the first
+% or last X or Y row 
+first_x= 1; first_full_x = 40;
+first_y =1; first_full_y =11; 
+
+%%
+
+
 %%
 figure
 utils.sf
@@ -81,8 +79,8 @@ xlabel('Y Coordinate')
 ylabel('Pixel Intensity')
 title('Second Order Polynomial Fit to Gradient in Y Dimension')
 legend({'Data','Fit'})
+axis([0 600 .1 .7])
 
-axis([0 200 .1 .7])
 
 subplot(2,1,1)
 hold on 
@@ -96,5 +94,4 @@ title('First Order Polynomial Fit to Gradient in X Dimension')
 ylabel('Pixel Intensity')
 legend({'Data','Fit'})
 sgtitle('Red And Green Averaged Together')
-
-axis([0 600 .1 .7])
+axis([0 200 .1 .7])
