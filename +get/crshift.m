@@ -1,4 +1,5 @@
 function [crshift] = crshift(ops,p)
+% p should start at 1 (stat starts at 0 by default)
 
 % returns the column and row shift for each plane relative to the combined
 % image

@@ -1,4 +1,4 @@
-function [Fall,tseries_md,zstack,zstack_md,tsync] = load_Data_Organization(dsnum)
+function [Fall,tseries_md,zstack,zstack_md,tsync,ypix_zplane] = load_Data_Organization(dsnum)
 arguments
     dsnum 
 
@@ -24,6 +24,7 @@ elseif ismac
     zstack_md = [base, 'Processed/zstack_md.mat'];
     tsync = [base, 'Processed/tsync.mat'];
     zstack = [base,'Processed/zstack.mat'];
+    ypix_zplane = [base,'Processed/ypix_zplane.mat']; 
 end
 
 % Load the data filesfall
@@ -31,8 +32,10 @@ try
     load(f_variables); % 
 catch 
     fall_path = [base, 'Processed/Fall.mat'];
+    disp('Fall_variables not created')
 
-    
+end
+
 load(tseries_md);
 
 if exist('tlapse_md')
@@ -40,6 +43,7 @@ if exist('tlapse_md')
 end
 load(zstack_md);
 load(tsync);
+%load(ypix_zplane)
 if exist('tsync541')
     tsync = tsync541; 
 end

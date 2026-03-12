@@ -1,21 +1,20 @@
 [Fall,tseries_md,zstack,zstack_md,tsync] = utils.load_Data_Organization(550); 
 %% DETERMINE DIAMETER
 d=[]; 
-for i = 1:length(stat)
-    d = [d,stat{i}.radius*2]; 
+for i = 1:length(Fall.stat)
+    d = [d,Fall.stat{i}.radius*2]; 
 end 
 %%
 figure
 histogram(d)
-diam=mean(d); 
-xline(mean(d),'color','r')
-title('Distribution of Cell Diameters')
 
+title({'Distribution of Cell Diameters','From 2D Masks Calculated by Suite2p'})
+utils.sf
 %%
 cp = cellpose(Model="cyto2",ModelFolder='/Users/ctp21/Desktop/cellpose files'); 
 
 %%
-z = squeeze(zstack(:,:,1,1:100));
+z = squeeze(zstack(:,:,1,1:121));
 
 labels = segmentCells3D(cp,z,ImageCellDiameter=15); 
 %%
@@ -26,17 +25,20 @@ for i = 1:50
 
 end
 %%
-
-volshow(z,OverlayData=labels)
+volshow(z)
+%%
+volshow(z,OverlayData=soma_labels)
 %%
 binlab = labels; 
-idx = binlab(binlab>1);
+idx = binlab>1;
 binlab(idx)=1;
 
 sumbin= sum(binlab,3);
-
+%%
 figure
 bar3(sumbin)
+%%
+
 
 %%
 rmlabels = labels; 

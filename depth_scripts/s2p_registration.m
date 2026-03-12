@@ -1,0 +1,137 @@
+
+%% LOAD Dataset 
+dsnum= 550; 
+[Fall,tseries_md,zstack,zstack_md,tsync,ypix_zplane] = utils.load_Data_Organization(dsnum); 
+raw_tsync = md.read_h5('/Volumes/Warwick/DRGS/#550/SDH/Functional/ThorSync/TS#550_000/Episode_0000.h5'); 
+
+[ypix_zdist,zlocs,totalpdist]= dep.fa_zdist(tseries_md,zstack_md,raw_tsync); 
+%%
+load('/Volumes/Warwick/DRGS/#550/SDH/Processed/cellpose/soma_labels.mat')
+load('/Volumes/Warwick/DRGS/#550/SDH/Processed/cellpose/nuclear_labels.mat')
+load('/Volumes/Warwick/DRGS/#550/SDH/Processed/id_vect_full.mat') 
+zrgb = permute(zstack, [1 2 4 3]);
+%% ALIGN FUNCTIONAL AND ANATOMICAL 
+stat = Fall.stat; 
+cellstat = stat(Fall.iscell(:,1)==1); 
+cellstat(id_vect==4)= [];
+%%
+ref_cell = [82 37 ]; % cell id, zplane  
+
+[ypix_zdist,zlocs,totalpdist] = dep.fa_zdist(tseries_md,zstack_md,raw_tsync); 
+[ypix_zplane,zlocs] = dep.modify_alignment(zlocs,ypix_zdist,stat,ref_cell,tseries_md,zstack_md); 
+
+%%
+
+zrgb = permute(zstack, [1 2 4 3]);
+
+fmasks3d = zeros(size(zrgb,[1:3])); 
+
+xoff = -6; yoff = 0; 
+perror=[];
+for i =1:length(cellstat)
+    xpix = cellstat{i}.xpix; 
+    ypix = cellstat{i}.ypix; 
+    plane = cellstat{i}.iplane+1; 
+    zplanes = ypix_zplane{plane};
+
+    if min(xpix)>size(Fall.ops.refImg,2)
+        xpix = xpix - size(Fall.ops.refImg,2); 
+    end
+    if min(ypix)>size(Fall.ops.refImg,1)
+        ypix = ypix - size(Fall.ops.refImg,1); 
+    end
+    %crshift = get.crshift(Fall.ops,plane); 
+
+    for r = 1:length(ypix)
+        x= xpix(r)+xoff; y = ypix(r)+yoff; 
+        if x < 1  
+            x = 1; 
+            perror =[perror,plane]; 
+        end
+
+        % elseif x > size(Fall.ops.refImg,2)
+        %     x = x - size(Fall.ops.refImg,2); 
+        %     perror =[perror,plane]; 
+        % end    
+        % 
+        if y < 1  
+            y = 1; 
+            perror =[perror,plane]; 
+        end
+        % elseif y > size(Fall.ops.refImg,1)
+        %     y = y - size(Fall.ops.refImg,1); 
+        %     perror =[perror,plane]; 
+        % end    
+        fmasks3d(y,x,zplanes(y))= i; 
+        zrgb(y,x,zplanes(y),3)= 1;  
+        %zplanes(y)
+    end
+    
+end
+%%
+binsoma = soma_labels>0 ; 
+h = plotv.volshow_rgb_dualAlpha(zrgb,'OverlayData',binsoma); 
+
+%%
+
+for i =1:length(stat)
+    planeidx(i) = stat{i}.iplane+1; 
+end
+%%
+volshow(overlap_labels)
+
+%%
+[anatIdxByFuncMask,overlap_labels]= cp.matchFunctionalToAnatomicalMasks(fmasks3d,soma_labels);
+
+%%
+% convert logical binsoma to 0.5 where true, preserving 3D size
+binsoma = double(binsoma) * 0.5;
+obinsoma = overlap_labels>0 ; 
+obinsoma = double(obinsoma)*.5; 
+csoma = binsoma + obinsoma; 
+h = plotv.volshow_rgb_dualAlpha(zrgb,'OverlayData',csoma); 
+%%
+h = plotv.volshow_rgb_dualAlpha(zrgb,'OverlayData',soma_labels); 
+
+%%
+%%
+figure
+histogram(vols,'BinWidth',50)
+diam=mean(vols); 
+xline(mean(vols),'color','r')
+title('Distribution of Cell Volumes Detected by Cellpose')
+xlabel('Cubic Microns')
+ylabel('Frequency')
+utils.sf
+
+%%
+
+% Default usage
+out = dep.findRedSurfaceDepth(zrgb);
+imagesc(out.depthMap);
+axis image;
+colorbar;
+title('First red crossing depth per 10x10 bin');
+%%
+
+opts = struct;
+opts.BinSize = [10 10];
+opts.RedChannel = 1;
+opts.Statistic = 'max';
+opts.ThresholdMode = 'relative';
+opts.Threshold = 0.25;
+opts.MinConsecutiveZ = 2;
+opts.interpMethod= 'nearest'; 
+opts.SurfaceMode = 'smooth';
+opts.SurfaceSmoothSigma = 1.2;
+opts.SurfaceFillMissing = true;
+out = dep.findRedSurfaceDepth(zrgb,'Statistic',opts.Statistic,'MinConsecutiveZ',opts.MinConsecutiveZ,'SurfaceMode',opts.SurfaceMode,'InterpMethod',opts.interpMethod,'BinSize',[1 1]);
+volshow(out.surfaceVolumeSmooth)
+
+%%
+imagesc(out.surfaceMapSmooth);
+colorbar
+%%
+
+zrgb(:,:,:,3)=out.surfaceVolumeSmooth;
+h = plotv.volshow_rgb_dualAlpha(zrgb,'OverlayData',soma_labels); 

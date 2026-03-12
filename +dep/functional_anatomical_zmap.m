@@ -24,8 +24,7 @@ allplanes = find(ismember(b,a));% get indices for the first nplanes
 %total distance covered by the piezo 
 totalpdist = tsync.piezo(allplanes(end))-tsync.piezo(allplanes(1)); 
 %
-totalzdist =  ts.stepSize*ts.pixelsize*ts.nplanes/1000;% ** INSERTED uM CONVERSION TO PIXELS HERE
-
+totalzdist =  ts.stepSize*ts.pixelsize*ts.nplanes/1000;% 
 plane_zranges = nan(ts.nplanes,2); 
 piezoprop = 0; 
 
@@ -107,15 +106,15 @@ if opt.plot
     
     xlabel('Y Pixel')
     ylabel('Z Location')
-    yticks([0:.02:.14])
-    yticklabels(140:-20:0)
+    yticks([0:.02:length(zlocs)/1000])
+    yticklabels(length(zlocs):-20:0)
     title(['#',num2str(dsnum),' Z-Stack v Functional Registration'])
     
     utils.sf
     %% MAKE PLOT OF PIEZO POSITION 
     figure 
     hold on 
-    plot([80000 80000],[ 2 2],'HandleVisibility','off')% to set color sequence the same as zs
+    %plot([80000 80000],[ 2 2],'HandleVisibility','off')% to set color sequence the same as zs
     for p = 1:ts.nplanes+ts.flybackFrames
         curframes = find(tsync.framecount==p); 
         curpiezo = tsync.piezo(curframes); 
@@ -127,7 +126,7 @@ if opt.plot
     ylabel('Z Position')
     xlabel('Time')
     
-    title(['#',num2str(518),' Piezo Frame Acquisition'])
+    title(['#',num2str(dsnum),' Piezo Frame Acquisition'])
     
     if ts.nplanes == 4
         legend({'frame 1','frame 2','frame 3','frame 4','fb1','fb2'},'location','northwest')

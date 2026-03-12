@@ -1,6 +1,6 @@
 %% LOAD DATASET
 dsnum= 545; 
-[Fall,tseries_md,zstack,zstack_md,tsync] = utils.load_Data_Organization(548); 
+[Fall,tseries_md,zstack,zstack_md,tsync] = utils.load_Data_Organization(dsnum); 
 %% 545 
 [zstack]= get.zstack('/Volumes/Warwick/DRGS/#545/SDH/Structural/Final Z-Stack.tif');
 xml = md.importxml('/Volumes/Warwick/DRGS/#545/SDH/Functional/Raw/#545_002/Experiment.xml'); 
@@ -25,8 +25,12 @@ ts_per_zmicron = .018164;
 
 %tsync.framecount = round(tsync.framecount); 
 [ypix_zdist,zlocs,totalpdist]= dep.fa_zdist(tseries_md,zstack_md,raw_tsync); 
+
+%% ALIGN BASED ON 
+
+
 %%
-plot.functional_vs_anatomical(550,zlocs,ypix_zdist,tseries_md,raw_tsync); 
+plot.functional_vs_anatomical(dsnum,zlocs,ypix_zdist,tseries_md,raw_tsync); 
 
 
 %%
