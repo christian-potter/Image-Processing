@@ -40,3 +40,5 @@ zsubl = zrgb;
 zsubl(repmat(mask, [1,1,1,size(zrgb,4)])) = 0;
 %%
 h = plotv.volshow_rgb_dualAlpha(zsubl,'OverlayData',binsoma); 
+%%
+plotOrthogonalPlanesFromConcatenatedPNG('/Users/ctp21/Library/Mobile Documents/com~apple~CloudDocs/Ross Lab/Conferences/USASP 2026/Anatomical Figures/v1.png', 'OriginMode', 'center');
