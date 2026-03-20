@@ -1,4 +1,4 @@
-function [anatIdxByFuncMask,overlapMaskVol] = matchFunctionalToAnatomicalMasks(funcMaskVol, anatMaskVol)
+function [anatIdxByFuncMask,overlapMaskVol,pOverlap] = matchFunctionalToAnatomicalMasks(funcMaskVol, anatMaskVol)
 %MATCHFUNCTIONALTOANATOMICALMASKS Match each functional mask to an anatomical mask.
 %
 % anatIdxByFuncMask = matchFunctionalToAnatomicalMasks(funcMaskVol, anatMaskVol)
@@ -46,9 +46,10 @@ function [anatIdxByFuncMask,overlapMaskVol] = matchFunctionalToAnatomicalMasks(f
     funcIDs(funcIDs == 0) = [];
 
     anatIdxByFuncMask = cell(numel(funcIDs), 1);
+    pOverlap = zeros(numel(funcIDs),1); 
 
     for iFunc = 1:numel(funcIDs)
-        iFunc
+     
         thisFuncID = funcIDs(iFunc);
 
         % Logical mask for this functional object
@@ -61,25 +62,27 @@ function [anatIdxByFuncMask,overlapMaskVol] = matchFunctionalToAnatomicalMasks(f
 
         if isempty(overlappingAnatIDs)
             anatIdxByFuncMask{iFunc} = [];
+            pOverlap(iFunc)=0; 
             continue
         end
 
         % Count overlap size for each overlapping anatomical mask
         candidateAnatIDs = unique(overlappingAnatIDs);
-        overlapCounts = zeros(size(candidateAnatIDs));
+        overlapPercents = zeros(size(candidateAnatIDs));
 
         for j = 1:numel(candidateAnatIDs)
-            overlapCounts(j) = sum(overlappingAnatIDs == candidateAnatIDs(j));
+            overlapPercents(j) = sum(overlappingAnatIDs == candidateAnatIDs(j))/sum(funcLogical(:));
         end
 
         % Pick the anatomical mask with maximum overlap
-        [~, maxIdx] = max(overlapCounts);
+        [p, maxIdx] = max(overlapPercents);
         bestAnatID = candidateAnatIDs(maxIdx);
 
         % Return all voxel indices of the matched anatomical mask
         [x, y, z] = ind2sub(size(anatMaskVol), find(anatMaskVol == bestAnatID));
         anatIdxByFuncMask{iFunc} = [x, y, z];
         overlapMaskVol(anatMaskVol==bestAnatID)=iFunc; 
+        pOverlap(iFunc)=p; 
 
     end
 end
