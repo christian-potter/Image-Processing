@@ -3,7 +3,15 @@ load('/Volumes/Warwick/DRGS/#550/SDH/Processed/cellpose/soma_labels.mat')
 load('/Volumes/Warwick/DRGS/#550/SDH/Processed/cellpose/nuclear_labels.mat')
 
 %%
-h = plotv.volshow_rgb_dualAlpha(zrgb,'OverlayData',binsoma); 
+% Create zrgb by permuting the 3rd and 4th dimensions of zsatck
+% Expect zsatck to have at least 4 dimensions: (Y, X, C, Z) or similar.
+% The task requests swapping the 3rd and 4th dims -> (Y,X,Z,C)
+zrgb = permute(zstack, [1 2 4 3]);
+%zrgb(:,:,:,1)=zstack(:,:,2,:); 
+%zrgb(:,:,:,2)=zstack(:,:,1,:);
+binsoma= soma_labels; 
+binsoma(binsoma>0)=1; 
+h = plotv.volshow_rgb_dualAlpha(zrgb,'OverlayData',soma_labels); 
 
 %%
 binsoma = soma_labels>0 ; 
