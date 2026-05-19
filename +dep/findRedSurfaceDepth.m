@@ -90,7 +90,7 @@ function out = findRedSurfaceDepth(V, opts)
 %   opts.MinConsecutiveZ = 2;
 %   opts.SurfaceMode = 'smooth_constrained';
 %   opts.SurfaceSmoothSigma = 1.2;
-%   opts.MaxDeltaPerPixel = 3;
+%   opts.MaxDeltaPerPixel = 3;25
 %   opts.ConstraintIterations = 30;
 %   out = findRedSurfaceDepth(V, opts);
 %

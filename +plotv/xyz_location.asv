@@ -1,0 +1,50 @@
+function [] = xyz_location(xyz, ypix_zplane,depth,Fall,zlocs)
+arguments
+    xyz double % each row contains xyz values for each neuron 
+    ypix_zplane cell % location of 
+    depth % structure output from dep.findRedSurfaceDepth
+    Fall struct 
+    zlocs double % translates the zplane to depth for plotting the planes correctly 
+
+end
+
+%% NOTES
+% need to add depth surface plotting 
+ref_yx = size(Fall.ops.refImg); 
+%zlocs=-zlocs; 
+
+% for each plane 
+for i = 1:length(ypix_zplane)
+    curplane = ypix_zplane{i};
+    coords = [1 1 zlocs(curplane(1)) ; ref_yx(2) 1 zlocs(curplane(1)); 1 ref_yx(1) zlocs(curplane(end)); ref_yx(2) ref_yx(1) zlocs(curplane(end))];
+    adj = depth.surfaceMapSmooth;
+    adj_coords = coords; 
+    adj_coords(:,3) = [coords(1,3)+adj(1,1), coords(2,3)+adj(ref_yx(1),1),coords(3,3)+adj(1,ref_yx(2)), coords(4,3)+adj(ref_yx(1),ref_yx(2))]; 
+    planecoords{i}=-adj_coords; 
+
+end
+xyz- 
+
+figure('Name','Cells 3D scatter','Color','w');
+scatter3(xyz(:,1),xyz(:,2),xyz(:,3),36,'filled');
+% Draw semi-transparent planes for each set of corner coordinates in planecoords
+for k = 1:numel(planecoords)
+    coords = planecoords{k}; % 4x3 matrix: [x y z] rows are corners
+    % Ensure the polygon is closed by repeating first vertex
+    verts = coords;
+    faces = [1 2 4 3]; % quads formed from the 4 corners
+    % Create patch (semi-transparent)
+    ppatch = patch('Vertices', verts, 'Faces', faces, ...
+        'FaceColor', [0.5 0.5 1], ...     % light bluish color
+        'FaceAlpha', 0.25, ...
+        'EdgeColor', 'none', ...
+        'FaceLighting', 'gouraud', ...
+        'AmbientStrength', 0.6);
+    hold on
+end
+xlabel('X (px)'); ylabel('Y (px)'); zlabel('Z (plane)');
+axis vis3d equal;
+grid on;
+view(45,25);
+title(sprintf('3D cell positions (%d cells)',size(xyz,1)));
+

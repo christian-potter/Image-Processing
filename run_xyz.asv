@@ -49,13 +49,12 @@ h = plotv.volshow_rgb_dualAlpha(zrgb);
 
 %% XY PLOT OF DEPTH 
 figure
-axis('equal')
 imagesc(depth.surfaceMapSmooth)
 colorbar
 title('First red crossing depth per XY pixel');
 xlabel('X Position');ylabel('Y Position'); 
 
-utils.sf('cond','any')
+utils.sf
 %% INSERT SURFACE INTO BLUE CHANNEL 
 %zrgb = permute(zstack, [1 2 4 3]);
 %zrgb = zstack;
@@ -68,7 +67,7 @@ utils.sf('cond','any')
 
 plotv.xyz_location(xyz, ypix_zplane,depth,Fall,zlocs)
 %%
- save(['\\Shadowfax\Warwick\DRGS\#',num2str(dsnum),'\SDH\Processed\zrgb.mat'],'zrgb')
+ save('\\Shadowfax\Warwick\DRGS\#541\SDH\Processed\Fall_variables.mat','Fall')
 
  %%
-  save(['\\Shadowfax\Warwick\DRGS\#',num2str(dsnum),'\SDH\Processed\xyz.mat'],'xyz')
+  save('\\Shadowfax\Warwick\DRGS\#541\SDH\Processed\xyz.mat','xyz')
