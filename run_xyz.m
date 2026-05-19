@@ -73,6 +73,6 @@ plotv.xyz_location(xyz, ypix_zplane,depth,Fall,zlocs)
 %%
   save(['\\Shadowfax\Warwick\DRGS\#',num2str(dsnum),'\SDH\Processed\xyz.mat'],'xyz')
 %%
-utils.save_depth(dsnum,xyz,zlocs,ypix_zplane,depth,zrgb)
+utils.save_depth(dsnum,xyz,zlocs,ypix_zplane,depth,zrgb,ref_cell)
 
 
