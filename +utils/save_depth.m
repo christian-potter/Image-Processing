@@ -1,0 +1,29 @@
+function [] = save_depth(dsnum,xyz,zlocs,ypix_zplane,depth,zrgb)
+
+arguments
+    dsnum double 
+    xyz double % each row contains the x,y,z coordinates of each cell 
+    zlocs double % depth from surface each plane is (not accounting for XY location) 
+    ypix_zplane cell % microscope metadata projection of where each plane would be depth-wise 
+    depth struct % output of dep.findRedSurfaceDepth
+    zrgb double % modified size matrix for rgb 
+end
+
+
+%% 
+
+if ispc
+    base =  ['\\Shadowfax\Warwick\DRGS\#',num2str(dsnum),'\SDH\Processed\Depth\']; 
+else
+    disp('needs update for mac')
+end
+
+
+%%
+
+save([base,'xyz.mat'],'xyz')
+save([base,'depth.mat'],'depth')
+save([base,'ypix_zplane.mat'],'ypix_zplane')
+save([base,'zlocs.mat'],'zlocs')
+save([base,'zrgb.mat'],'zrgb')
+

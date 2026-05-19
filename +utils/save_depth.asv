@@ -1,0 +1,27 @@
+function [] = save_depth(dsnum,xyz,zlocs,ypix_zplane,depth)
+
+arguments
+    dsnum double 
+    xyz double % 
+    zlocs double % 
+    ypix_zplane double % 
+    depth struct % output of dep.findRedSurfaceDepth
+end
+
+
+%% 
+
+if ispc
+    base =  ['\\Shadowfax\Warwick\DRGS\#',num2str(dsnum),'\SDH\Processed\']; 
+else
+    disp('needs update for mac')
+end
+
+
+%%
+
+save([base,'xyz.mat'],'xyz')
+save([base,'depth.mat'],'depth')
+save([base,'ypix_zplane.mat'],'ypix_zplane')
+save([base,'zlocs.mat'],'zlocs')
+
