@@ -1,4 +1,4 @@
-function [xyz,id_vect] = neuron_xyz(id_vect_full,Fall,ypix_zplane,depth,zlocs)
+function [xyz,xyp,id_vect] = neuron_xyz(id_vect_full,Fall,ypix_zplane,depth,zlocs)
 arguments
     id_vect_full double % vector of length sum(Fall.iscell(:,1)==1)
     Fall struct % structure with all of the outputs from Fall.mat
@@ -13,6 +13,7 @@ id_vect= id_vect_full(id_vect_full~=4);
 
 %% CALCULATE DEPTH 
 xyz= nan(length(cellstat),3); 
+xyp= nan(length(cellstat),3); 
 
 for i = 1:length(cellstat)
     yx = cellstat{i}.med; 
@@ -31,7 +32,8 @@ for i = 1:length(cellstat)
 
     yz = ypix_zplane{plane}; 
     z = zlocs(yz(yx(1))); % zlocation for plane/ ypixel 
-    xyz(i,:)=[yx(2) yx(1) z+round(zoff)]; 
+    xyz(i,:)=[yx(2) yx(1) z-round(zoff)];
+    xyp(i,:)=[yx(2) yx(1) yz(yx(1))];
 
 end
 

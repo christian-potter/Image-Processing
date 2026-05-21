@@ -16,7 +16,7 @@ end
 if ispc
     base =  ['\\Shadowfax\Warwick\DRGS\#',num2str(dsnum),'\SDH\Processed\Depth\']; 
 else
-    disp('needs update for mac')
+    base =  ['/Volumes/Warwick/DRGS/#',num2str(dsnum),'/SDH/Processed/Depth/']; 
 end
 
 

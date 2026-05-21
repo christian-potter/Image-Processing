@@ -11,7 +11,7 @@ ref_cell = [56 31];
 [ypix_zplane,zlocs] = dep.modify_alignment(zlocs,ypix_zdist,Fall.cellstat,ref_cell,tseries_md,zstack_md); 
 
 %%
-load("C:\Users\rosslab.PITT\Desktop\MATLAB Code\Image-Processing\home_positions.mat")
+%load("C:\Users\rosslab.PITT\Desktop\MATLAB Code\Image-Processing\home_positions.mat")
 %load("/Users/ctp21/Desktop/Analysis/Image-Processing/work-positions.mat")
 %zstack=zs;
 p = 1;% Choose Plane 
@@ -63,10 +63,10 @@ utils.sf('cond','any')
 
 %%
 %id_vect= id_vect_full(id_vect_full~=4); 
-[xyz,id_vect] = dep.neuron_xyz(id_vect_full,Fall,ypix_zplane,depth,zlocs);
+[xyz,xyp,id_vect] = dep.neuron_xyz(id_vect_full,Fall,ypix_zplane,depth,zlocs);
 %%
 
-plotv.xyz_location(xyz, ypix_zplane,depth,Fall,zlocs)
+plotv.xyz_location(xyp,xyz, ypix_zplane,depth,Fall,zlocs)
 %%
  save(['\\Shadowfax\Warwick\DRGS\#',num2str(dsnum),'\SDH\Processed\zrgb.mat'],'zrgb')
 

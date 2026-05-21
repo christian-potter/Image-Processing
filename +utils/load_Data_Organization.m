@@ -25,8 +25,9 @@ elseif ismac
     tseries_md = [base, 'Processed/tseries_md.mat'];
     zstack_md = [base, 'Processed/zstack_md.mat'];
     tsync = [base, 'Processed/tsync.mat'];
+    raw_tsync = [base, 'Processed/raw_tsync.mat'];
     zstack = [base,'Processed/zstack.mat'];
-    ypix_zplane = [base,'Processed/ypix_zplane.mat']; 
+    ypix_zplane = [base,'Processed/Depth/ypix_zplane.mat']; 
 end
 
 %% load f_variables
@@ -47,7 +48,7 @@ load(tseries_md);
 load(zstack_md);
 load(tsync);
 load(raw_tsync)
-%load(ypix_zplane)
+load(ypix_zplane)
 load(zstack); 
 
 %%
